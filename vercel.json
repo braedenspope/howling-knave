@@ -1,0 +1,7 @@
+{
+  "buildCommand": "node scripts/generate-env.js && npx ng build",
+  "outputDirectory": "dist/the-last-weaving/browser",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

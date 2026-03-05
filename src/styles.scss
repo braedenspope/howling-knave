@@ -1,0 +1,99 @@
+@use '@angular/material' as mat;
+
+// Custom dark theme
+$dark-theme: mat.define-theme((
+  color: (
+    theme-type: dark,
+    primary: mat.$yellow-palette,
+    tertiary: mat.$violet-palette,
+  ),
+  typography: (
+    brand-family: 'Roboto',
+    plain-family: 'Roboto',
+  ),
+  density: (
+    scale: 0,
+  ),
+));
+
+html {
+  @include mat.all-component-themes($dark-theme);
+  @include mat.typography-hierarchy($dark-theme);
+}
+
+// ---- App-wide styles ----
+
+:root {
+  --bg-main: #0f0f14;
+  --bg-card: #1a1a24;
+  --bg-card-border: #2e2e3e;
+  --bg-nav: #13131a;
+  --accent-gold: #e8d5a3;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --success-green: #2ecc40;
+  --failure-red: #e63946;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: 'Roboto', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+// Custom scrollbar
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-card-border);
+  border-radius: 4px;
+
+  &:hover {
+    background: #444;
+  }
+}
+
+// Angular Material overrides for dark theme
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-color: var(--bg-card);
+}
+
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-color: var(--bg-card);
+}
+
+.mat-mdc-card {
+  --mdc-elevated-card-container-color: var(--bg-card);
+  border: 1px solid var(--bg-card-border);
+}
+
+.mat-mdc-tab-group {
+  --mat-tab-header-label-text-color: var(--text-secondary);
+  --mat-tab-header-active-label-text-color: var(--accent-gold);
+  --mat-tab-header-active-focus-indicator-color: var(--accent-gold);
+  --mat-tab-header-active-hover-indicator-color: var(--accent-gold);
+}
+
+// Utility classes
+.gold-text {
+  color: var(--accent-gold);
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
