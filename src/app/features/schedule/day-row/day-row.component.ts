@@ -85,44 +85,51 @@ import { Day, DAY_BUDGET, SLOT_WEIGHT_UNITS } from '../../../shared/models';
   `,
   styles: [`
     .day-card {
-      margin-bottom: 16px;
+      margin-bottom: 0;
+      border-radius: 2px !important;
+      padding: 28px 32px;
     }
 
     .day-header {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: 20px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(61,46,31,0.5);
     }
 
     .day-title {
       margin: 0;
-      font-size: 16px;
+      font-family: var(--font-heading);
+      font-size: 26px;
+      letter-spacing: 1.5px;
     }
 
     .duty-badge {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      font-size: 12px;
-      padding: 2px 8px;
-      border-radius: 4px;
-      background: rgba(247, 127, 0, 0.15);
-      color: #f77f00;
+      gap: 8px;
+      font-family: var(--font-data);
+      font-size: 15px;
+      padding: 6px 16px;
+      border-radius: 2px;
+      background: rgba(184,115,51,0.15);
+      color: var(--accent-copper);
       cursor: help;
 
       mat-icon {
-        font-size: 14px;
-        width: 14px;
-        height: 14px;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
       }
     }
 
     .player-row {
       display: flex;
-      gap: 12px;
-      padding: 8px 0;
-      border-top: 1px solid var(--bg-card-border);
+      gap: 28px;
+      padding: 18px 0;
+      border-top: 1px solid rgba(61,46,31,0.3);
       align-items: flex-start;
 
       &:first-of-type {
@@ -131,61 +138,66 @@ import { Day, DAY_BUDGET, SLOT_WEIGHT_UNITS } from '../../../shared/models';
     }
 
     .player-info {
-      min-width: 140px;
-      max-width: 140px;
+      min-width: 220px;
+      max-width: 220px;
       flex-shrink: 0;
     }
 
     .character-name {
       display: block;
-      font-size: 14px;
-      font-weight: 500;
+      font-family: var(--font-heading);
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
     }
 
     .display-name {
       display: block;
-      font-size: 11px;
+      font-family: var(--font-body);
+      font-size: 16px;
       color: var(--text-secondary);
+      font-style: italic;
+      margin-top: 4px;
     }
 
     .budget-pips {
       display: flex;
-      gap: 2px;
-      margin-top: 4px;
+      gap: 4px;
+      margin-top: 10px;
     }
 
     .pip {
-      height: 6px;
+      height: 10px;
       border-radius: 2px;
-      background: var(--accent-gold);
+      background: var(--accent-brass);
       transition: background 0.2s;
 
-      &.pip-heavy { width: 16px; }
-      &.pip-medium { width: 10px; }
-      &.pip-light { width: 6px; }
-      &.pip-unit { width: 6px; }
-      &.pip-used { background: #333; }
+      &.pip-heavy { width: 24px; }
+      &.pip-medium { width: 16px; }
+      &.pip-light { width: 10px; }
+      &.pip-unit { width: 10px; }
+      &.pip-used { background: #2a1f14; }
     }
 
     .blocks-container {
       display: flex;
-      gap: 8px;
+      gap: 12px;
       flex-wrap: wrap;
       flex: 1;
-      min-height: 40px;
+      min-height: 60px;
       align-items: flex-start;
     }
 
     .drag-placeholder {
-      background: rgba(232, 213, 163, 0.1);
-      border: 1px dashed var(--accent-gold);
-      border-radius: 4px;
-      min-width: 120px;
-      height: 50px;
+      background: rgba(196,154,60,0.08);
+      border: 1px dashed var(--accent-brass);
+      border-radius: 2px;
+      min-width: 200px;
+      height: 80px;
     }
 
     .cdk-drag-preview {
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
     }
 
     .cdk-drag-animating {
@@ -195,9 +207,15 @@ import { Day, DAY_BUDGET, SLOT_WEIGHT_UNITS } from '../../../shared/models';
     .add-btn {
       color: var(--text-secondary);
       border: 1px dashed var(--bg-card-border);
-      border-radius: 4px;
-      width: 36px;
-      height: 36px;
+      border-radius: 2px;
+      width: 52px;
+      height: 52px;
+
+      mat-icon {
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+      }
 
       &:hover {
         color: var(--accent-gold);

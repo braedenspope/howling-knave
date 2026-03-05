@@ -102,6 +102,11 @@ import { MandatoryDuty, SlotWeight } from '../../../shared/models';
   styles: [`
     .duty-day-section {
       margin-bottom: 24px;
+
+      h3 {
+        font-family: var(--font-heading);
+        letter-spacing: 1px;
+      }
     }
 
     .current-duty {
@@ -109,8 +114,9 @@ import { MandatoryDuty, SlotWeight } from '../../../shared/models';
       align-items: center;
       gap: 8px;
       padding: 8px 12px;
-      background: rgba(247, 127, 0, 0.08);
-      border-radius: 4px;
+      background: rgba(184,115,51,0.1);
+      border-radius: 2px;
+      border-left: 3px solid var(--accent-copper);
       margin-bottom: 8px;
     }
 
@@ -119,8 +125,9 @@ import { MandatoryDuty, SlotWeight } from '../../../shared/models';
       align-items: center;
       gap: 6px;
       flex: 1;
+      font-family: var(--font-body);
       font-size: 14px;
-      color: #f77f00;
+      color: var(--accent-copper);
 
       mat-icon {
         font-size: 18px;
@@ -132,6 +139,7 @@ import { MandatoryDuty, SlotWeight } from '../../../shared/models';
     .duty-form {
       padding: 16px;
       margin-top: 8px;
+      border-radius: 2px !important;
     }
 
     .form-grid {

@@ -1,15 +1,15 @@
 export const CREW_COLORS: Record<string, string> = {
-  'Anna Rose':       '#e63946',
-  'Guner Aldric':    '#1a3a6b',
-  'Rachel Rose':     '#2ecc40',
-  'Lehiri Stars':    '#7b2fbe',
-  'Toji Brassboot':  '#f77f00',
-  'Porter Tomas':    '#8a8a8a',
-  'Shanoa Buckler':  '#3cb4a0',
-  'Ardor':           '#00897b',
-  'Bryce Morrison':  '#d4af37',
-  'Elro Boldfall':   '#a0522d',
-  'Delvin Moss':     '#b87333',
+  'Anna Rose':       '#a63d2f',
+  'Guner Aldric':    '#2a4a6b',
+  'Rachel Rose':     '#5a8a4a',
+  'Lehiri Stars':    '#6b3a8b',
+  'Toji Brassboot':  '#b87333',
+  'Porter Tomas':    '#6a6a5a',
+  'Shanoa Buckler':  '#3a7a6a',
+  'Ardor':           '#2a6a5a',
+  'Bryce Morrison':  '#c49a3c',
+  'Elro Boldfall':   '#7a4a2a',
+  'Delvin Moss':     '#8a6a3a',
 };
 
 export const CREW_LIST = [
@@ -37,9 +37,9 @@ export const TIER_NAMES: Record<number, string> = {
 };
 
 export const TIER_COLORS: Record<number, string> = {
-  1: '#666',
-  2: '#4a90d9',
-  3: '#2ecc40',
-  4: '#d4af37',
-  5: '#f0ead6',
+  1: '#5a5040',
+  2: '#4a7a8a',
+  3: '#5a8a4a',
+  4: '#c49a3c',
+  5: '#dcd0be',
 };

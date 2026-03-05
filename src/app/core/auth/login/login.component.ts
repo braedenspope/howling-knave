@@ -75,6 +75,27 @@ import { AuthService } from '../auth.service';
     .auth-card {
       width: 100%;
       max-width: 400px;
+      border-radius: 2px !important;
+      position: relative;
+      overflow: visible;
+
+      // Rope border at top
+      &::before {
+        content: '';
+        position: absolute;
+        top: -4px;
+        left: 10%;
+        right: 10%;
+        height: 4px;
+        background: repeating-linear-gradient(
+          90deg,
+          var(--accent-copper) 0px,
+          var(--accent-copper) 8px,
+          transparent 8px,
+          transparent 12px
+        );
+        border-radius: 2px;
+      }
     }
 
     .full-width {
@@ -89,11 +110,31 @@ import { AuthService } from '../auth.service';
       color: var(--failure-red);
       margin-bottom: 12px;
       font-size: 14px;
+      font-family: var(--font-body);
     }
 
     mat-card-title {
+      font-family: var(--font-heading) !important;
       font-size: 24px !important;
       margin-bottom: 4px;
+      letter-spacing: 1px;
+    }
+
+    mat-card-subtitle {
+      font-family: var(--font-body) !important;
+    }
+
+    // Wax seal decoration
+    :host mat-card-header::after {
+      content: '';
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 40%, #b83a1a, #8b2500 60%, #6a1a00);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 -1px 3px rgba(0,0,0,0.3);
     }
   `],
 })

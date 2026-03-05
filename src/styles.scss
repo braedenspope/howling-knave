@@ -8,8 +8,8 @@ $dark-theme: mat.define-theme((
     tertiary: mat.$violet-palette,
   ),
   typography: (
-    brand-family: 'Roboto',
-    plain-family: 'Roboto',
+    brand-family: 'Cinzel',
+    plain-family: 'IM Fell English',
   ),
   density: (
     scale: 0,
@@ -21,18 +21,45 @@ html {
   @include mat.typography-hierarchy($dark-theme);
 }
 
-// ---- App-wide styles ----
+// ---- D&D Pirate Ship Variables ----
 
 :root {
-  --bg-main: #0f0f14;
-  --bg-card: #1a1a24;
-  --bg-card-border: #2e2e3e;
-  --bg-nav: #13131a;
-  --accent-gold: #e8d5a3;
-  --text-primary: #e0e0e0;
-  --text-secondary: #a0a0a0;
-  --success-green: #2ecc40;
-  --failure-red: #e63946;
+  --bg-main: #1a140e;
+  --bg-card: #241c14;
+  --bg-card-border: #3d2e1f;
+  --bg-nav: #15100a;
+  --accent-gold: #d4a843;
+  --accent-brass: #c49a3c;
+  --accent-copper: #b87333;
+  --text-primary: #dcd0be;
+  --text-secondary: #9a8b78;
+  --success-green: #5a8a4a;
+  --failure-red: #a63d2f;
+  --parchment: #c8b88a;
+  --parchment-dark: #a89568;
+  --sea-dark: #1a2a2a;
+  --ink-brown: #3d2b1f;
+  --wax-red: #8b2500;
+
+  --font-heading: 'Cinzel', serif;
+  --font-body: 'IM Fell English', serif;
+  --font-data: 'Courier Prime', monospace;
+
+  // Wood grain gradient
+  --wood-grain: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    transparent 3px,
+    rgba(0,0,0,0.06) 3px,
+    rgba(0,0,0,0.06) 4px
+  );
+
+  --wood-bg: linear-gradient(
+    180deg,
+    #15100a 0%,
+    #1e1610 40%,
+    #1a130d 100%
+  );
 }
 
 * {
@@ -43,43 +70,101 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
+  background: var(--wood-bg);
   background-color: var(--bg-main);
   color: var(--text-primary);
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
 
-// Custom scrollbar
+// ---- Parchment Texture Mixin ----
+@mixin parchment-texture {
+  background:
+    // age spots
+    radial-gradient(ellipse at 20% 80%, rgba(139,69,19,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 75% 20%, rgba(139,69,19,0.03) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 50%, rgba(139,69,19,0.02) 0%, transparent 60%),
+    // fiber lines
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 6px,
+      rgba(139,69,19,0.02) 6px,
+      rgba(139,69,19,0.02) 7px
+    ),
+    // base color
+    var(--bg-card);
+  // burnt-edge inner shadow
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.3), inset 0 0 4px rgba(0,0,0,0.15);
+}
+
+// ---- Brass Button Mixin ----
+@mixin brass-button {
+  background: linear-gradient(180deg, #c49a3c 0%, #a67c28 50%, #b88a30 100%) !important;
+  color: #1a140e !important;
+  font-family: var(--font-heading) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px;
+  border-radius: 2px !important;
+  text-transform: uppercase;
+  font-size: 12px !important;
+  border: 1px solid #d4a843 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,220,150,0.3);
+}
+
+// ---- Copper Outline Button Mixin ----
+@mixin copper-outline-button {
+  border: 1px solid var(--accent-copper) !important;
+  color: var(--accent-copper) !important;
+  font-family: var(--font-heading) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px;
+  border-radius: 2px !important;
+  text-transform: uppercase;
+  font-size: 12px !important;
+  background: transparent !important;
+}
+
+// ---- Custom Scrollbar (wood-toned) ----
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-main);
+  background: #15100a;
+  border-left: 1px solid #2a1f14;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-card-border);
-  border-radius: 4px;
+  background: linear-gradient(180deg, #3d2e1f, #2a1f14);
+  border-radius: 2px;
+  border: 1px solid #4a3828;
 
   &:hover {
-    background: #444;
+    background: linear-gradient(180deg, #4a3828, #3d2e1f);
   }
 }
 
-// Angular Material overrides for dark theme
+// ---- Angular Material Overrides ----
+
 .mat-mdc-dialog-container {
   --mdc-dialog-container-color: var(--bg-card);
+  border-radius: 2px !important;
 }
 
 .mat-mdc-snack-bar-container {
   --mdc-snackbar-container-color: var(--bg-card);
 }
 
+// All cards: parchment texture, sharp corners
 .mat-mdc-card {
   --mdc-elevated-card-container-color: var(--bg-card);
+  --mat-card-title-text-color: var(--text-primary);
+  --mat-card-subtitle-text-color: var(--text-secondary);
   border: 1px solid var(--bg-card-border);
+  border-radius: 2px !important;
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.15), inset 0 0 4px rgba(0,0,0,0.1);
 }
 
 .mat-mdc-tab-group {
@@ -89,7 +174,76 @@ html, body {
   --mat-tab-header-active-hover-indicator-color: var(--accent-gold);
 }
 
-// Utility classes
+// Tab labels use heading font
+.mat-mdc-tab .mdc-tab__text-label {
+  font-family: var(--font-heading) !important;
+  letter-spacing: 0.5px;
+}
+
+// Form fields
+.mat-mdc-form-field {
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: var(--accent-copper) !important;
+    border-radius: 2px !important;
+  }
+
+  .mat-mdc-floating-label {
+    font-family: var(--font-heading) !important;
+    font-size: 13px !important;
+  }
+}
+
+// Primary raised buttons → brass
+.mat-mdc-raised-button.mat-primary {
+  @include brass-button;
+}
+
+// Stroked buttons → copper outline
+.mat-mdc-outlined-button,
+.mat-mdc-button[mat-stroked-button] {
+  @include copper-outline-button;
+}
+
+// All button border-radius
+.mat-mdc-button, .mat-mdc-raised-button, .mat-mdc-outlined-button, .mat-mdc-icon-button {
+  border-radius: 2px !important;
+}
+
+// Expansion panels
+.mat-expansion-panel {
+  background: var(--bg-card) !important;
+  border-radius: 2px !important;
+  border: 1px solid var(--bg-card-border) !important;
+  margin-bottom: 4px !important;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+
+  .mat-expansion-panel-header-title {
+    font-family: var(--font-heading);
+    color: var(--text-primary);
+  }
+}
+
+// Dialogs
+.mat-mdc-dialog-surface {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--bg-card-border);
+  border-radius: 2px !important;
+}
+
+// Main content area
+main {
+  position: relative;
+}
+
+// ---- Typography ----
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+// ---- Utility Classes ----
 .gold-text {
   color: var(--accent-gold);
 }

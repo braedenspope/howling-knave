@@ -51,7 +51,10 @@ import { TrainingEditorComponent } from '../training-editor/training-editor.comp
 
     .dm-title {
       margin: 0 0 16px;
+      font-family: var(--font-heading);
       font-size: 24px;
+      letter-spacing: 1.5px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.4);
     }
 
     .tab-content {

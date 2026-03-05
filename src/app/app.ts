@@ -58,24 +58,30 @@ import { VoyageService } from './features/voyage/voyage.service';
   styles: [`
     .app-nav {
       background: var(--bg-nav);
-      border-bottom: 1px solid var(--bg-card-border);
+      background-image: var(--wood-grain);
+      border-bottom: 3px solid var(--accent-brass);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 -1px 0 rgba(196,154,60,0.2);
       position: sticky;
       top: 0;
       z-index: 100;
     }
 
     .app-title {
+      font-family: var(--font-heading);
       font-size: 18px;
       font-weight: 700;
       cursor: pointer;
       margin-right: 16px;
+      letter-spacing: 1px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
     }
 
     .voyage-name {
-      font-size: 13px;
+      font-family: var(--font-data);
+      font-size: 12px;
       color: var(--text-secondary);
       padding: 2px 10px;
-      border-radius: 12px;
+      border-radius: 2px;
       border: 1px solid var(--bg-card-border);
     }
 
@@ -86,6 +92,9 @@ import { VoyageService } from './features/voyage/voyage.service';
 
     .nav-label {
       margin-left: 4px;
+      font-family: var(--font-heading);
+      font-size: 12px;
+      letter-spacing: 0.5px;
     }
 
     .active-link {
@@ -93,11 +102,13 @@ import { VoyageService } from './features/voyage/voyage.service';
     }
 
     .character-chip {
-      font-size: 12px;
+      font-family: var(--font-data);
+      font-size: 11px;
       padding: 4px 10px;
-      border-radius: 12px;
-      background: rgba(232, 213, 163, 0.1);
+      border-radius: 2px;
+      background: rgba(196,154,60,0.1);
       color: var(--accent-gold);
+      border: 1px solid rgba(196,154,60,0.2);
       margin: 0 8px;
     }
 

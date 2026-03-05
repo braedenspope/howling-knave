@@ -103,7 +103,8 @@ export interface AddBlockDialogResult {
     .budget-info {
       color: var(--accent-gold);
       margin-bottom: 16px;
-      font-size: 14px;
+      font-family: var(--font-data);
+      font-size: 13px;
     }
 
     .crew-dot {
@@ -125,18 +126,18 @@ export interface AddBlockDialogResult {
 
     .training-option {
       padding: 10px 12px;
-      border-left: 3px solid #666;
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.03);
+      border-left: 3px solid #5a5040;
+      border-radius: 2px;
+      background: rgba(36,28,20,0.4);
       cursor: pointer;
       transition: background 0.15s;
 
       &:hover:not(.disabled) {
-        background: rgba(255, 255, 255, 0.07);
+        background: rgba(36,28,20,0.7);
       }
 
       &.selected {
-        background: rgba(232, 213, 163, 0.1);
+        background: rgba(196,154,60,0.1);
         outline: 1px solid var(--accent-gold);
       }
 
@@ -154,31 +155,36 @@ export interface AddBlockDialogResult {
     }
 
     .training-topic {
-      font-weight: 500;
-      font-size: 14px;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.3px;
     }
 
     .weight-badge {
+      font-family: var(--font-data);
       font-size: 9px;
       font-weight: 700;
       letter-spacing: 0.5px;
       padding: 1px 6px;
-      border-radius: 3px;
+      border-radius: 2px;
 
-      &.weight-heavy { background: rgba(230, 57, 70, 0.2); color: #e63946; }
-      &.weight-medium { background: rgba(247, 127, 0, 0.2); color: #f77f00; }
-      &.weight-light { background: rgba(46, 204, 64, 0.2); color: #2ecc40; }
+      &.weight-heavy { background: rgba(166,61,47,0.2); color: #c45a4a; }
+      &.weight-medium { background: rgba(184,115,51,0.2); color: var(--accent-copper); }
+      &.weight-light { background: rgba(90,138,74,0.2); color: #6a9a5a; }
     }
 
     .training-desc {
       font-size: 12px;
       color: var(--text-secondary);
       margin: 4px 0;
+      font-style: italic;
     }
 
     .training-meta {
       display: flex;
       justify-content: space-between;
+      font-family: var(--font-data);
       font-size: 11px;
       color: var(--text-secondary);
     }

@@ -88,7 +88,9 @@ import { TrainingProgress } from '../../../shared/models';
 
     h1 {
       margin: 0 0 16px;
+      font-family: var(--font-heading);
       font-size: 24px;
+      letter-spacing: 1.5px;
     }
 
     .summary-bar {
@@ -98,7 +100,8 @@ import { TrainingProgress } from '../../../shared/models';
       padding: 16px;
       background: var(--bg-card);
       border: 1px solid var(--bg-card-border);
-      border-radius: 8px;
+      border-radius: 2px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
     }
 
     .summary-item {
@@ -108,20 +111,25 @@ import { TrainingProgress } from '../../../shared/models';
     }
 
     .summary-value {
+      font-family: var(--font-data);
       font-size: 28px;
       font-weight: 700;
       color: var(--accent-gold);
     }
 
     .summary-label {
-      font-size: 12px;
+      font-family: var(--font-heading);
+      font-size: 11px;
       color: var(--text-secondary);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
     }
 
     .empty-state {
       text-align: center;
       padding: 48px 16px;
       color: var(--text-secondary);
+      font-style: italic;
 
       mat-icon {
         font-size: 48px;
@@ -150,7 +158,7 @@ import { TrainingProgress } from '../../../shared/models';
       justify-content: space-between;
       align-items: center;
       padding: 8px 0;
-      border-bottom: 1px solid var(--bg-card-border);
+      border-bottom: 1px solid rgba(61,46,31,0.3);
 
       &:last-child {
         border-bottom: none;
@@ -164,15 +172,19 @@ import { TrainingProgress } from '../../../shared/models';
     }
 
     .topic-name {
-      font-weight: 500;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.3px;
     }
 
     .mastered-badge {
+      font-family: var(--font-data);
       font-size: 9px;
       font-weight: 700;
       padding: 1px 6px;
-      border-radius: 3px;
-      background: rgba(46, 204, 64, 0.2);
+      border-radius: 2px;
+      background: rgba(90,138,74,0.2);
       color: var(--success-green);
     }
 
@@ -182,23 +194,29 @@ import { TrainingProgress } from '../../../shared/models';
       gap: 4px;
     }
 
+    // Porthole-style progress pips
     .pip {
-      width: 16px;
-      height: 10px;
-      border-radius: 3px;
-      background: #333;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #2a1f14;
+      border: 1px solid rgba(255,255,255,0.08);
       transition: background 0.2s;
 
       &.filled {
-        background: var(--accent-gold);
+        background: var(--accent-brass);
+        border-color: rgba(196,154,60,0.3);
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
       }
 
       &.mastered {
         background: var(--success-green);
+        border-color: rgba(90,138,74,0.3);
       }
     }
 
     .fraction {
+      font-family: var(--font-data);
       font-size: 12px;
       color: var(--text-secondary);
       margin-left: 4px;

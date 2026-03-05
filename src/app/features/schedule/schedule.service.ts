@@ -22,6 +22,7 @@ export class ScheduleService {
     const { data } = await this.sb.supabase
       .from('users')
       .select('id, display_name, character_name')
+      .neq('role', 'dm')
       .order('character_name');
     if (data) this.allUsers.set(data);
   }

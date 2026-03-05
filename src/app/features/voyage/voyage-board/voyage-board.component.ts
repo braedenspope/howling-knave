@@ -56,41 +56,49 @@ import { CREW_COLORS } from '../../../shared/data/training.data';
       text-align: center;
       padding: 64px 16px;
 
+      h2 {
+        font-family: var(--font-heading);
+        letter-spacing: 1px;
+      }
+
       p {
         color: var(--text-secondary);
+        font-family: var(--font-body);
       }
     }
 
     .board-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 16px;
+      width: 100%;
+      padding: 24px 32px;
     }
 
     .player-legend {
       display: flex;
-      gap: 8px;
+      gap: 12px;
       flex-wrap: wrap;
-      margin-bottom: 16px;
-      padding: 12px;
+      margin-bottom: 24px;
+      padding: 16px 24px;
       background: var(--bg-card);
       border: 1px solid var(--bg-card-border);
-      border-radius: 8px;
+      border-radius: 2px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
     }
 
     .player-chip {
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 12px;
-      background: rgba(232, 213, 163, 0.1);
+      font-family: var(--font-heading);
+      font-size: 16px;
+      padding: 8px 20px;
+      border-radius: 2px;
+      background: rgba(196,154,60,0.1);
       color: var(--accent-gold);
-      border: 1px solid rgba(232, 213, 163, 0.2);
+      border: 1px solid rgba(196,154,60,0.2);
+      letter-spacing: 0.5px;
     }
 
     .day-list {
       display: flex;
       flex-direction: column;
-      gap: 0;
+      gap: 8px;
     }
   `],
 })

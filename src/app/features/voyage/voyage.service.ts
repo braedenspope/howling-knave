@@ -112,6 +112,16 @@ export class VoyageService {
     return null;
   }
 
+  async deleteVoyage(voyageId: string): Promise<string | null> {
+    const { error } = await this.sb.supabase
+      .from('voyages')
+      .delete()
+      .eq('id', voyageId);
+    if (error) return error.message;
+    await this.loadVoyages();
+    return null;
+  }
+
   async updateDayDuty(dayId: string, duty: Day['mandatory_duty']): Promise<string | null> {
     const { error } = await this.sb.supabase
       .from('days')

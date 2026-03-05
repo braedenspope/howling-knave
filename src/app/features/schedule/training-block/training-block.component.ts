@@ -48,18 +48,32 @@ import { CREW_COLORS } from '../../../shared/data/training.data';
     .training-block {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px 10px;
-      background: rgba(255, 255, 255, 0.04);
-      border-left: 3px solid #666;
-      border-radius: 4px;
+      gap: 12px;
+      padding: 14px 18px;
+      background: rgba(36,28,20,0.6);
+      border-left: 4px solid #5a5040;
+      border-radius: 2px;
       position: relative;
       cursor: grab;
       transition: background 0.15s;
-      min-width: 0;
+      min-width: 180px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+
+      // Copper pin dot
+      &::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: -8px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 40% 40%, #d4956a, #b87333);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+      }
 
       &:hover {
-        background: rgba(255, 255, 255, 0.08);
+        background: rgba(36,28,20,0.8);
 
         .remove-btn {
           opacity: 1;
@@ -67,11 +81,11 @@ import { CREW_COLORS } from '../../../shared/data/training.data';
       }
 
       &.status-success {
-        background: rgba(46, 204, 64, 0.08);
+        background: rgba(90,138,74,0.12);
       }
 
       &.status-failure {
-        background: rgba(230, 57, 70, 0.08);
+        background: rgba(166,61,47,0.12);
       }
 
       &.status-locked {
@@ -88,42 +102,48 @@ import { CREW_COLORS } from '../../../shared/data/training.data';
     }
 
     .crew-name {
-      font-size: 11px;
+      font-family: var(--font-body);
+      font-size: 15px;
       color: var(--text-secondary);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      font-style: italic;
     }
 
     .topic-name {
-      font-size: 13px;
-      font-weight: 500;
+      font-family: var(--font-heading);
+      font-size: 17px;
+      font-weight: 600;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      letter-spacing: 0.3px;
+      margin: 2px 0;
     }
 
     .weight-badge {
       display: inline-block;
-      font-size: 9px;
+      font-family: var(--font-data);
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.5px;
-      padding: 1px 6px;
-      border-radius: 3px;
-      margin-top: 2px;
+      padding: 3px 10px;
+      border-radius: 2px;
+      margin-top: 4px;
       width: fit-content;
 
       &.weight-heavy {
-        background: rgba(230, 57, 70, 0.2);
-        color: #e63946;
+        background: rgba(166,61,47,0.2);
+        color: #c45a4a;
       }
       &.weight-medium {
-        background: rgba(247, 127, 0, 0.2);
-        color: #f77f00;
+        background: rgba(184,115,51,0.2);
+        color: var(--accent-copper);
       }
       &.weight-light {
-        background: rgba(46, 204, 64, 0.2);
-        color: #2ecc40;
+        background: rgba(90,138,74,0.2);
+        color: #6a9a5a;
       }
     }
 
@@ -133,9 +153,9 @@ import { CREW_COLORS } from '../../../shared/data/training.data';
     }
 
     .status-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
+      font-size: 26px;
+      width: 26px;
+      height: 26px;
 
       &.success { color: var(--success-green); }
       &.failure { color: var(--failure-red); }
@@ -144,13 +164,13 @@ import { CREW_COLORS } from '../../../shared/data/training.data';
 
     .remove-btn {
       position: absolute;
-      top: -6px;
-      right: -6px;
+      top: -8px;
+      right: -8px;
       background: var(--bg-card);
       border: 1px solid var(--bg-card-border);
       border-radius: 50%;
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       display: flex;
       align-items: center;
       justify-content: center;

@@ -173,9 +173,11 @@ interface TrainingForm {
     }
 
     .crew-role {
+      font-family: var(--font-body);
       font-size: 12px;
       color: var(--text-secondary);
       margin-left: 8px;
+      font-style: italic;
     }
 
     .trainings-list {
@@ -190,8 +192,8 @@ interface TrainingForm {
       align-items: flex-start;
       gap: 8px;
       padding: 10px;
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: 4px;
+      background: rgba(36,28,20,0.4);
+      border-radius: 2px;
       position: relative;
 
       button {
@@ -209,43 +211,48 @@ interface TrainingForm {
     }
 
     .training-topic {
-      font-weight: 500;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.3px;
     }
 
     .badge {
+      font-family: var(--font-data);
       font-size: 9px;
       font-weight: 700;
       letter-spacing: 0.5px;
       padding: 1px 6px;
-      border-radius: 3px;
+      border-radius: 2px;
     }
 
     .tier-badge {
-      background: rgba(123, 47, 190, 0.2);
-      color: #b388ff;
+      background: rgba(107,58,139,0.2);
+      color: #9a7ab8;
     }
 
     .sessions-badge {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.08);
       color: var(--text-secondary);
     }
 
-    .weight-heavy { background: rgba(230, 57, 70, 0.2); color: #e63946; }
-    .weight-medium { background: rgba(247, 127, 0, 0.2); color: #f77f00; }
-    .weight-light { background: rgba(46, 204, 64, 0.2); color: #2ecc40; }
+    .weight-heavy { background: rgba(166,61,47,0.2); color: #c45a4a; }
+    .weight-medium { background: rgba(184,115,51,0.2); color: var(--accent-copper); }
+    .weight-light { background: rgba(90,138,74,0.2); color: #6a9a5a; }
 
     .training-desc, .training-reward {
       font-size: 12px;
       color: var(--text-secondary);
       margin: 2px 0;
       width: 100%;
+      font-style: italic;
     }
 
     .training-form {
       padding: 12px;
-      background: rgba(255, 255, 255, 0.02);
+      background: rgba(36,28,20,0.3);
       border: 1px solid var(--bg-card-border);
-      border-radius: 4px;
+      border-radius: 2px;
     }
 
     .form-grid {

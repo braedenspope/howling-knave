@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { DatePipe } from '@angular/common';
 import { VoyageService } from '../voyage.service';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -22,6 +23,7 @@ import { AuthService } from '../../../core/auth/auth.service';
     MatButtonModule,
     MatIconModule,
     MatDividerModule,
+    MatTooltipModule,
     DatePipe,
   ],
   template: `
@@ -76,6 +78,10 @@ import { AuthService } from '../../../core/auth/auth.service';
               <button mat-stroked-button (click)="setActive(voyage.id)">
                 Set Active
               </button>
+              <button mat-icon-button color="warn" (click)="onDelete(voyage.id, voyage.name)"
+                      matTooltip="Delete Voyage">
+                <mat-icon>delete</mat-icon>
+              </button>
             }
           </mat-card-actions>
         </mat-card>
@@ -86,13 +92,14 @@ import { AuthService } from '../../../core/auth/auth.service';
   `,
   styles: [`
     .voyage-list-container {
-      max-width: 700px;
-      margin: 24px auto;
-      padding: 0 16px;
+      max-width: 900px;
+      margin: 32px auto;
+      padding: 0 24px;
     }
 
     .create-card {
       margin-bottom: 24px;
+      border-radius: 2px !important;
     }
 
     .create-form {
@@ -116,15 +123,32 @@ import { AuthService } from '../../../core/auth/auth.service';
     }
 
     .section-title {
-      margin: 24px 0 12px;
+      margin: 32px 0 16px;
+      font-family: var(--font-heading);
+      font-size: 24px;
+      letter-spacing: 1px;
     }
 
     .voyage-card {
-      margin-bottom: 12px;
+      margin-bottom: 16px;
+      padding: 20px;
       transition: border-color 0.2s;
+      border-radius: 2px !important;
 
       &.active-voyage {
         border-color: var(--accent-gold);
+        box-shadow: 0 0 12px rgba(212,168,67,0.15);
+      }
+
+      mat-card-title {
+        font-family: var(--font-heading);
+        font-size: 20px;
+        letter-spacing: 0.5px;
+      }
+
+      mat-card-subtitle {
+        font-family: var(--font-data);
+        font-size: 14px;
       }
     }
 
@@ -138,6 +162,7 @@ import { AuthService } from '../../../core/auth/auth.service';
       color: var(--text-secondary);
       text-align: center;
       padding: 32px 0;
+      font-style: italic;
     }
   `],
 })
@@ -172,6 +197,12 @@ export class VoyageListComponent implements OnInit {
 
   async setActive(voyageId: string) {
     await this.voyageService.setActiveVoyage(voyageId);
+  }
+
+  async onDelete(voyageId: string, name: string) {
+    if (!confirm(`Delete voyage "${name}"? This will remove all days and training blocks.`)) return;
+    const err = await this.voyageService.deleteVoyage(voyageId);
+    if (err) this.error.set(err);
   }
 
   openBoard() {

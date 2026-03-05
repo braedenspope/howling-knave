@@ -81,10 +81,11 @@ import { RelationshipTier } from '../../../shared/models';
     }
 
     .crew-card {
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(36,28,20,0.4);
       border: 1px solid var(--bg-card-border);
-      border-radius: 6px;
+      border-radius: 2px;
       padding: 12px;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.15);
     }
 
     .crew-header {
@@ -102,14 +103,18 @@ import { RelationshipTier } from '../../../shared/models';
     }
 
     .crew-name {
-      font-size: 14px;
-      font-weight: 500;
+      font-family: var(--font-heading);
+      font-size: 13px;
+      font-weight: 600;
       flex: 1;
+      letter-spacing: 0.5px;
     }
 
     .tier-name {
+      font-family: var(--font-body);
       font-size: 11px;
       color: var(--text-secondary);
+      font-style: italic;
     }
 
     .notes-toggle {
@@ -128,18 +133,29 @@ import { RelationshipTier } from '../../../shared/models';
       gap: 6px;
     }
 
+    // Porthole-style pips (circles with progressive sizing)
     .tier-pip {
-      width: 24px;
-      height: 12px;
-      border-radius: 3px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.1);
       cursor: pointer;
       transition: transform 0.15s, box-shadow 0.15s;
       padding: 0;
 
+      &:nth-child(2) { width: 18px; height: 18px; }
+      &:nth-child(3) { width: 20px; height: 20px; }
+      &:nth-child(4) { width: 22px; height: 22px; }
+      &:nth-child(5) { width: 24px; height: 24px; }
+
+      &.active {
+        border-color: rgba(255, 255, 255, 0.25);
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.3), 0 0 4px rgba(196,154,60,0.2);
+      }
+
       &:hover {
-        transform: scaleY(1.3);
-        box-shadow: 0 0 6px rgba(255, 255, 255, 0.2);
+        transform: scale(1.2);
+        box-shadow: 0 0 8px rgba(196,154,60,0.3);
       }
     }
 

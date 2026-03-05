@@ -82,7 +82,9 @@ import { ScheduleBlock, Day } from '../../../shared/models';
 
     .day-label {
       margin: 0 0 8px;
+      font-family: var(--font-heading);
       font-size: 16px;
+      letter-spacing: 1px;
     }
 
     .player-section {
@@ -92,10 +94,12 @@ import { ScheduleBlock, Day } from '../../../shared/models';
 
     .player-name {
       display: block;
-      font-size: 13px;
-      font-weight: 500;
+      font-family: var(--font-heading);
+      font-size: 12px;
+      font-weight: 600;
       color: var(--text-secondary);
       margin-bottom: 4px;
+      letter-spacing: 0.5px;
     }
 
     .blocks-list {
@@ -109,11 +113,24 @@ import { ScheduleBlock, Day } from '../../../shared/models';
       justify-content: space-between;
       align-items: center;
       padding: 8px 12px;
-      background: rgba(255, 255, 255, 0.03);
-      border-left: 3px solid #666;
-      border-radius: 4px;
+      background: rgba(36,28,20,0.4);
+      border-left: 3px solid #5a5040;
+      border-radius: 2px;
       gap: 8px;
       flex-wrap: wrap;
+      position: relative;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 4px;
+        left: -7px;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 40% 40%, #d4956a, #b87333);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+      }
     }
 
     .block-info {
@@ -126,38 +143,45 @@ import { ScheduleBlock, Day } from '../../../shared/models';
     }
 
     .crew {
+      font-family: var(--font-body);
       font-size: 12px;
       color: var(--text-secondary);
+      font-style: italic;
     }
 
     .topic {
-      font-size: 14px;
-      font-weight: 500;
+      font-family: var(--font-heading);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
     }
 
     .weight-badge {
+      font-family: var(--font-data);
       font-size: 9px;
       font-weight: 700;
       letter-spacing: 0.5px;
       padding: 1px 6px;
-      border-radius: 3px;
+      border-radius: 2px;
 
-      &.weight-heavy { background: rgba(230, 57, 70, 0.2); color: #e63946; }
-      &.weight-medium { background: rgba(247, 127, 0, 0.2); color: #f77f00; }
-      &.weight-light { background: rgba(46, 204, 64, 0.2); color: #2ecc40; }
+      &.weight-heavy { background: rgba(166,61,47,0.2); color: #c45a4a; }
+      &.weight-medium { background: rgba(184,115,51,0.2); color: var(--accent-copper); }
+      &.weight-light { background: rgba(90,138,74,0.2); color: #6a9a5a; }
     }
 
     .progress-label {
+      font-family: var(--font-data);
       font-size: 11px;
       color: var(--text-secondary);
     }
 
     .mastered-badge {
+      font-family: var(--font-data);
       font-size: 9px;
       font-weight: 700;
       padding: 1px 6px;
-      border-radius: 3px;
-      background: rgba(46, 204, 64, 0.2);
+      border-radius: 2px;
+      background: rgba(90,138,74,0.2);
       color: var(--success-green);
     }
 
