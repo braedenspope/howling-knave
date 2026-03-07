@@ -1,0 +1,126 @@
+<mat-accordion multi>
+  @for (crew of trainingService.crewMembers(); track crew.id) {
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <span class="crew-dot" [style.background]="getCrewColor(crew.name)"></span>
+          {{ crew.name }}
+          <span class="crew-role">({{ crew.role }})</span>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <div class="trainings-list">
+        @for (training of trainingService.getTrainingsForCrew(crew.id); track training.id) {
+          @if (editingId() === training.id) {
+            <div class="training-form">
+              <div class="form-grid">
+                <mat-form-field appearance="outline">
+                  <mat-label>Topic</mat-label>
+                  <input matInput [(ngModel)]="editForm.topic" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Weight</mat-label>
+                  <mat-select [(ngModel)]="editForm.slot_weight">
+                    <mat-option value="heavy">Heavy</mat-option>
+                    <mat-option value="medium">Medium</mat-option>
+                    <mat-option value="light">Light</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Sessions (1–5)</mat-label>
+                  <input matInput type="number" [(ngModel)]="editForm.sessions_required" min="1" max="5" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Tier Required (1–5)</mat-label>
+                  <input matInput type="number" [(ngModel)]="editForm.tier_required" min="1" max="5" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-span">
+                  <mat-label>Description</mat-label>
+                  <textarea matInput rows="2" [(ngModel)]="editForm.description"></textarea>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-span">
+                  <mat-label>Reward</mat-label>
+                  <textarea matInput rows="2" [(ngModel)]="editForm.reward"></textarea>
+                </mat-form-field>
+              </div>
+              <div class="form-actions">
+                <button mat-button (click)="cancelEdit()">Cancel</button>
+                <button mat-raised-button color="primary" (click)="saveEdit(training.id)">Save</button>
+                <button mat-button color="warn" (click)="deleteTraining(training.id)">Delete</button>
+              </div>
+            </div>
+          } @else {
+            <div class="training-item">
+              <div class="training-info">
+                <span class="training-topic">{{ training.topic }}</span>
+                <span class="badge tier-badge">Tier {{ training.tier_required }}</span>
+                <span class="badge" [class]="'weight-' + training.slot_weight">
+                  {{ training.slot_weight | uppercase }}
+                </span>
+                <span class="badge sessions-badge">{{ training.sessions_required }}s</span>
+              </div>
+              <p class="training-desc">{{ training.description }}</p>
+              <p class="training-reward">Reward: {{ training.reward }}</p>
+              <button mat-icon-button (click)="startEdit(training)">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </div>
+          }
+        }
+
+        @if (addingForCrew() === crew.id) {
+          <div class="training-form">
+            <div class="form-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Topic</mat-label>
+                <input matInput [(ngModel)]="addForm.topic" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Weight</mat-label>
+                <mat-select [(ngModel)]="addForm.slot_weight">
+                  <mat-option value="heavy">Heavy</mat-option>
+                  <mat-option value="medium">Medium</mat-option>
+                  <mat-option value="light">Light</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Sessions (1–5)</mat-label>
+                <input matInput type="number" [(ngModel)]="addForm.sessions_required" min="1" max="5" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Tier Required (1–5)</mat-label>
+                <input matInput type="number" [(ngModel)]="addForm.tier_required" min="1" max="5" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-span">
+                <mat-label>Description</mat-label>
+                <textarea matInput rows="2" [(ngModel)]="addForm.description"></textarea>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-span">
+                <mat-label>Reward</mat-label>
+                <textarea matInput rows="2" [(ngModel)]="addForm.reward"></textarea>
+              </mat-form-field>
+            </div>
+            <div class="form-actions">
+              <button mat-button (click)="cancelAdd()">Cancel</button>
+              <button mat-raised-button color="primary" (click)="saveNewTraining(crew.id)">Add</button>
+            </div>
+          </div>
+        } @else {
+          <button mat-stroked-button (click)="startAdd(crew.id)" class="add-training-btn">
+            <mat-icon>add</mat-icon> Add Training
+          </button>
+        }
+      </div>
+    </mat-expansion-panel>
+  }
+</mat-accordion>

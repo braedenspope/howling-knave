@@ -1,0 +1,72 @@
+@for (day of voyageService.days(); track day.id) {
+  <div class="duty-day-section">
+    <h3 class="gold-text">Day {{ day.day_number }}</h3>
+
+    @if (day.mandatory_duty) {
+      <div class="current-duty">
+        <span class="duty-label">
+          <mat-icon>warning</mat-icon>
+          {{ day.mandatory_duty.crew_member }} — {{ day.mandatory_duty.task_description }}
+          ({{ day.mandatory_duty.slot_weight | uppercase }})
+        </span>
+        <button mat-icon-button (click)="clearDuty(day.id)" color="warn">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    }
+
+    @if (editingDay() === day.id) {
+      <mat-card class="duty-form">
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Crew Member</mat-label>
+            <mat-select [(ngModel)]="dutyCrew">
+              @for (crew of crewList; track crew) {
+                <mat-option [value]="crew">{{ crew }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Task Description</mat-label>
+            <input matInput [(ngModel)]="dutyDescription" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Slot Weight</mat-label>
+            <mat-select [(ngModel)]="dutyWeight">
+              <mat-option value="heavy">Heavy</mat-option>
+              <mat-option value="medium">Medium</mat-option>
+              <mat-option value="light">Light</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Consequence Type</mat-label>
+            <mat-select [(ngModel)]="dutyConsequenceType">
+              <mat-option value="crew">Crew</mat-option>
+              <mat-option value="ship">Ship</mat-option>
+              <mat-option value="both">Both</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-span">
+            <mat-label>Consequence Description</mat-label>
+            <textarea matInput rows="2" [(ngModel)]="dutyConsequenceDesc"></textarea>
+          </mat-form-field>
+        </div>
+        <div class="form-actions">
+          <button mat-button (click)="editingDay.set(null)">Cancel</button>
+          <button mat-stroked-button (click)="setDuty(day.id)">Set Duty</button>
+          <button mat-raised-button color="primary" (click)="setDutyAndPush(day.id)">
+            Set &amp; Push to Rows
+          </button>
+        </div>
+      </mat-card>
+    } @else {
+      <button mat-stroked-button (click)="startEdit(day.id)">
+        {{ day.mandatory_duty ? 'Replace Duty' : 'Add Duty' }}
+      </button>
+    }
+  </div>
+}

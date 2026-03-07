@@ -1,0 +1,47 @@
+<mat-tab-group (selectedIndexChange)="onPlayerTabChange($event)">
+  @for (user of scheduleService.allUsers(); track user.id) {
+    <mat-tab [label]="user.character_name">
+      <div class="crew-grid">
+        @for (crew of crewList; track crew) {
+          <div class="crew-card">
+            <div class="crew-header">
+              <span class="crew-dot" [style.background]="getCrewColor(crew)"></span>
+              <span class="crew-name">{{ crew }}</span>
+              <span class="tier-name">{{ getTierName(user.id, crew) }}</span>
+              <button
+                mat-icon-button
+                class="notes-toggle"
+                (click)="toggleNotes(user.id, crew)"
+                [matTooltip]="'DM Notes'"
+              >
+                <mat-icon>{{ hasNotes(user.id, crew) ? 'note' : 'note_add' }}</mat-icon>
+              </button>
+            </div>
+            <div class="tier-pips">
+              @for (pip of [1, 2, 3, 4, 5]; track pip) {
+                <button
+                  class="tier-pip"
+                  [class.active]="pip <= getTier(user.id, crew)"
+                  [style.background]="pip <= getTier(user.id, crew) ? getTierColor(pip) : '#333'"
+                  (click)="setTier(user.id, crew, pip)"
+                  [matTooltip]="getTierNameByNum(pip)"
+                ></button>
+              }
+            </div>
+            @if (isNotesOpen(user.id, crew)) {
+              <mat-form-field appearance="outline" class="notes-field">
+                <mat-label>Notes</mat-label>
+                <textarea
+                  matInput
+                  rows="2"
+                  [ngModel]="getNotesValue(user.id, crew)"
+                  (ngModelChange)="updateNotes(user.id, crew, $event)"
+                ></textarea>
+              </mat-form-field>
+            }
+          </div>
+        }
+      </div>
+    </mat-tab>
+  }
+</mat-tab-group>

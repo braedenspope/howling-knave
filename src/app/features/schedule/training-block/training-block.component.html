@@ -1,0 +1,33 @@
+<div
+  class="training-block"
+  [style.border-left-color]="crewColor()"
+  [class.status-success]="block().status === 'success'"
+  [class.status-failure]="block().status === 'failure'"
+  [class.status-locked]="block().status === 'locked'"
+>
+  <div class="block-content">
+    <span class="crew-name">{{ block().crew_member }}</span>
+    <span class="topic-name">{{ block().training_topic }}</span>
+    <span class="weight-badge" [class]="'weight-' + block().slot_weight">
+      {{ block().slot_weight | uppercase }}
+    </span>
+  </div>
+  <div class="block-status">
+    @switch (block().status) {
+      @case ('success') {
+        <mat-icon class="status-icon success" matTooltip="Success">check_circle</mat-icon>
+      }
+      @case ('failure') {
+        <mat-icon class="status-icon failure" matTooltip="Failure">cancel</mat-icon>
+      }
+      @case ('locked') {
+        <mat-icon class="status-icon locked" matTooltip="Mandatory">lock</mat-icon>
+      }
+    }
+  </div>
+  @if (canRemove()) {
+    <button class="remove-btn" (click)="remove.emit(block().id)" matTooltip="Remove">
+      <mat-icon>close</mat-icon>
+    </button>
+  }
+</div>

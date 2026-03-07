@@ -15,51 +15,7 @@ import { TrainingEditorComponent } from '../training-editor/training-editor.comp
     DutyInjectorComponent,
     TrainingEditorComponent,
   ],
-  template: `
-    <div class="dm-container">
-      <h1 class="gold-text dm-title">DM Dashboard</h1>
-      <mat-tab-group>
-        <mat-tab label="Block Outcomes">
-          <div class="tab-content">
-            <app-block-outcomes />
-          </div>
-        </mat-tab>
-        <mat-tab label="Relationships">
-          <div class="tab-content">
-            <app-relationship-tracker />
-          </div>
-        </mat-tab>
-        <mat-tab label="Ship Duties">
-          <div class="tab-content">
-            <app-duty-injector />
-          </div>
-        </mat-tab>
-        <mat-tab label="Trainings">
-          <div class="tab-content">
-            <app-training-editor />
-          </div>
-        </mat-tab>
-      </mat-tab-group>
-    </div>
-  `,
-  styles: [`
-    .dm-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-
-    .dm-title {
-      margin: 0 0 16px;
-      font-family: var(--font-heading);
-      font-size: 24px;
-      letter-spacing: 1.5px;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.4);
-    }
-
-    .tab-content {
-      padding: 16px 0;
-    }
-  `],
+  templateUrl: './dm-dashboard.component.html',
+  styleUrl: './dm-dashboard.component.scss',
 })
 export class DmDashboardComponent {}

@@ -1,0 +1,60 @@
+<h2 mat-dialog-title class="gold-text">Add Training Block</h2>
+<mat-dialog-content>
+  <p class="budget-info">Remaining budget: {{ data.remainingBudget }} units</p>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Crew Member</mat-label>
+    <mat-select [(ngModel)]="selectedCrew" (ngModelChange)="onCrewChange()">
+      @for (crew of crewList; track crew) {
+        <mat-option [value]="crew">
+          <span class="crew-dot" [style.background]="getCrewColor(crew)"></span>
+          {{ crew }}
+        </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  @if (selectedCrew) {
+    <div class="training-options">
+      @for (training of availableTrainings(); track training.id) {
+        <div
+          class="training-option"
+          [class.disabled]="!training.affordable || !training.available"
+          [class.selected]="selectedTraining()?.id === training.id"
+          (click)="selectTraining(training)"
+          [style.border-left-color]="getCrewColor(selectedCrew)"
+        >
+          <div class="training-header">
+            <span class="training-topic">{{ training.topic }}</span>
+            <span class="weight-badge" [class]="'weight-' + training.slot_weight">
+              {{ training.slot_weight | uppercase }}
+            </span>
+          </div>
+          <p class="training-desc">{{ training.description }}</p>
+          <div class="training-meta">
+            <span class="reward">{{ training.reward }}</span>
+            <span class="sessions">{{ training.sessions_required }} session{{ training.sessions_required > 1 ? 's' : '' }}</span>
+          </div>
+          @if (!training.available) {
+            <span class="lock-reason">Requires higher relationship tier</span>
+          } @else if (!training.affordable) {
+            <span class="lock-reason">Not enough budget ({{ getCost(training.slot_weight) }} units)</span>
+          }
+        </div>
+      } @empty {
+        <p class="empty-state">No trainings available for this crew member.</p>
+      }
+    </div>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    [disabled]="!selectedTraining()"
+    (click)="confirm()"
+  >
+    Add Block
+  </button>
+</mat-dialog-actions>

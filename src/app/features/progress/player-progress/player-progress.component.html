@@ -1,0 +1,66 @@
+<div class="progress-container">
+  <h1 class="gold-text">My Training Progress</h1>
+
+  <div class="summary-bar">
+    <div class="summary-item">
+      <span class="summary-value">{{ masteredCount() }}</span>
+      <span class="summary-label">Mastered</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-value">{{ inProgressCount() }}</span>
+      <span class="summary-label">In Progress</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-value">{{ totalCount() }}</span>
+      <span class="summary-label">Total Trained</span>
+    </div>
+  </div>
+
+  @if (groupedProgress().length === 0) {
+    <div class="empty-state">
+      <mat-icon>school</mat-icon>
+      <p>You haven't started any training yet. Head to the board and begin!</p>
+    </div>
+  } @else {
+    <mat-accordion multi>
+      @for (group of groupedProgress(); track group.crewMember) {
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <span class="crew-dot" [style.background]="getCrewColor(group.crewMember)"></span>
+              {{ group.crewMember }}
+            </mat-panel-title>
+            <mat-panel-description>
+              {{ group.trainings.length }} training{{ group.trainings.length > 1 ? 's' : '' }}
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <div class="training-list">
+            @for (training of group.trainings; track training.training_topic) {
+              <div class="training-row">
+                <div class="training-info">
+                  <span class="topic-name">{{ training.training_topic }}</span>
+                  @if (training.completed) {
+                    <span class="mastered-badge">MASTERED</span>
+                  }
+                </div>
+                <div class="pip-row">
+                  @for (pip of getPips(training); track $index) {
+                    <div
+                      class="pip"
+                      [class.filled]="pip.filled"
+                      [class.mastered]="training.completed"
+                    ></div>
+                  }
+                  <span class="fraction">
+                    {{ training.successes_accumulated }}/{{ training.successes_required }}
+                  </span>
+                </div>
+              </div>
+            }
+          </div>
+        </mat-expansion-panel>
+      }
+    </mat-accordion>
+  }
+</div>

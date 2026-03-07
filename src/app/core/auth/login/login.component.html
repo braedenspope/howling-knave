@@ -1,0 +1,41 @@
+<div class="auth-container">
+  <mat-card class="auth-card">
+    <mat-card-header>
+      <mat-card-title class="gold-text">Echoes of the Sundering</mat-card-title>
+      <mat-card-subtitle>Sign in to continue</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      @if (error()) {
+        <p class="error-text">{{ error() }}</p>
+      }
+      <form (ngSubmit)="onLogin()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" [(ngModel)]="email" name="email" required />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" [(ngModel)]="password" name="password" required />
+        </mat-form-field>
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          class="full-width"
+          [disabled]="submitting()"
+        >
+          @if (submitting()) {
+            <mat-spinner diameter="20"></mat-spinner>
+          } @else {
+            Sign In
+          }
+        </button>
+      </form>
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <a mat-button routerLink="/register">Create Account</a>
+    </mat-card-actions>
+  </mat-card>
+</div>

@@ -1,0 +1,36 @@
+@if (auth.isAuthed()) {
+  <mat-toolbar class="app-nav">
+    <span class="app-title gold-text" routerLink="/board">Echoes of the Sundering</span>
+    @if (voyageService.activeVoyage(); as voyage) {
+      <span class="voyage-name">{{ voyage.name }}</span>
+    }
+    <span class="spacer"></span>
+    <nav class="nav-links">
+      <a mat-button routerLink="/board" routerLinkActive="active-link">
+        <mat-icon>dashboard</mat-icon>
+        <span class="nav-label">Board</span>
+      </a>
+      <a mat-button routerLink="/voyages" routerLinkActive="active-link">
+        <mat-icon>sailing</mat-icon>
+        <span class="nav-label">Voyages</span>
+      </a>
+      <a mat-button routerLink="/progress" routerLinkActive="active-link">
+        <mat-icon>trending_up</mat-icon>
+        <span class="nav-label">Progress</span>
+      </a>
+      @if (auth.isDm()) {
+        <a mat-button routerLink="/dm" routerLinkActive="active-link">
+          <mat-icon>shield</mat-icon>
+          <span class="nav-label">DM</span>
+        </a>
+      }
+    </nav>
+    <span class="character-chip">{{ auth.profile()?.character_name }}</span>
+    <button mat-icon-button (click)="auth.logout()" aria-label="Logout">
+      <mat-icon>logout</mat-icon>
+    </button>
+  </mat-toolbar>
+}
+<main>
+  <router-outlet />
+</main>

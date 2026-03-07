@@ -1,0 +1,73 @@
+.voyage-list-container {
+  max-width: 900px;
+  margin: 32px auto;
+  padding: 0 24px;
+}
+
+.create-card {
+  margin-bottom: 24px;
+  border-radius: 2px !important;
+}
+
+.create-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+
+  mat-form-field {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .day-count-field {
+    max-width: 140px;
+  }
+
+  button {
+    margin-top: 4px;
+  }
+}
+
+.section-title {
+  margin: 32px 0 16px;
+  font-family: var(--font-heading);
+  font-size: 24px;
+  letter-spacing: 1px;
+}
+
+.voyage-card {
+  margin-bottom: 16px;
+  padding: 20px;
+  transition: border-color 0.2s;
+  border-radius: 2px !important;
+
+  &.active-voyage {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 12px rgba(212,168,67,0.15);
+  }
+
+  mat-card-title {
+    font-family: var(--font-heading);
+    font-size: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  mat-card-subtitle {
+    font-family: var(--font-data);
+    font-size: 14px;
+  }
+}
+
+.error-text {
+  color: var(--failure-red);
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.empty-state {
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 32px 0;
+  font-style: italic;
+}

@@ -1,0 +1,58 @@
+@for (day of voyageService.days(); track day.id) {
+  <div class="day-section">
+    <h3 class="gold-text day-label">Day {{ day.day_number }}</h3>
+
+    @for (user of scheduleService.allUsers(); track user.id) {
+      @if (getBlocksForDayUser(day.id, user.id).length > 0) {
+        <div class="player-section">
+          <span class="player-name">{{ user.character_name }}</span>
+          <div class="blocks-list">
+            @for (block of getBlocksForDayUser(day.id, user.id); track block.id) {
+              <div class="outcome-block" [style.border-left-color]="getCrewColor(block.crew_member)">
+                <div class="block-info">
+                  <span class="crew">{{ block.crew_member }}</span>
+                  <span class="topic">{{ block.training_topic }}</span>
+                  <span class="weight-badge" [class]="'weight-' + block.slot_weight">
+                    {{ block.slot_weight | uppercase }}
+                  </span>
+                  @if (getProgressLabel(block)) {
+                    <span class="progress-label">{{ getProgressLabel(block) }}</span>
+                  }
+                  @if (isMastered(block)) {
+                    <span class="mastered-badge">MASTERED</span>
+                  }
+                </div>
+                <div class="outcome-actions">
+                  <button mat-icon-button
+                    matTooltip="+2 Double Success"
+                    class="action-double"
+                    (click)="markOutcome(block, 2)">
+                    <mat-icon>star</mat-icon>
+                  </button>
+                  <button mat-icon-button
+                    matTooltip="Success (+1)"
+                    class="action-success"
+                    (click)="markOutcome(block, 1)">
+                    <mat-icon>check</mat-icon>
+                  </button>
+                  <button mat-icon-button
+                    matTooltip="Failure"
+                    class="action-failure"
+                    (click)="markFailure(block)">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                  <button mat-icon-button
+                    matTooltip="Reset to Pending"
+                    class="action-reset"
+                    (click)="resetBlock(block)">
+                    <mat-icon>refresh</mat-icon>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+}

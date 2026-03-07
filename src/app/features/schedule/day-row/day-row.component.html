@@ -1,0 +1,57 @@
+<mat-card class="day-card">
+  <div class="day-header">
+    <h3 class="day-title gold-text">Day {{ day().day_number }}</h3>
+    @if (day().mandatory_duty) {
+      <span class="duty-badge" [matTooltip]="day().mandatory_duty?.consequence_description ?? ''">
+        <mat-icon>warning</mat-icon>
+        {{ day().mandatory_duty?.task_description }}
+      </span>
+    }
+  </div>
+
+  @for (user of users(); track user.id) {
+    <div class="player-row">
+      <div class="player-info">
+        <span class="character-name">{{ user.character_name }}</span>
+        <span class="display-name">{{ user.display_name }}</span>
+        <div class="budget-pips">
+          @for (pip of getBudgetPips(user.id); track $index) {
+            <div
+              class="pip"
+              [class.pip-used]="pip.used"
+              [class]="'pip-' + pip.weight"
+            ></div>
+          }
+        </div>
+      </div>
+      <div
+        class="blocks-container"
+        cdkDropList
+        [cdkDropListData]="getPlayerBlocks(user.id)"
+        [cdkDropListDisabled]="user.id !== currentUserId()"
+        (cdkDropListDropped)="onDrop($event, user.id)"
+      >
+        @for (block of getPlayerBlocks(user.id); track block.id) {
+          <div cdkDrag [cdkDragDisabled]="block.is_mandatory || user.id !== currentUserId()">
+            <app-training-block
+              [block]="block"
+              [canRemove]="user.id === currentUserId() && !block.is_mandatory"
+              (remove)="onRemoveBlock($event)"
+            />
+            <div class="drag-placeholder" *cdkDragPlaceholder></div>
+          </div>
+        }
+        @if (user.id === currentUserId() && getRemainingBudget(user.id) > 0) {
+          <button
+            mat-icon-button
+            class="add-btn"
+            (click)="openAddDialog(user.id)"
+            matTooltip="Add training block"
+          >
+            <mat-icon>add</mat-icon>
+          </button>
+        }
+      </div>
+    </div>
+  }
+</mat-card>

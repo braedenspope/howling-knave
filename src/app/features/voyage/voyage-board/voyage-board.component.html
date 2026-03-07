@@ -1,0 +1,26 @@
+@if (voyageService.loading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+} @else if (!voyageService.activeVoyage()) {
+  <div class="empty-state">
+    <h2 class="gold-text">No Active Voyage</h2>
+    <p>Ask your DM to create or activate a voyage.</p>
+  </div>
+} @else {
+  <div class="board-container">
+    <div class="player-legend">
+      @for (user of scheduleService.allUsers(); track user.id) {
+        <span class="player-chip">
+          {{ user.character_name }}
+        </span>
+      }
+    </div>
+
+    <div class="day-list">
+      @for (day of voyageService.days(); track day.id) {
+        <app-day-row [day]="day" [users]="scheduleService.allUsers()" />
+      }
+    </div>
+  </div>
+}
