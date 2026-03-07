@@ -29,7 +29,41 @@
     <button mat-icon-button (click)="auth.logout()" aria-label="Logout">
       <mat-icon>logout</mat-icon>
     </button>
+    <button mat-icon-button class="menu-toggle" (click)="toggleMenu()" aria-label="Menu">
+      <mat-icon>{{ menuOpen() ? 'close' : 'menu' }}</mat-icon>
+    </button>
   </mat-toolbar>
+
+  @if (menuOpen()) {
+    <div class="mobile-menu-backdrop" (click)="closeMenu()"></div>
+    <nav class="mobile-menu">
+      <a mat-button routerLink="/board" routerLinkActive="active-link" (click)="closeMenu()">
+        <mat-icon>dashboard</mat-icon>
+        <span>Board</span>
+      </a>
+      <a mat-button routerLink="/voyages" routerLinkActive="active-link" (click)="closeMenu()">
+        <mat-icon>sailing</mat-icon>
+        <span>Voyages</span>
+      </a>
+      <a mat-button routerLink="/progress" routerLinkActive="active-link" (click)="closeMenu()">
+        <mat-icon>trending_up</mat-icon>
+        <span>Progress</span>
+      </a>
+      @if (auth.isDm()) {
+        <a mat-button routerLink="/dm" routerLinkActive="active-link" (click)="closeMenu()">
+          <mat-icon>shield</mat-icon>
+          <span>DM</span>
+        </a>
+      }
+      <div class="mobile-menu-footer">
+        <span class="character-chip">{{ auth.profile()?.character_name }}</span>
+        <button mat-button (click)="auth.logout(); closeMenu()">
+          <mat-icon>logout</mat-icon>
+          <span>Logout</span>
+        </button>
+      </div>
+    </nav>
+  }
 }
 <main>
   <router-outlet />

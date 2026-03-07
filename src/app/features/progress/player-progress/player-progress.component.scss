@@ -139,3 +139,11 @@ h1 {
   color: var(--text-secondary);
   margin-left: 4px;
 }
+
+@media (max-width: 600px) {
+  .progress-container { padding: 12px; }
+  h1 { font-size: 20px; }
+  .summary-bar { gap: 12px; padding: 12px; flex-wrap: wrap; }
+  .summary-value { font-size: 22px; }
+  .training-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+}

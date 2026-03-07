@@ -143,3 +143,40 @@
     color: var(--failure-red);
   }
 }
+
+@media (max-width: 900px) {
+  .training-block {
+    padding: 8px 10px;
+    gap: 6px;
+
+    &::before { display: none; }
+  }
+
+  .crew-name { font-size: 11px; }
+  .topic-name { font-size: 12px; }
+  .weight-badge { font-size: 9px; padding: 2px 6px; }
+  .status-icon { font-size: 18px; width: 18px; height: 18px; }
+  .remove-btn { opacity: 0.7; }
+}
+
+@media (max-width: 600px) {
+  .training-block {
+    padding: 6px 6px;
+    gap: 2px;
+    border-left-width: 3px;
+  }
+
+  .block-content { gap: 0; }
+  .crew-name { font-size: 10px; }
+  .topic-name { font-size: 10px; letter-spacing: 0; }
+  .weight-badge { display: none; }
+  .block-status { display: none; }
+
+  .remove-btn {
+    opacity: 0.7;
+    top: -6px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
+  }
+}

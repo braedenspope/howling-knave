@@ -105,26 +105,25 @@
   gap: 8px;
   padding: 4px 8px;
   border-radius: 2px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
   font-size: 12px;
   font-family: var(--font-data);
-  &.mandatory-block { border-color: rgba(196, 154, 60, 0.2); background: rgba(196, 154, 60, 0.05); }
-  .block-player { font-weight: 600; min-width: 80px; color: var(--text-secondary); }
-  .block-crew { font-weight: 600; min-width: 100px; }
+  &.mandatory-block { border-color: rgba(196,154,60,0.2); background: rgba(196,154,60,0.05); }
+  .block-player { font-weight: 600; color: var(--text-secondary); }
+  .block-crew { font-weight: 600; }
   .block-topic { flex: 1; opacity: 0.8; }
-  .mandatory-icon { font-size: 14px; width: 14px; height: 14px; opacity: 0.5; }
 }
 
 .weight-badge, .status-badge { font-size: 10px; padding: 1px 6px; border-radius: 2px; text-transform: uppercase; }
 .weight-badge { font-weight: 600; }
-.weight-badge[data-weight="heavy"] { background: rgba(183, 28, 28, 0.2); color: #ef5350; }
-.weight-badge[data-weight="medium"] { background: rgba(196, 154, 60, 0.2); color: var(--accent-gold); }
-.weight-badge[data-weight="light"] { background: rgba(76, 175, 80, 0.2); color: #66bb6a; }
+.weight-badge[data-weight="heavy"] { background: rgba(183,28,28,0.2); color: #ef5350; }
+.weight-badge[data-weight="medium"] { background: rgba(196,154,60,0.2); color: var(--accent-gold); }
+.weight-badge[data-weight="light"] { background: rgba(76,175,80,0.2); color: #66bb6a; }
 .status-badge[data-status="pending"] { color: var(--text-secondary); opacity: 0.6; }
 .status-badge[data-status="success"] { color: #66bb6a; }
 .status-badge[data-status="failure"] { color: #ef5350; }
-.status-badge[data-status="locked"] { color: var(--accent-copper, #b87333); }
+.status-badge[data-status="locked"] { color: var(--accent-copper); }
 
 .sm-btn {
   transform: scale(0.75);
@@ -136,7 +135,11 @@
 .empty-state, .loading-text { color: var(--text-secondary); text-align: center; padding: 24px 0; font-style: italic; }
 
 @media (max-width: 600px) {
-  .dm-actions { margin-left: 0; width: 100%; }
+  .voyage-list-container { padding: 0 12px; margin: 16px auto; }
+  .voyage-card { padding: 14px; }
+  .section-title { font-size: 20px; margin: 20px 0 12px; }
+  .dm-actions { margin-left: 0; width: 100%; flex-wrap: wrap; }
   .blocks-list { padding-left: 0; }
   .block-chip { flex-wrap: wrap; }
+  .duty-form { mat-form-field { min-width: 100%; } .narrow-field { max-width: 100%; } }
 }

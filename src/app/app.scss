@@ -58,17 +58,79 @@ main {
   min-height: calc(100vh - 64px);
 }
 
-@media (max-width: 600px) {
-  .nav-label {
-    display: none;
-  }
+.menu-toggle {
+  display: none;
+}
 
-  .voyage-name {
-    display: none;
-  }
+.mobile-menu-backdrop {
+  display: none;
+}
+
+.mobile-menu {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .nav-links { display: none; }
+  .voyage-name { display: none; }
+
+  .app-nav .character-chip { display: none; }
+  .app-nav button[aria-label="Logout"] { display: none; }
 
   .app-title {
     font-size: 14px;
-    margin-right: 8px;
+    margin-right: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+  }
+
+  .mobile-menu-backdrop {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+  }
+
+  .mobile-menu {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: var(--bg-nav);
+    background-image: var(--wood-grain);
+    border-bottom: 3px solid var(--accent-brass);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    z-index: 101;
+    padding: 8px 0;
+
+    a {
+      justify-content: flex-start;
+      padding: 12px 24px;
+      font-family: var(--font-heading);
+      font-size: 14px;
+      letter-spacing: 0.5px;
+
+      mat-icon {
+        margin-right: 12px;
+      }
+    }
+
+    .mobile-menu-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 24px;
+      margin-top: 4px;
+      border-top: 1px solid var(--bg-card-border);
+    }
   }
 }

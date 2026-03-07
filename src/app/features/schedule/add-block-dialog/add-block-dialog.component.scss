@@ -139,3 +139,11 @@
   text-align: center;
   padding: 24px 0;
 }
+
+@media (max-width: 600px) {
+  .mode-toggle mat-button-toggle { font-size: 11px; }
+  .training-options { max-height: 300px; }
+  .training-topic { font-size: 12px; }
+  .training-desc { font-size: 11px; }
+  .weight-toggles mat-button-toggle { font-size: 10px; }
+}

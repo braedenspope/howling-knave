@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -21,8 +21,18 @@ import { VoyageService } from './features/voyage/voyage.service';
   styleUrl: './app.scss',
 })
 export class App {
+  menuOpen = signal(false);
+
   constructor(
     public auth: AuthService,
     public voyageService: VoyageService,
   ) {}
+
+  toggleMenu() {
+    this.menuOpen.update(v => !v);
+  }
+
+  closeMenu() {
+    this.menuOpen.set(false);
+  }
 }

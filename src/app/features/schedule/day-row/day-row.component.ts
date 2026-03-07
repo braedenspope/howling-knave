@@ -212,6 +212,7 @@ export class DayRowComponent {
 
     const dialogRef = this.dialog.open(AddBlockDialogComponent, {
       width: '500px',
+      maxWidth: '95vw',
       data: { dayId: this.day().id, remainingBudget: contiguous, forUserId: userId },
     });
 
