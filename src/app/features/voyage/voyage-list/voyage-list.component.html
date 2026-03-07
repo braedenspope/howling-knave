@@ -34,11 +34,37 @@
   @for (voyage of voyageService.voyages(); track voyage.id) {
     <mat-card class="voyage-card" [class.active-voyage]="voyage.is_active">
       <mat-card-header>
-        <mat-card-title>{{ voyage.name }}</mat-card-title>
+        @if (editingVoyageId() === voyage.id) {
+          <div class="edit-name-row">
+            <mat-form-field appearance="outline" class="edit-name-field">
+              <mat-label>Voyage Name</mat-label>
+              <input matInput [(ngModel)]="editName" (keyup.enter)="saveName(voyage.id)" />
+            </mat-form-field>
+            <button mat-icon-button color="primary" (click)="saveName(voyage.id)" matTooltip="Save">
+              <mat-icon>check</mat-icon>
+            </button>
+            <button mat-icon-button (click)="cancelEditName()" matTooltip="Cancel">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        } @else {
+          <mat-card-title>
+            {{ voyage.name }}
+            @if (auth.isDm()) {
+              <button mat-icon-button class="edit-name-btn" (click)="startEditName(voyage)" matTooltip="Edit Name">
+                <mat-icon>edit</mat-icon>
+              </button>
+            }
+          </mat-card-title>
+        }
         <mat-card-subtitle>
           {{ voyage.day_count }} days &middot; {{ voyage.created_at | date:'mediumDate' }}
+          @if (voyage.is_active) {
+            <span class="active-badge">Active</span>
+          }
         </mat-card-subtitle>
       </mat-card-header>
+
       <mat-card-actions>
         @if (voyage.is_active) {
           <button mat-raised-button color="primary" (click)="openBoard()">
@@ -47,14 +73,159 @@
           </button>
         } @else if (auth.isDm()) {
           <button mat-stroked-button (click)="setActive(voyage.id)">
+            <mat-icon>play_arrow</mat-icon>
             Set Active
           </button>
-          <button mat-icon-button color="warn" (click)="onDelete(voyage.id, voyage.name)"
-                  matTooltip="Delete Voyage">
-            <mat-icon>delete</mat-icon>
-          </button>
+        }
+
+        @if (auth.isDm()) {
+          <div class="dm-actions">
+            <div class="day-controls">
+              <button mat-icon-button (click)="removeLastDay(voyage)"
+                      [disabled]="voyage.day_count <= 1"
+                      matTooltip="Remove Last Day">
+                <mat-icon>remove_circle_outline</mat-icon>
+              </button>
+              <span class="day-count-label">{{ voyage.day_count }} days</span>
+              <button mat-icon-button (click)="addDay(voyage)" matTooltip="Add Day">
+                <mat-icon>add_circle_outline</mat-icon>
+              </button>
+            </div>
+
+            <button mat-stroked-button (click)="toggleExpand(voyage)">
+              <mat-icon>{{ expandedVoyageId() === voyage.id ? 'expand_less' : 'expand_more' }}</mat-icon>
+              {{ expandedVoyageId() === voyage.id ? 'Collapse' : 'Manage Days' }}
+            </button>
+
+            <button mat-icon-button color="warn" (click)="onDelete(voyage.id, voyage.name)"
+                    matTooltip="Delete Voyage">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
         }
       </mat-card-actions>
+
+      <!-- Expanded Day Details (DM only) -->
+      @if (auth.isDm() && expandedVoyageId() === voyage.id) {
+        <mat-divider></mat-divider>
+        <div class="days-panel">
+          @if (loadingDays()) {
+            <p class="loading-text">Loading days...</p>
+          } @else {
+            @for (day of voyageDays(); track day.id) {
+              <div class="day-row">
+                <div class="day-header">
+                  <span class="day-label gold-text">Day {{ day.day_number }}</span>
+
+                  <!-- Duty display -->
+                  @if (day.mandatory_duty && editingDutyDayId() !== day.id) {
+                    <div class="duty-chip">
+                      <mat-icon class="duty-icon">assignment</mat-icon>
+                      <span class="duty-crew" [style.color]="getCrewColor(day.mandatory_duty.crew_member)">
+                        {{ day.mandatory_duty.crew_member }}
+                      </span>
+                      <span class="duty-task">{{ day.mandatory_duty.task_description }}</span>
+                      <span class="weight-badge" [attr.data-weight]="day.mandatory_duty.slot_weight">
+                        {{ day.mandatory_duty.slot_weight }}
+                      </span>
+                      <button mat-icon-button class="sm-btn" (click)="startEditDuty(day)" matTooltip="Edit Duty">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button class="sm-btn" color="warn" (click)="clearDuty(day.id)" matTooltip="Clear Duty">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </div>
+                  } @else if (editingDutyDayId() !== day.id) {
+                    <button mat-stroked-button class="add-duty-btn" (click)="startEditDuty(day)">
+                      <mat-icon>add</mat-icon> Add Duty
+                    </button>
+                  }
+                </div>
+
+                <!-- Duty edit form -->
+                @if (editingDutyDayId() === day.id) {
+                  <div class="duty-form">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Crew Member</mat-label>
+                      <mat-select [(ngModel)]="dutyForm.crew_member">
+                        @for (crew of crewList; track crew) {
+                          <mat-option [value]="crew">{{ crew }}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Task Description</mat-label>
+                      <input matInput [(ngModel)]="dutyForm.task_description" />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="narrow-field">
+                      <mat-label>Weight</mat-label>
+                      <mat-select [(ngModel)]="dutyForm.slot_weight">
+                        <mat-option value="heavy">Heavy</mat-option>
+                        <mat-option value="medium">Medium</mat-option>
+                        <mat-option value="light">Light</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="narrow-field">
+                      <mat-label>Consequence</mat-label>
+                      <mat-select [(ngModel)]="dutyForm.consequence_type">
+                        <mat-option value="crew">Crew</mat-option>
+                        <mat-option value="ship">Ship</mat-option>
+                        <mat-option value="both">Both</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Consequence Description</mat-label>
+                      <input matInput [(ngModel)]="dutyForm.consequence_description" />
+                    </mat-form-field>
+
+                    <div class="duty-form-actions">
+                      <button mat-raised-button color="primary" (click)="saveDuty(day.id)"
+                              [disabled]="!dutyForm.crew_member || !dutyForm.task_description">
+                        Save Duty
+                      </button>
+                      <button mat-stroked-button (click)="cancelEditDuty()">Cancel</button>
+                    </div>
+                  </div>
+                }
+
+                <!-- Schedule blocks for this day -->
+                @if (getBlocksForDay(day.id).length > 0) {
+                  <div class="blocks-list">
+                    @for (block of getBlocksForDay(day.id); track block.id) {
+                      <div class="block-chip" [class.mandatory-block]="block.is_mandatory">
+                        <span class="block-player">{{ getUserName(block.user_id) }}</span>
+                        <span class="block-crew" [style.color]="getCrewColor(block.crew_member)">
+                          {{ block.crew_member }}
+                        </span>
+                        <span class="block-topic">{{ block.training_topic }}</span>
+                        <span class="weight-badge" [attr.data-weight]="block.slot_weight">
+                          {{ block.slot_weight }}
+                        </span>
+                        <span class="status-badge" [attr.data-status]="block.status">
+                          {{ block.status }}
+                        </span>
+                        @if (block.is_mandatory) {
+                          <mat-icon class="mandatory-icon" matTooltip="Mandatory">lock</mat-icon>
+                        }
+                        <button mat-icon-button class="sm-btn" color="warn"
+                                (click)="deleteBlock(block)" matTooltip="Delete Block">
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            } @empty {
+              <p class="empty-state">No days in this voyage.</p>
+            }
+          }
+        </div>
+      }
     </mat-card>
   } @empty {
     <p class="empty-state">No voyages yet.</p>

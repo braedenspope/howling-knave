@@ -9,7 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { VoyageService } from '../../voyage/voyage.service';
 import { ScheduleService } from '../../schedule/schedule.service';
-import { CREW_LIST, CREW_COLORS } from '../../../shared/data/training.data';
+import { CREW_LIST } from '../../../shared/data/training.data';
 import { MandatoryDuty, SlotWeight } from '../../../shared/models';
 
 @Component({
@@ -37,6 +37,7 @@ export class DutyInjectorComponent {
   dutyWeight: SlotWeight = 'medium';
   dutyConsequenceType: 'crew' | 'ship' | 'both' = 'crew';
   dutyConsequenceDesc = '';
+  dutySlotPosition = 0;
 
   constructor(
     public voyageService: VoyageService,
@@ -50,6 +51,7 @@ export class DutyInjectorComponent {
     this.dutyWeight = 'medium';
     this.dutyConsequenceType = 'crew';
     this.dutyConsequenceDesc = '';
+    this.dutySlotPosition = 0;
   }
 
   private buildDuty(): MandatoryDuty {
@@ -64,15 +66,13 @@ export class DutyInjectorComponent {
 
   async setDuty(dayId: string) {
     const duty = this.buildDuty();
-    await this.voyageService.updateDayDuty(dayId, duty);
-    this.editingDay.set(null);
-  }
 
-  async setDutyAndPush(dayId: string) {
-    const duty = this.buildDuty();
+    // Remove existing mandatory blocks first
+    await this.scheduleService.removeMandatoryBlocks(dayId);
+
     await this.voyageService.updateDayDuty(dayId, duty);
 
-    // Push locked mandatory block to every player's row
+    // Auto-push locked mandatory block to every player's row
     const allUsers = this.scheduleService.allUsers();
     for (const user of allUsers) {
       await this.scheduleService.insertMandatoryBlock(
@@ -81,6 +81,7 @@ export class DutyInjectorComponent {
         duty.crew_member,
         duty.task_description,
         duty.slot_weight,
+        this.dutySlotPosition,
       );
     }
 
@@ -88,6 +89,7 @@ export class DutyInjectorComponent {
   }
 
   async clearDuty(dayId: string) {
+    await this.scheduleService.removeMandatoryBlocks(dayId);
     await this.voyageService.updateDayDuty(dayId, null);
   }
 }

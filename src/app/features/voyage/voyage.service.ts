@@ -122,6 +122,72 @@ export class VoyageService {
     return null;
   }
 
+  async updateVoyageName(voyageId: string, name: string): Promise<string | null> {
+    const { error } = await this.sb.supabase
+      .from('voyages')
+      .update({ name })
+      .eq('id', voyageId);
+    if (error) return error.message;
+    await this.loadVoyages();
+    return null;
+  }
+
+  async addDays(voyageId: string, currentCount: number, newTotal: number): Promise<string | null> {
+    if (newTotal <= currentCount) return null;
+    const dayRows = Array.from({ length: newTotal - currentCount }, (_, i) => ({
+      voyage_id: voyageId,
+      day_number: currentCount + i + 1,
+    }));
+    const { error } = await this.sb.supabase.from('days').insert(dayRows);
+    if (error) return error.message;
+    await this.sb.supabase
+      .from('voyages')
+      .update({ day_count: newTotal })
+      .eq('id', voyageId);
+    await this.loadVoyages();
+    return null;
+  }
+
+  async removeDays(voyageId: string, newTotal: number): Promise<string | null> {
+    // Get days to remove (those with day_number > newTotal)
+    const { data: daysToRemove } = await this.sb.supabase
+      .from('days')
+      .select('id')
+      .eq('voyage_id', voyageId)
+      .gt('day_number', newTotal);
+
+    if (daysToRemove && daysToRemove.length > 0) {
+      const dayIds = daysToRemove.map(d => d.id);
+      // Delete schedule blocks on those days first
+      await this.sb.supabase
+        .from('schedule_blocks')
+        .delete()
+        .in('day_id', dayIds);
+      // Delete the days
+      const { error } = await this.sb.supabase
+        .from('days')
+        .delete()
+        .in('id', dayIds);
+      if (error) return error.message;
+    }
+
+    await this.sb.supabase
+      .from('voyages')
+      .update({ day_count: newTotal })
+      .eq('id', voyageId);
+    await this.loadVoyages();
+    return null;
+  }
+
+  async loadDaysForVoyage(voyageId: string): Promise<Day[]> {
+    const { data } = await this.sb.supabase
+      .from('days')
+      .select('*')
+      .eq('voyage_id', voyageId)
+      .order('day_number', { ascending: true });
+    return (data as Day[]) ?? [];
+  }
+
   async updateDayDuty(dayId: string, duty: Day['mandatory_duty']): Promise<string | null> {
     const { error } = await this.sb.supabase
       .from('days')

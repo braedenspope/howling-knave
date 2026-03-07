@@ -1,49 +1,91 @@
-<h2 mat-dialog-title class="gold-text">Add Training Block</h2>
+<h2 mat-dialog-title class="gold-text">Add Block</h2>
 <mat-dialog-content>
   <p class="budget-info">Remaining budget: {{ data.remainingBudget }} units</p>
 
-  <mat-form-field appearance="outline" class="full-width">
-    <mat-label>Crew Member</mat-label>
-    <mat-select [(ngModel)]="selectedCrew" (ngModelChange)="onCrewChange()">
-      @for (crew of crewList; track crew) {
-        <mat-option [value]="crew">
-          <span class="crew-dot" [style.background]="getCrewColor(crew)"></span>
-          {{ crew }}
-        </mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+  <mat-button-toggle-group [value]="mode()" (change)="setMode($event.value)" class="mode-toggle">
+    <mat-button-toggle value="training">Crew Training</mat-button-toggle>
+    <mat-button-toggle value="custom">Custom Event</mat-button-toggle>
+  </mat-button-toggle-group>
 
-  @if (selectedCrew) {
-    <div class="training-options">
-      @for (training of availableTrainings(); track training.id) {
-        <div
-          class="training-option"
-          [class.disabled]="!training.affordable || !training.available"
-          [class.selected]="selectedTraining()?.id === training.id"
-          (click)="selectTraining(training)"
-          [style.border-left-color]="getCrewColor(selectedCrew)"
-        >
-          <div class="training-header">
-            <span class="training-topic">{{ training.topic }}</span>
-            <span class="weight-badge" [class]="'weight-' + training.slot_weight">
-              {{ training.slot_weight | uppercase }}
-            </span>
+  @if (mode() === 'training') {
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Crew Member</mat-label>
+      <mat-select [(ngModel)]="selectedCrew" (ngModelChange)="onCrewChange()">
+        @for (crew of crewList; track crew) {
+          <mat-option [value]="crew">
+            <span class="crew-dot" [style.background]="getCrewColor(crew)"></span>
+            {{ crew }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (selectedCrew) {
+      <div class="training-options">
+        @for (training of availableTrainings(); track training.id) {
+          <div
+            class="training-option"
+            [class.disabled]="!training.affordable || !training.available"
+            [class.selected]="selectedTraining()?.id === training.id"
+            (click)="selectTraining(training)"
+            [style.border-left-color]="getCrewColor(selectedCrew)"
+          >
+            <div class="training-header">
+              <span class="training-topic">{{ training.topic }}</span>
+              <span class="weight-badge" [class]="'weight-' + training.slot_weight">
+                {{ training.slot_weight | uppercase }}
+              </span>
+            </div>
+            <p class="training-desc">{{ training.description }}</p>
+            <div class="training-meta">
+              <span class="reward">{{ training.reward }}</span>
+              <span class="sessions">{{ training.sessions_required }} session{{ training.sessions_required > 1 ? 's' : '' }}</span>
+            </div>
+            @if (!training.available) {
+              <span class="lock-reason">Requires higher relationship tier</span>
+            } @else if (!training.affordable) {
+              <span class="lock-reason">Not enough budget ({{ getCost(training.slot_weight) }} units)</span>
+            }
           </div>
-          <p class="training-desc">{{ training.description }}</p>
-          <div class="training-meta">
-            <span class="reward">{{ training.reward }}</span>
-            <span class="sessions">{{ training.sessions_required }} session{{ training.sessions_required > 1 ? 's' : '' }}</span>
-          </div>
-          @if (!training.available) {
-            <span class="lock-reason">Requires higher relationship tier</span>
-          } @else if (!training.affordable) {
-            <span class="lock-reason">Not enough budget ({{ getCost(training.slot_weight) }} units)</span>
+        } @empty {
+          <p class="empty-state">No trainings available for this crew member.</p>
+        }
+      </div>
+    }
+  } @else {
+    <div class="custom-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Activity</mat-label>
+        <input matInput [(ngModel)]="customTopic" placeholder="What are you doing?" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Crew Member (optional)</mat-label>
+        <mat-select [(ngModel)]="customCrew">
+          <mat-option value="">None</mat-option>
+          @for (crew of crewList; track crew) {
+            <mat-option [value]="crew">
+              <span class="crew-dot" [style.background]="getCrewColor(crew)"></span>
+              {{ crew }}
+            </mat-option>
           }
-        </div>
-      } @empty {
-        <p class="empty-state">No trainings available for this crew member.</p>
-      }
+        </mat-select>
+      </mat-form-field>
+
+      <div class="weight-select">
+        <span class="weight-label">Time Cost</span>
+        <mat-button-toggle-group [(ngModel)]="customWeight" class="weight-toggles">
+          <mat-button-toggle value="light" [disabled]="getCost('light') > data.remainingBudget">
+            Light ({{ getCost('light') }})
+          </mat-button-toggle>
+          <mat-button-toggle value="medium" [disabled]="getCost('medium') > data.remainingBudget">
+            Medium ({{ getCost('medium') }})
+          </mat-button-toggle>
+          <mat-button-toggle value="heavy" [disabled]="getCost('heavy') > data.remainingBudget">
+            Heavy ({{ getCost('heavy') }})
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
     </div>
   }
 </mat-dialog-content>
@@ -52,7 +94,7 @@
   <button
     mat-raised-button
     color="primary"
-    [disabled]="!selectedTraining()"
+    [disabled]="!canConfirm()"
     (click)="confirm()"
   >
     Add Block

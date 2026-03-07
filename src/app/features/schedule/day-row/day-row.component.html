@@ -6,6 +6,17 @@
         <mat-icon>warning</mat-icon>
         {{ day().mandatory_duty?.task_description }}
       </span>
+      @if (isDm()) {
+        <button
+          mat-icon-button
+          class="remove-duty-btn"
+          (click)="onRemoveDuty()"
+          matTooltip="Remove duty from all players"
+          color="warn"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      }
     }
   </div>
 
@@ -14,42 +25,42 @@
       <div class="player-info">
         <span class="character-name">{{ user.character_name }}</span>
         <span class="display-name">{{ user.display_name }}</span>
-        <div class="budget-pips">
-          @for (pip of getBudgetPips(user.id); track $index) {
-            <div
-              class="pip"
-              [class.pip-used]="pip.used"
-              [class]="'pip-' + pip.weight"
-            ></div>
-          }
-        </div>
       </div>
-      <div
-        class="blocks-container"
-        cdkDropList
-        [cdkDropListData]="getPlayerBlocks(user.id)"
-        [cdkDropListDisabled]="user.id !== currentUserId()"
-        (cdkDropListDropped)="onDrop($event, user.id)"
-      >
-        @for (block of getPlayerBlocks(user.id); track block.id) {
-          <div cdkDrag [cdkDragDisabled]="block.is_mandatory || user.id !== currentUserId()">
-            <app-training-block
-              [block]="block"
-              [canRemove]="user.id === currentUserId() && !block.is_mandatory"
-              (remove)="onRemoveBlock($event)"
-            />
-            <div class="drag-placeholder" *cdkDragPlaceholder></div>
-          </div>
-        }
-        @if (user.id === currentUserId() && getRemainingBudget(user.id) > 0) {
-          <button
-            mat-icon-button
-            class="add-btn"
-            (click)="openAddDialog(user.id)"
-            matTooltip="Add training block"
-          >
-            <mat-icon>add</mat-icon>
-          </button>
+      <div class="slots-grid">
+        @for (item of getSlotItems(user.id); track item.slotIndex) {
+          @if (item.type === 'block') {
+            <div
+              class="slot-block"
+              [style.grid-column]="'span ' + item.span"
+              [class.is-dragging]="draggingBlock()?.id === item.block!.id || (draggingBlock()?.is_mandatory && item.block!.is_mandatory && item.block!.day_id === draggingBlock()?.day_id)"
+              [attr.draggable]="item.block!.is_mandatory ? isDm() : canEdit(user.id)"
+              (dragstart)="onDragStart($event, item.block!)"
+              (dragend)="onDragEnd()"
+            >
+              <app-training-block
+                [block]="item.block!"
+                [canRemove]="canEdit(user.id) && !item.block!.is_mandatory"
+                (remove)="onRemoveBlock($event)"
+              />
+            </div>
+          } @else {
+            <div
+              class="slot-empty"
+              [class.slot-interactive]="canEdit(user.id)"
+              [class.drop-target]="dragOverSlot() === item.slotIndex && canDropAt(user.id, item.slotIndex)"
+              [class.drag-active]="draggingBlock() !== null"
+              [class.drop-valid]="draggingBlock() !== null && canDropAt(user.id, item.slotIndex)"
+              (click)="!draggingBlock() && canEdit(user.id) ? openAddDialog(user.id, item.slotIndex) : null"
+              (dragover)="onDragOver($event, user.id, item.slotIndex)"
+              (dragleave)="onDragLeave(item.slotIndex)"
+              (drop)="onDrop($event, user.id, item.slotIndex)"
+            >
+              @if (canEdit(user.id) && !draggingBlock()) {
+                <mat-icon>add</mat-icon>
+              }
+              <span class="slot-number">{{ item.slotIndex + 1 }}</span>
+            </div>
+          }
         }
       </div>
     </div>

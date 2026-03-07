@@ -27,6 +27,16 @@ export class ScheduleService {
     if (data) this.allUsers.set(data);
   }
 
+  async loadBlocksByDayIds(dayIds: string[]): Promise<ScheduleBlock[]> {
+    if (dayIds.length === 0) return [];
+    const { data } = await this.sb.supabase
+      .from('schedule_blocks')
+      .select('*')
+      .in('day_id', dayIds)
+      .order('slot_position', { ascending: true });
+    return (data as ScheduleBlock[]) ?? [];
+  }
+
   async loadBlocks(dayIds: string[]) {
     this.currentVoyageDayIds = dayIds;
     if (dayIds.length === 0) {
@@ -102,8 +112,10 @@ export class ScheduleService {
     crewMember: string,
     trainingTopic: string,
     slotWeight: SlotWeight,
+    forUserId?: string,
+    atPosition?: number,
   ): Promise<string | null> {
-    const userId = this.auth.userId();
+    const userId = forUserId ?? this.auth.userId();
     if (!userId) return 'Not authenticated';
 
     const remaining = this.getRemainingBudget(dayId, userId);
@@ -111,9 +123,9 @@ export class ScheduleService {
     if (cost > remaining) return 'Not enough budget remaining';
 
     const currentBlocks = this.getBlocksForDayUser(dayId, userId);
-    const nextPosition = currentBlocks.length > 0
+    const position = atPosition ?? (currentBlocks.length > 0
       ? Math.max(...currentBlocks.map(b => b.slot_position)) + 1
-      : 0;
+      : 0);
 
     const { error } = await this.sb.supabase.from('schedule_blocks').insert({
       day_id: dayId,
@@ -121,7 +133,7 @@ export class ScheduleService {
       crew_member: crewMember,
       training_topic: trainingTopic,
       slot_weight: slotWeight,
-      slot_position: nextPosition,
+      slot_position: position,
     });
 
     return error?.message ?? null;
@@ -157,6 +169,7 @@ export class ScheduleService {
     crewMember: string,
     taskDescription: string,
     slotWeight: SlotWeight,
+    slotPosition: number = 0,
   ): Promise<string | null> {
     const { error } = await this.sb.supabase.from('schedule_blocks').insert({
       day_id: dayId,
@@ -164,10 +177,41 @@ export class ScheduleService {
       crew_member: crewMember,
       training_topic: taskDescription,
       slot_weight: slotWeight,
-      slot_position: -1,
+      slot_position: slotPosition,
       status: 'locked',
       is_mandatory: true,
     });
+    return error?.message ?? null;
+  }
+
+  async removeMandatoryBlocks(dayId: string): Promise<string | null> {
+    const { error } = await this.sb.supabase
+      .from('schedule_blocks')
+      .delete()
+      .eq('day_id', dayId)
+      .eq('is_mandatory', true);
+    if (!error) {
+      this.blocks.update(blocks =>
+        blocks.filter(b => !(b.day_id === dayId && b.is_mandatory))
+      );
+    }
+    return error?.message ?? null;
+  }
+
+  async moveMandatoryBlocks(dayId: string, newPosition: number): Promise<string | null> {
+    // Update all mandatory blocks on this day to the new position
+    const { error } = await this.sb.supabase
+      .from('schedule_blocks')
+      .update({ slot_position: newPosition })
+      .eq('day_id', dayId)
+      .eq('is_mandatory', true);
+    if (!error) {
+      this.blocks.update(blocks =>
+        blocks.map(b =>
+          b.day_id === dayId && b.is_mandatory ? { ...b, slot_position: newPosition } : b
+        )
+      );
+    }
     return error?.message ?? null;
   }
 

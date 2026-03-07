@@ -7,9 +7,9 @@
   border-left: 4px solid #5a5040;
   border-radius: 2px;
   position: relative;
-  cursor: grab;
   transition: background 0.15s;
-  min-width: 180px;
+  min-width: 0;
+  cursor: grab;
   box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 
   // Copper pin dot

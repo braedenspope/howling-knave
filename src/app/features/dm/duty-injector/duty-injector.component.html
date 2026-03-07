@@ -42,6 +42,15 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline">
+            <mat-label>Slot Position</mat-label>
+            <mat-select [(ngModel)]="dutySlotPosition">
+              @for (slot of [0,1,2,3,4,5,6,7]; track slot) {
+                <mat-option [value]="slot">Slot {{ slot + 1 }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
             <mat-label>Consequence Type</mat-label>
             <mat-select [(ngModel)]="dutyConsequenceType">
               <mat-option value="crew">Crew</mat-option>
@@ -57,9 +66,9 @@
         </div>
         <div class="form-actions">
           <button mat-button (click)="editingDay.set(null)">Cancel</button>
-          <button mat-stroked-button (click)="setDuty(day.id)">Set Duty</button>
-          <button mat-raised-button color="primary" (click)="setDutyAndPush(day.id)">
-            Set &amp; Push to Rows
+          <button mat-raised-button color="primary" (click)="setDuty(day.id)"
+                  [disabled]="!dutyCrew || !dutyDescription">
+            Set Duty
           </button>
         </div>
       </mat-card>
