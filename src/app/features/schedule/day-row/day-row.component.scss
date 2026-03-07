@@ -180,60 +180,59 @@
 }
 
 @media (max-width: 900px) {
-  .day-card { padding: 16px 20px; }
+  :host ::ng-deep .day-card.mat-mdc-card {
+    padding: 12px 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
 
-  .day-header { gap: 12px; margin-bottom: 14px; }
+  .day-header {
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 0 12px 10px;
+    flex-wrap: wrap;
+  }
+
   .day-title { font-size: 20px; }
 
   .player-row {
     flex-direction: column;
-    gap: 10px;
-    padding: 14px 0;
+    gap: 8px;
+    padding: 10px 0;
   }
 
-  .player-info { max-width: 100%; min-width: 0; }
+  .player-info {
+    max-width: 100%;
+    min-width: 0;
+    padding: 0 12px;
+  }
+
   .character-name { font-size: 16px; }
   .display-name { font-size: 14px; }
 
-  .slots-grid { gap: 3px; }
-  .slot-empty { min-height: 64px; }
-  .slot-block { min-height: 64px; }
-}
-
-@media (max-width: 600px) {
-  .day-card { padding: 12px 12px; }
-
-  .day-header {
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 10px;
-    padding-bottom: 10px;
+  .slots-grid {
+    grid-template-columns: repeat(8, 1fr);
+    gap: 2px;
+    width: 100%;
   }
 
-  .day-title { font-size: 18px; }
+  .slot-empty {
+    min-height: 64px;
+
+    .slot-number { font-size: 10px; }
+    mat-icon { font-size: 16px; width: 16px; height: 16px; opacity: 0.5; }
+
+    &.slot-interactive mat-icon { opacity: 0.5; }
+  }
+
+  .slot-block {
+    min-height: 64px;
+  }
 
   .duty-badge {
     font-size: 12px;
     padding: 4px 10px;
   }
-
-  .player-row { gap: 8px; padding: 10px 0; }
-  .character-name { font-size: 15px; }
-  .display-name { font-size: 13px; }
-
-  .slots-grid {
-    grid-template-columns: repeat(8, 1fr);
-    gap: 2px;
-  }
-
-  .slot-empty {
-    min-height: 56px;
-
-    .slot-number { font-size: 9px; }
-    mat-icon { font-size: 14px; width: 14px; height: 14px; opacity: 0.5; }
-
-    &.slot-interactive mat-icon { opacity: 0.5; }
-  }
-
-  .slot-block { min-height: 56px; }
 }

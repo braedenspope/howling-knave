@@ -55,14 +55,8 @@
 }
 
 @media (max-width: 900px) {
-  .board-container { padding: 16px 12px; }
-  .player-legend { padding: 10px 14px; gap: 8px; }
+  .board-container { padding: 8px 0; }
+  .player-legend { padding: 10px 12px; gap: 8px; margin: 0 0 8px; }
   .player-chip { font-size: 13px; padding: 6px 12px; }
-}
-
-@media (max-width: 600px) {
-  .board-container { padding: 8px 6px; }
-  .player-legend { padding: 8px 10px; gap: 6px; margin-bottom: 12px; }
-  .player-chip { font-size: 11px; padding: 4px 8px; }
-  .day-list { gap: 4px; }
+  .day-list { gap: 0; }
 }
