@@ -80,6 +80,8 @@ export interface Training {
   topic: string;
   description: string;
   reward: string;
+  /** DM-facing scene prompt read at the table during the montage. */
+  scene_seed: string | null;
   slot_weight: SlotWeight;
   sessions_required: number;
   tier_required: number;
@@ -96,6 +98,13 @@ export const SLOT_WEIGHT_UNITS: Record<SlotWeight, number> = {
   heavy: 4,
   medium: 2,
   light: 1,
+};
+
+/** Display label for a session length (matches the design's Short / Medium / Long). */
+export const SLOT_WEIGHT_LABEL: Record<SlotWeight, string> = {
+  light: 'Short',
+  medium: 'Medium',
+  heavy: 'Long',
 };
 
 export const DAY_BUDGET = 8;

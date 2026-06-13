@@ -1,66 +1,81 @@
-<div class="progress-container">
-  <h1 class="gold-text">My Training Progress</h1>
+<div class="page">
+  <div class="section-title">
+    <div class="section-title-row"><h2>Training Log — {{ auth.profile()?.character_name }}</h2></div>
+    <div class="rope-divider"></div>
+  </div>
 
   <div class="summary-bar">
     <div class="summary-item">
-      <span class="summary-value">{{ masteredCount() }}</span>
-      <span class="summary-label">Mastered</span>
+      <span class="summary-value gold-text">{{ masteredCount() }}</span>
+      <span class="stamp-label">Mastered</span>
     </div>
     <div class="summary-item">
       <span class="summary-value">{{ inProgressCount() }}</span>
-      <span class="summary-label">In Progress</span>
-    </div>
-    <div class="summary-item">
-      <span class="summary-value">{{ totalCount() }}</span>
-      <span class="summary-label">Total Trained</span>
+      <span class="stamp-label">In progress</span>
     </div>
   </div>
 
+  @if (earnedAbilities().length > 0) {
+    <div class="hk-card corners abilities-card">
+      <p class="stamp-label" style="margin-top: 0;">Earned abilities</p>
+      @for (a of earnedAbilities(); track a.topic) {
+        <div class="ability-row">
+          <span class="ms sm">military_tech</span>
+          <span class="ability-name">{{ a.topic }}</span>
+          <span class="ability-benefit">{{ a.reward }}</span>
+          <span class="ability-source" [style.color]="a.color">{{ a.crew }}</span>
+        </div>
+      }
+    </div>
+  }
+
   @if (groupedProgress().length === 0) {
     <div class="empty-state">
-      <mat-icon>school</mat-icon>
-      <p>You haven't started any training yet. Head to the board and begin!</p>
+      <span class="ms">school</span>
+      <p>You haven't trained with anyone yet. Head to the board and claim a block.</p>
     </div>
   } @else {
-    <mat-accordion multi>
-      @for (group of groupedProgress(); track group.crewMember) {
-        <mat-expansion-panel>
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <span class="crew-dot" [style.background]="getCrewColor(group.crewMember)"></span>
-              {{ group.crewMember }}
-            </mat-panel-title>
-            <mat-panel-description>
-              {{ group.trainings.length }} training{{ group.trainings.length > 1 ? 's' : '' }}
-            </mat-panel-description>
-          </mat-expansion-panel-header>
-
-          <div class="training-list">
-            @for (training of group.trainings; track training.training_topic) {
-              <div class="training-row">
-                <div class="training-info">
-                  <span class="topic-name">{{ training.training_topic }}</span>
-                  @if (training.completed) {
-                    <span class="mastered-badge">MASTERED</span>
-                  }
-                </div>
-                <div class="pip-row">
-                  @for (pip of getPips(training); track $index) {
-                    <div
-                      class="pip"
-                      [class.filled]="pip.filled"
-                      [class.mastered]="training.completed"
-                    ></div>
-                  }
-                  <span class="fraction">
-                    {{ training.successes_accumulated }}/{{ training.successes_required }}
-                  </span>
-                </div>
-              </div>
+    @for (group of groupedProgress(); track group.crew) {
+      <div class="hk-card corners progress-group">
+        <div class="progress-group-head">
+          <span class="crew-chip">
+            <span class="crew-dot" [style.background]="getCrewColor(group.crew)"></span>
+            <span class="crew-chip-name">{{ group.crew }}</span>
+            <span class="crew-chip-role">{{ group.role }}</span>
+          </span>
+          <span class="tier-tag" [style.color]="tierColor(group.tier)" [style.border-color]="tierColor(group.tier)">
+            {{ tierName(group.tier) }}
+          </span>
+          <div class="tier-pips-ro" style="margin-left: auto;">
+            @for (p of tierPips(group.tier); track p.n) {
+              <div class="pip" [style.background]="p.on ? p.color : ''" [style.border-color]="p.on ? p.color : ''"></div>
             }
           </div>
-        </mat-expansion-panel>
-      }
-    </mat-accordion>
+        </div>
+
+        @for (row of group.rows; track row.progress.id) {
+          <div class="progress-row">
+            <div class="progress-row-info">
+              <span class="progress-topic">{{ row.progress.training_topic }}</span>
+              @if (row.training) {
+                <span class="wt-badge" [class]="lengthClass(row.training.slot_weight)">{{ lengthLabel(row.training.slot_weight) }}</span>
+              }
+              @if (row.progress.completed) {
+                <span class="mastered-badge">Mastered</span>
+              }
+            </div>
+            <div class="progress-row-pips">
+              @for (i of pipArray(row.progress.successes_required); track i) {
+                <span class="pip" [class.filled]="i < row.progress.successes_accumulated" [class.mastered]="row.progress.completed"></span>
+              }
+              <span class="stamp-label">{{ row.progress.successes_accumulated }}/{{ row.progress.successes_required }}</span>
+            </div>
+            @if (row.training) {
+              <p class="progress-reward">{{ row.progress.completed ? row.training.reward : row.training.description }}</p>
+            }
+          </div>
+        }
+      </div>
+    }
   }
 </div>

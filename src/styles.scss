@@ -24,22 +24,30 @@ html {
 // ---- D&D Pirate Ship Variables ----
 
 :root {
-  --bg-main: #1a140e;
+  --bg-main: #16110b;
+  --bg-deep: #0f0b07;
   --bg-card: #241c14;
+  --bg-card-raised: #2a2118;
   --bg-card-border: #3d2e1f;
   --bg-nav: #15100a;
   --accent-gold: #d4a843;
   --accent-brass: #c49a3c;
   --accent-copper: #b87333;
+  --accent-gold-dim: rgba(212, 168, 67, 0.35);
   --text-primary: #dcd0be;
   --text-secondary: #9a8b78;
-  --success-green: #5a8a4a;
+  --text-faint: #6f6353;
+  --success-green: #6f9a5c;
   --failure-red: #a63d2f;
   --parchment: #c8b88a;
   --parchment-dark: #a89568;
   --sea-dark: #1a2a2a;
   --ink-brown: #3d2b1f;
   --wax-red: #8b2500;
+  --wax-red-hi: #b03a12;
+
+  --radius: 2px;
+  --texture-alpha: 1; // tweak: texture intensity
 
   --font-heading: 'Cinzel', serif;
   --font-body: 'IM Fell English', serif;
@@ -50,15 +58,15 @@ html {
     90deg,
     transparent 0px,
     transparent 3px,
-    rgba(0,0,0,0.06) 3px,
-    rgba(0,0,0,0.06) 4px
+    rgba(0,0,0, calc(0.07 * var(--texture-alpha))) 3px,
+    rgba(0,0,0, calc(0.07 * var(--texture-alpha))) 4px
   );
 
   --wood-bg: linear-gradient(
     180deg,
     #15100a 0%,
     #1e1610 40%,
-    #1a130d 100%
+    #17110b 100%
   );
 }
 
@@ -69,14 +77,49 @@ html {
 html, body {
   margin: 0;
   padding: 0;
-  height: 100%;
-  background: var(--wood-bg);
+  min-height: 100%;
   background-color: var(--bg-main);
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% -10%, rgba(212,168,67, calc(0.04 * var(--texture-alpha))), transparent 60%),
+    var(--wood-bg);
+  background-attachment: fixed;
   color: var(--text-primary);
   font-family: var(--font-body);
+  font-size: 17px;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
+
+// Plank seams across the whole page
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    repeating-linear-gradient(0deg,
+      transparent 0px, transparent 178px,
+      rgba(0, 0, 0, calc(0.18 * var(--texture-alpha))) 178px,
+      rgba(0, 0, 0, calc(0.18 * var(--texture-alpha))) 180px),
+    repeating-linear-gradient(90deg,
+      transparent 0px, transparent 5px,
+      rgba(0, 0, 0, calc(0.025 * var(--texture-alpha))) 5px,
+      rgba(0, 0, 0, calc(0.025 * var(--texture-alpha))) 6px);
+}
+
+// Vignette
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  box-shadow: inset 0 0 180px rgba(0, 0, 0, calc(0.55 * var(--texture-alpha)));
+}
+
+// Keep app content above the texture layers
+app-root { position: relative; z-index: 1; display: block; }
 
 // ---- Parchment Texture Mixin ----
 @mixin parchment-texture {
@@ -251,4 +294,281 @@ h1, h2, h3, h4, h5, h6 {
 
 .spacer {
   flex: 1 1 auto;
+}
+
+// ============================================================
+//  HOWLING KNAVE COMPONENT KIT (ported from design theme.css)
+// ============================================================
+
+// ---- Parchment card ----
+.hk-card {
+  position: relative;
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius);
+  background:
+    radial-gradient(ellipse at 20% 80%, rgba(139,69,19, calc(0.05 * var(--texture-alpha))) 0%, transparent 50%),
+    radial-gradient(ellipse at 75% 20%, rgba(139,69,19, calc(0.04 * var(--texture-alpha))) 0%, transparent 40%),
+    repeating-linear-gradient(0deg,
+      transparent 0px, transparent 6px,
+      rgba(139,69,19, calc(0.03 * var(--texture-alpha))) 6px,
+      rgba(139,69,19, calc(0.03 * var(--texture-alpha))) 7px),
+    var(--bg-card);
+  box-shadow:
+    inset 0 0 30px rgba(0,0,0, calc(0.3 * var(--texture-alpha))),
+    inset 0 0 4px rgba(0,0,0,0.15),
+    0 2px 10px rgba(0,0,0,0.35);
+}
+
+// brass corner flourishes
+.hk-card.corners::before,
+.hk-card.corners::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  opacity: 0.7;
+}
+.hk-card.corners::before {
+  top: 5px; left: 5px;
+  border-top: 1px solid var(--accent-brass);
+  border-left: 1px solid var(--accent-brass);
+}
+.hk-card.corners::after {
+  bottom: 5px; right: 5px;
+  border-bottom: 1px solid var(--accent-brass);
+  border-right: 1px solid var(--accent-brass);
+}
+
+// ---- Stamped section label ----
+.stamp-label {
+  font-family: var(--font-data);
+  font-size: 11px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+// ---- Buttons (non-Material) ----
+button { cursor: pointer; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-radius: var(--radius);
+  padding: 9px 18px;
+  border: 1px solid transparent;
+  transition: filter 0.15s, background 0.15s, border-color 0.15s, color 0.15s;
+  user-select: none;
+}
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-brass {
+  background: linear-gradient(180deg, #c49a3c 0%, #a67c28 50%, #b88a30 100%);
+  color: #1a140e;
+  border-color: #d4a843;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,220,150,0.3);
+}
+.btn-brass:hover:not(:disabled) { filter: brightness(1.12); }
+
+.btn-copper {
+  background: transparent;
+  color: var(--accent-copper);
+  border-color: var(--accent-copper);
+}
+.btn-copper:hover:not(:disabled) { background: rgba(184,115,51,0.12); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border-color: transparent;
+}
+.btn-ghost:hover:not(:disabled) { color: var(--text-primary); background: rgba(220,208,190,0.06); }
+
+.btn-danger {
+  background: transparent;
+  color: var(--failure-red);
+  border-color: rgba(166,61,47,0.5);
+}
+.btn-danger:hover:not(:disabled) { background: rgba(166,61,47,0.12); }
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: background 0.15s, color 0.15s;
+}
+.btn-icon:hover { background: rgba(220,208,190,0.08); color: var(--text-primary); }
+
+// ---- Inputs (non-Material) ----
+.hk-field { display: flex; flex-direction: column; gap: 5px; }
+.hk-field label {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+.hk-field input,
+.hk-field select,
+.hk-field textarea {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--text-primary);
+  background: rgba(15, 11, 7, 0.55);
+  border: 1px solid var(--accent-copper);
+  border-radius: var(--radius);
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.hk-field input:focus,
+.hk-field select:focus,
+.hk-field textarea:focus {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 1px var(--accent-gold-dim);
+}
+.hk-field select { appearance: none; }
+.hk-field textarea { resize: vertical; }
+
+// ---- Chips & badges ----
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-data);
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: var(--radius);
+  background: rgba(196,154,60,0.08);
+  color: var(--accent-gold);
+  border: 1px solid rgba(196,154,60,0.25);
+  white-space: nowrap;
+}
+
+.crew-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
+}
+
+.wt-badge {
+  font-family: var(--font-data);
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 1px 7px;
+  border-radius: var(--radius);
+  text-transform: uppercase;
+  border: 1px solid;
+}
+.wt-short,  .wt-light  { color: #8aa86a; border-color: rgba(138,168,106,0.45); }
+.wt-medium { color: var(--accent-gold); border-color: rgba(212,168,67,0.45); }
+.wt-long,   .wt-heavy   { color: var(--accent-copper); border-color: rgba(184,115,51,0.5); }
+
+.status-success { color: var(--success-green); }
+.status-failure { color: var(--failure-red); }
+
+// ---- Rope divider ----
+.rope-divider {
+  position: relative;
+  height: 7px;
+  margin: 4px 0;
+  border: none;
+  background: repeating-linear-gradient(115deg,
+    #5a4226 0px, #6e5230 3px, #4a3520 6px, #5a4226 7px);
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,220,150,0.12);
+  opacity: calc(0.85 * var(--texture-alpha) + 0.15);
+}
+.rope-divider::before,
+.rope-divider::after {
+  content: "";
+  position: absolute;
+  top: -2.5px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #7a5c36, #4a3520);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+.rope-divider::before { left: -2px; }
+.rope-divider::after { right: -2px; }
+
+// ---- Pips (progress / tiers) ----
+.pip {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1px solid var(--bg-card-border);
+  background: rgba(15,11,7,0.6);
+  transition: background 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
+}
+.pip.filled {
+  background: radial-gradient(circle at 35% 30%, #e8c466, var(--accent-brass));
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 6px rgba(212,168,67,0.4);
+}
+.pip.mastered {
+  background: radial-gradient(circle at 35% 30%, #fff3cd, var(--accent-gold));
+  box-shadow: 0 0 9px rgba(212,168,67,0.7);
+}
+
+// ---- Material Symbols sizing ----
+.ms {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  -webkit-font-feature-settings: 'liga';
+  font-feature-settings: 'liga';
+}
+.ms.sm { font-size: 16px; }
+.ms.lg { font-size: 26px; }
+.ms.fill { font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+
+// ---- Animations ----
+@keyframes seal-press {
+  0% { transform: scale(1.6) rotate(-14deg); opacity: 0; }
+  55% { transform: scale(0.92) rotate(-7deg); opacity: 1; }
+  100% { transform: scale(1) rotate(-8deg); opacity: 1; }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fade-up 0.3s ease both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

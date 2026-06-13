@@ -23,15 +23,6 @@
   mat-card-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 }
 
-.active-badge {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 2px;
-  background: rgba(212, 168, 67, 0.15);
-  color: var(--accent-gold);
-  border: 1px solid rgba(212, 168, 67, 0.3);
-  font-family: var(--font-data);
-}
 
 .edit-name-btn { transform: scale(0.8); opacity: 0.6; &:hover { opacity: 1; } }
 

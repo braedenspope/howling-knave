@@ -1,0 +1,225 @@
+@if (detail(); as crew) {
+  <!-- ================= DOSSIER ================= -->
+  <div class="page fade-up">
+    <button class="btn btn-ghost dossier-back" (click)="closeDossier()">
+      <span class="ms sm">arrow_back</span> The Crew
+    </button>
+
+    <div class="hk-card corners dossier-head">
+      <div class="dossier-emblem"
+        [style.background]="'radial-gradient(circle at 35% 30%, ' + crewColor(crew) + ', ' + crewColor(crew) + ' 40%, rgba(0,0,0,0.55))'">
+        {{ crew.charAt(0) }}
+      </div>
+      <div style="min-width: 0; flex: 1;">
+        <p class="stamp-label" style="margin: 0;">Crew dossier · {{ crewRole(crew) }}</p>
+        <h1 class="dossier-name gold-text">{{ crew }}</h1>
+        <p class="crew-card-line" style="font-size: 15px; margin: 4px 0 10px;">{{ crewLine(crew) }}</p>
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <span class="tier-tag" [style.color]="tierColor(tierOf(crew))" [style.border-color]="tierColor(tierOf(crew))">
+            {{ tierName(tierOf(crew)) }}
+          </span>
+          <div class="tier-pips-ro">
+            @for (p of tierPips(tierOf(crew)); track p.n) {
+              <div class="pip" [style.background]="p.on ? p.color : ''" [style.border-color]="p.on ? p.color : ''"></div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-bar" style="margin-top: 16px;">
+      <div class="summary-item">
+        <span class="summary-value">{{ dossierStats(crew).pathCount }}</span>
+        <span class="stamp-label">Training paths</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-value gold-text">{{ dossierStats(crew).mastered }}</span>
+        <span class="stamp-label">Mastered</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-value">{{ dossierStats(crew).successes }}</span>
+        <span class="stamp-label">Successes logged</span>
+      </div>
+    </div>
+
+    @if (nextUnlocks(crew).length > 0) {
+      <div class="dossier-unlock">
+        <span class="ms sm">key</span>
+        <span>At <strong>{{ tierName(tierOf(crew) + 1) }}</strong>, {{ firstName(crew) }} opens:
+          <em>{{ nextUnlocksTopics(crew) }}</em></span>
+      </div>
+    }
+
+    <div class="section-title">
+      <div class="section-title-row"><h2>Training Paths</h2></div>
+      <div class="rope-divider"></div>
+    </div>
+
+    @if (pathsFor(crew).length === 0) {
+      <p class="crew-card-line" style="font-size: 15px;">Nothing to teach — yet. But every relationship is a thread, and threads get pulled.</p>
+    } @else {
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        @for (t of pathsFor(crew); track t.id) {
+          <div class="training-item" [class.catalog-locked]="statusFor(crew, t, tierOf(crew)).kind === 'locked'">
+            <div class="ti-head">
+              <span class="ti-topic">{{ t.topic }}</span>
+              <span class="wt-badge" [class]="lengthClass(t.slot_weight)">{{ lengthLabel(t.slot_weight) }}</span>
+              <span class="stamp-label">{{ t.sessions_required }} sessions</span>
+              <ng-container [ngTemplateOutlet]="statusChip"
+                [ngTemplateOutletContext]="{ st: statusFor(crew, t, tierOf(crew)), t: t }"></ng-container>
+            </div>
+            <p class="ti-desc">{{ t.description }}</p>
+            <p class="ti-reward"><span class="ms sm">military_tech</span>{{ t.reward }}</p>
+          </div>
+        }
+      </div>
+    }
+  </div>
+} @else {
+  <!-- ================= ROSTER / CATALOG ================= -->
+  <div class="page">
+    <div class="section-title">
+      <div class="section-title-row"><h2>The Crew of the Howling Knave</h2></div>
+      <div class="rope-divider"></div>
+    </div>
+
+    @if (auth.isDm() && schedule.allUsers().length > 0) {
+      <div class="hk-tabs">
+        @for (u of schedule.allUsers(); track u.id) {
+          <button class="hk-tab" [class.on]="viewAs() === u.id" (click)="viewAs.set(u.id)">
+            {{ firstName(u.character_name) }}
+          </button>
+        }
+      </div>
+    }
+
+    <div class="hk-tabs">
+      <button class="hk-tab" [class.on]="view() === 'roster'" (click)="view.set('roster')">The Crew</button>
+      <button class="hk-tab" [class.on]="view() === 'catalog'" (click)="view.set('catalog')">Training Catalog</button>
+    </div>
+
+    @if (view() === 'catalog') {
+      <div class="filter-chips">
+        @for (f of catalogFilters; track f.id) {
+          <button class="filter-chip" [class.on]="filter() === f.id" (click)="filter.set(f.id)">{{ f.label }}</button>
+        }
+      </div>
+
+      @if (catalogGroups().length === 0) {
+        <div class="empty-state">
+          <span class="ms">school</span>
+          <p>Nothing here under that filter. Train, bond, and check back.</p>
+        </div>
+      } @else {
+        @for (g of catalogGroups(); track g.crew) {
+          <div class="catalog-group">
+            <div class="catalog-group-head">
+              <span class="crew-chip">
+                <span class="crew-dot" [style.background]="crewColor(g.crew)"></span>
+                <span class="crew-chip-name">{{ g.crew }}</span>
+                <span class="crew-chip-role">{{ g.role }}</span>
+              </span>
+              <span class="tier-tag" style="margin-left: auto;"
+                [style.color]="tierColor(g.tier)" [style.border-color]="tierColor(g.tier)">{{ tierName(g.tier) }}</span>
+            </div>
+            <div class="catalog-list">
+              @for (p of g.paths; track p.training.id) {
+                <div class="training-item" [class.catalog-locked]="p.status.kind === 'locked'">
+                  <div class="ti-head">
+                    <span class="ti-topic">{{ p.training.topic }}</span>
+                    <span class="wt-badge" [class]="lengthClass(p.training.slot_weight)">{{ lengthLabel(p.training.slot_weight) }}</span>
+                    <span class="stamp-label">{{ p.training.sessions_required }} sessions</span>
+                    <ng-container [ngTemplateOutlet]="statusChip"
+                      [ngTemplateOutletContext]="{ st: p.status, t: p.training }"></ng-container>
+                  </div>
+                  <p class="ti-desc">{{ p.training.description }}</p>
+                  <p class="ti-reward"><span class="ms sm">military_tech</span>{{ p.training.reward }}</p>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      }
+    } @else {
+      <!-- roster -->
+      <div class="crew-roster">
+        @for (crew of sortedCrew(); track crew) {
+          <div class="hk-card corners crew-card clickable" role="button" tabindex="0"
+            (click)="openDossier(crew)" (keydown)="onCardKey($event, crew)"
+            [title]="'View ' + crew + ' — trainings, rewards, and your standing'">
+            <div class="crew-card-head">
+              <span class="crew-dot lg" [style.background]="crewColor(crew)"></span>
+              <div style="min-width: 0;">
+                <span class="crew-card-name">{{ crew }}</span>
+                <span class="stamp-label" style="display: block;">{{ crewRole(crew) }}</span>
+              </div>
+              <span class="tier-tag" style="margin-left: auto;"
+                [style.color]="tierColor(tierOf(crew))" [style.border-color]="tierColor(tierOf(crew))">{{ tierName(tierOf(crew)) }}</span>
+              <span class="ms sm cc-chevron">chevron_right</span>
+            </div>
+            <div class="tier-pips-ro" style="margin: 8px 0 2px;">
+              @for (p of tierPips(tierOf(crew)); track p.n) {
+                <div class="pip" [style.background]="p.on ? p.color : ''" [style.border-color]="p.on ? p.color : ''"></div>
+              }
+            </div>
+            <p class="crew-card-line">{{ crewLine(crew) }}</p>
+            @if (pathsFor(crew).length > 0) {
+              <div class="crew-card-paths">
+                @for (t of pathsFor(crew); track t.id) {
+                  @let st = statusFor(crew, t, tierOf(crew));
+                  <div class="cr-path" [class.locked]="st.kind === 'locked'">
+                    <span class="ms sm"
+                      [style.color]="st.kind === 'mastered' ? 'var(--accent-gold)' : st.kind === 'locked' ? 'var(--text-faint)' : 'var(--text-secondary)'">{{
+                      st.kind === 'mastered' ? 'military_tech' : st.kind === 'locked' ? 'lock' : st.kind === 'progress' ? 'pending' : 'lock_open' }}</span>
+                    <span class="cr-topic">{{ t.topic }}</span>
+                    @switch (st.kind) {
+                      @case ('mastered') { <span class="mastered-badge">Mastered</span> }
+                      @case ('progress') {
+                        <span class="cr-state">
+                          @for (i of pipArray(t.sessions_required); track i) {
+                            <span class="pip" [class.filled]="i < st.successes"></span>
+                          }
+                          {{ st.successes }}/{{ t.sessions_required }}
+                        </span>
+                      }
+                      @case ('locked') {
+                        <span class="cr-state" [class.next]="st.next">
+                          {{ st.next ? 'Unlocks at ' + tierName(t.tier_required) + ' — one tier away' : 'Requires ' + tierName(t.tier_required) }}
+                        </span>
+                      }
+                      @default { <span class="cr-state open">Available</span> }
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="crew-card-line" style="opacity: 0.7;">Nothing to teach — yet.</p>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+}
+
+<!-- shared status chip for catalog / dossier rows -->
+<ng-template #statusChip let-st="st" let-t="t">
+  @switch (st.kind) {
+    @case ('mastered') { <span class="mastered-badge" style="margin-left: auto;">Mastered</span> }
+    @case ('progress') {
+      <span class="cr-state" style="margin-left: auto;">
+        @for (i of pipArray(t.sessions_required); track i) {
+          <span class="pip" [class.filled]="i < st.successes"></span>
+        }
+        {{ st.successes }}/{{ t.sessions_required }}
+      </span>
+    }
+    @case ('locked') {
+      <span class="cr-state" style="margin-left: auto;" [class.next]="st.next">
+        <span class="ms sm">lock</span>
+        {{ st.next ? 'Unlocks at ' + tierName(t.tier_required) + ' — one tier away' : 'Requires ' + tierName(t.tier_required) }}
+      </span>
+    }
+    @default { <span class="cr-state open" style="margin-left: auto;">Available</span> }
+  }
+</ng-template>

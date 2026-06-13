@@ -29,7 +29,10 @@
     <mat-divider></mat-divider>
   }
 
-  <h2 class="gold-text section-title">All Voyages</h2>
+  <div class="section-title voyages-title">
+    <div class="section-title-row"><h2>Voyages</h2></div>
+    <div class="rope-divider"></div>
+  </div>
 
   @for (voyage of voyageService.voyages(); track voyage.id) {
     <mat-card class="voyage-card" [class.active-voyage]="voyage.is_active">
@@ -60,7 +63,7 @@
         <mat-card-subtitle>
           {{ voyage.day_count }} days &middot; {{ voyage.created_at | date:'mediumDate' }}
           @if (voyage.is_active) {
-            <span class="active-badge">Active</span>
+            <span class="under-sail"><span class="ms sm">sailing</span> Under Sail</span>
           }
         </mat-card-subtitle>
       </mat-card-header>

@@ -1,77 +1,45 @@
-.auth-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+:host { display: block; }
+
+.auth-wrap {
   min-height: 100vh;
-  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
 }
 
 .auth-card {
   width: 100%;
-  max-width: 400px;
-  border-radius: 2px !important;
-  position: relative;
-  overflow: visible;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: -4px;
-    left: 10%;
-    right: 10%;
-    height: 4px;
-    background: repeating-linear-gradient(
-      90deg,
-      var(--accent-copper) 0px,
-      var(--accent-copper) 8px,
-      transparent 8px,
-      transparent 12px
-    );
-    border-radius: 2px;
-  }
+  max-width: 430px;
+  padding: 26px 34px 30px;
 }
 
-.full-width {
-  width: 100%;
+.auth-stamp { text-align: center; margin-top: 4px; }
+
+.auth-title {
+  text-align: center;
+  font-size: 26px;
+  letter-spacing: 1.5px;
+  margin: 6px 0 0;
 }
 
-mat-form-field {
-  margin-bottom: 8px;
-}
+.auth-form { display: flex; flex-direction: column; gap: 14px; }
 
 .error-text {
   color: var(--failure-red);
-  margin-bottom: 12px;
+  margin: 0 0 12px;
   font-size: 14px;
   font-family: var(--font-body);
+  text-align: center;
 }
-
 .success-text {
   color: var(--success-green);
-  margin-bottom: 12px;
+  margin: 0 0 12px;
   font-size: 14px;
   font-family: var(--font-body);
+  text-align: center;
 }
 
-mat-card-title {
-  font-family: var(--font-heading) !important;
-  font-size: 24px !important;
-  margin-bottom: 4px;
-  letter-spacing: 1px;
-}
-
-mat-card-subtitle {
-  font-family: var(--font-body) !important;
-}
-
-:host mat-card-header::after {
-  content: '';
-  position: absolute;
-  top: 12px;
-  right: 16px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 40%, #b83a1a, #8b2500 60%, #6a1a00);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 -1px 3px rgba(0,0,0,0.3);
+@media (max-width: 480px) {
+  .auth-card { padding: 20px 20px 24px; }
 }

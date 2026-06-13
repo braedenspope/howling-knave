@@ -10,6 +10,10 @@
         <mat-icon>dashboard</mat-icon>
         <span class="nav-label">Board</span>
       </a>
+      <a mat-button routerLink="/crew" routerLinkActive="active-link">
+        <mat-icon>groups</mat-icon>
+        <span class="nav-label">Crew</span>
+      </a>
       <a mat-button routerLink="/voyages" routerLinkActive="active-link">
         <mat-icon>sailing</mat-icon>
         <span class="nav-label">Voyages</span>
@@ -40,6 +44,10 @@
       <a mat-button routerLink="/board" routerLinkActive="active-link" (click)="closeMenu()">
         <mat-icon>dashboard</mat-icon>
         <span>Board</span>
+      </a>
+      <a mat-button routerLink="/crew" routerLinkActive="active-link" (click)="closeMenu()">
+        <mat-icon>groups</mat-icon>
+        <span>Crew</span>
       </a>
       <a mat-button routerLink="/voyages" routerLinkActive="active-link" (click)="closeMenu()">
         <mat-icon>sailing</mat-icon>

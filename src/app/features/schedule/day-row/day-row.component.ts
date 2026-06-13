@@ -10,6 +10,7 @@ import { ScheduleService } from '../schedule.service';
 import { VoyageService } from '../../voyage/voyage.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { Day, ScheduleBlock, DAY_BUDGET, SLOT_WEIGHT_UNITS } from '../../../shared/models';
+import { ToastService } from '../../../shared/toast.service';
 
 export interface SlotItem {
   type: 'block' | 'empty';
@@ -47,6 +48,7 @@ export class DayRowComponent {
     private voyageService: VoyageService,
     private auth: AuthService,
     private dialog: MatDialog,
+    private toast: ToastService,
   ) {}
 
   canEdit(userId: string): boolean {
@@ -218,7 +220,7 @@ export class DayRowComponent {
 
     dialogRef.afterClosed().subscribe(async (result: AddBlockDialogResult | undefined) => {
       if (result) {
-        await this.scheduleService.addBlock(
+        const err = await this.scheduleService.addBlock(
           this.day().id,
           result.crewMember,
           result.trainingTopic,
@@ -226,6 +228,9 @@ export class DayRowComponent {
           userId,
           atSlot,
         );
+        if (!err) {
+          this.toast.show(`Scheduled — ${result.trainingTopic} with ${result.crewMember}`);
+        }
       }
     });
   }

@@ -26,6 +26,12 @@ export const routes: Routes = [
       import('./features/voyage/voyage-list/voyage-list.component').then(m => m.VoyageListComponent),
   },
   {
+    path: 'crew',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/crew/crew.component').then(m => m.CrewComponent),
+  },
+  {
     path: 'progress',
     canActivate: [authGuard],
     loadComponent: () =>

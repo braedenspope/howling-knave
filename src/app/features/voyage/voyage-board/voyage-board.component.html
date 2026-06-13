@@ -4,16 +4,31 @@
   </div>
 } @else if (!voyageService.activeVoyage()) {
   <div class="empty-state">
-    <h2 class="gold-text">No Active Voyage</h2>
-    <p>Ask your DM to create or activate a voyage.</p>
+    <span class="ms">sailing</span>
+    <h2 class="gold-text">No active voyage</h2>
+    <p>Ask your DM to declare a crossing from the Voyages page.</p>
   </div>
 } @else {
-  <div class="board-container">
+  <div class="page board-container">
+    @if (voyageService.activeVoyage(); as voyage) {
+      <div class="board-masthead">
+        <p class="stamp-label">
+          <span class="ms sm" style="vertical-align: -3px;">sailing</span> Under sail
+        </p>
+        <h1 class="board-voyage-name gold-text">{{ voyage.name }}</h1>
+        <p class="board-route">A crossing of {{ voyage.day_count }} days aboard the Howling Knave.</p>
+        <div class="board-legend">
+          <span class="chip"><span class="crew-dot" style="background: var(--accent-copper);"></span> Ship duty</span>
+          <span class="chip"><span class="crew-dot" style="background: var(--accent-gold);"></span> Training</span>
+          <span class="chip"><span class="ms sm" style="font-size: 13px;">flag</span> Spotlight flag</span>
+        </div>
+        <div class="rope-divider" style="margin-top: 16px;"></div>
+      </div>
+    }
+
     <div class="player-legend">
       @for (user of scheduleService.allUsers(); track user.id) {
-        <span class="player-chip">
-          {{ user.character_name }}
-        </span>
+        <span class="character-chip">{{ user.character_name }}</span>
       }
     </div>
 

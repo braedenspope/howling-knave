@@ -28,6 +28,26 @@ export const CREW_LIST = [
 
 export type CrewName = typeof CREW_LIST[number];
 
+export interface CrewMeta {
+  role: string;
+  line: string;
+}
+
+/** Role + one-line character read for each crew member (Crew roster / dossiers). */
+export const CREW_META: Record<string, CrewMeta> = {
+  'Anna Rose':       { role: 'Captain',             line: 'Runs the ship like a held breath — nothing happens she hasn’t already noticed.' },
+  'Guner Aldric':    { role: 'First Mate',          line: 'Observes, remembers, and at some point — acts.' },
+  'Rachel Rose':     { role: "Ship's Surgeon",      line: 'Stops the bleeding first. Everything else is conversation.' },
+  'Lehiri Stars':    { role: 'Navigator',           line: 'Knows the fixed lights by name, and a few that move.' },
+  'Toji Brassboot':  { role: 'Quartermaster',       line: 'If it’s broken, bring it to her. If it explodes, bring it faster.' },
+  'Porter Tomas':    { role: 'Cargo Master',        line: 'Knows what everything weighs and what it’s worth in three ports.' },
+  'Shanoa Buckler':  { role: 'Master-at-Arms',      line: 'Teaches patience the hard way — by making you hold it.' },
+  'Ardor':           { role: 'Passenger',           line: 'Speaks rarely. The pauses say more.' },
+  'Bryce Morrison':  { role: "Bosun's Apprentice",  line: 'Trying his best, usually at the worst possible moment.' },
+  'Elro Boldfall':   { role: "Ship's Cook",         line: 'Insists the galley is harder than swordwork. May be right.' },
+  'Delvin Moss':     { role: 'Deckhand · Herbalist', line: 'Quiet hands, green thumbs, salt-stained pockets.' },
+};
+
 export const TIER_NAMES: Record<number, string> = {
   1: 'Stranger',
   2: 'Familiar',

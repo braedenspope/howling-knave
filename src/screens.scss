@@ -1,0 +1,357 @@
+/* ============================================================
+   Howling Knave — shared screen-level classes (global)
+   Ported from the design prototype's screens.css. These are
+   global because they are reused across feature components and
+   would otherwise blow the per-component style budget.
+   ============================================================ */
+
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 18px 28px 80px;
+}
+
+/* ---- Section heading with rope divider ---- */
+.section-title {
+  margin: 26px 0 14px;
+
+  &:first-child { margin-top: 8px; }
+
+  .section-title-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  h2 {
+    margin: 0;
+    color: var(--accent-gold);
+    font-size: 21px;
+    letter-spacing: 1.5px;
+  }
+}
+
+/* ================= SUMMARY BAR ================= */
+.summary-bar {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+.summary-item {
+  flex: 1;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 10px;
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius);
+  background: rgba(36,28,20,0.45);
+}
+.summary-value { font-family: var(--font-heading); font-size: 30px; font-weight: 700; line-height: 1; }
+
+/* ================= TIER TAGS / PIPS ================= */
+.tier-tag {
+  font-family: var(--font-data);
+  font-size: 10.5px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border: 1px solid;
+  border-radius: var(--radius);
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+.tier-pips-ro { display: flex; gap: 4px; }
+
+.mastered-badge {
+  font-family: var(--font-heading);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #1a140e;
+  background: linear-gradient(180deg, #e8c466, var(--accent-brass));
+  border-radius: var(--radius);
+  padding: 3px 9px;
+}
+
+/* ================= PROGRESS ================= */
+.progress-group { padding: 18px 22px; margin-bottom: 14px; }
+.progress-group-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(61,46,31,0.5);
+}
+.progress-row { padding: 12px 0 4px; border-top: 1px solid rgba(61,46,31,0.3); }
+.progress-row:first-of-type { border-top: none; }
+.progress-row-info { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.progress-topic { font-family: var(--font-heading); font-size: 16px; font-weight: 600; }
+.progress-row-pips { display: flex; align-items: center; gap: 10px; margin: 8px 0 4px; }
+.progress-reward { margin: 4px 0 6px; font-size: 14px; font-style: italic; color: var(--text-secondary); }
+
+/* ================= EARNED ABILITIES ================= */
+.abilities-card { padding: 18px 22px; margin-bottom: 22px; }
+.ability-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 9px 0;
+  border-top: 1px solid rgba(61,46,31,0.3);
+}
+.ability-row:first-of-type { border-top: none; }
+.ability-row .ms { align-self: center; flex-shrink: 0; color: var(--accent-gold); }
+.ability-name { font-family: var(--font-heading); font-size: 15px; font-weight: 600; }
+.ability-benefit { font-size: 14.5px; color: var(--text-secondary); font-style: italic; }
+.ability-source {
+  font-family: var(--font-data);
+  font-size: 10.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* ================= CREW CHIP ================= */
+.crew-chip { display: inline-flex; align-items: center; gap: 7px; }
+.crew-chip-name { font-family: var(--font-heading); font-size: 14px; letter-spacing: 0.3px; }
+.crew-chip-role { font-family: var(--font-body); font-style: italic; color: var(--text-secondary); font-size: 13px; }
+
+/* ================= CREW ROSTER ================= */
+.crew-roster {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
+}
+.crew-card { padding: 16px 20px; }
+.crew-card.clickable {
+  cursor: pointer;
+  transition: transform 0.16s ease, border-color 0.16s, box-shadow 0.16s;
+}
+.crew-card.clickable:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-gold-dim);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.45), inset 0 0 30px rgba(0,0,0,0.25);
+}
+.cc-chevron { color: var(--text-faint); opacity: 0; transition: opacity 0.16s, transform 0.16s; }
+.crew-card.clickable:hover .cc-chevron { opacity: 1; transform: translateX(2px); color: var(--accent-gold); }
+.crew-card-head { display: flex; align-items: center; gap: 12px; }
+.crew-dot.lg { width: 16px; height: 16px; }
+.crew-card-name {
+  font-family: var(--font-heading);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  display: block;
+}
+.crew-card-line {
+  font-style: italic;
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 8px 0 10px;
+}
+.crew-card-paths {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid rgba(61,46,31,0.4);
+  padding-top: 10px;
+}
+.cr-path { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.cr-path.locked .cr-topic { color: var(--text-faint); }
+.cr-topic { font-family: var(--font-heading); font-size: 14px; font-weight: 600; }
+.cr-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  font-family: var(--font-data);
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: var(--text-faint);
+}
+.cr-state.open { color: var(--success-green); text-transform: uppercase; letter-spacing: 1.5px; font-size: 10px; }
+.cr-state.next { color: var(--accent-gold); }
+.cr-path .mastered-badge { margin-left: auto; }
+
+/* ---- training catalog ---- */
+.filter-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.filter-chip {
+  font-family: var(--font-data);
+  font-size: 11.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: rgba(15,11,7,0.4);
+  color: var(--text-secondary);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius);
+  padding: 6px 13px;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.filter-chip:hover { color: var(--text-primary); }
+.filter-chip.on {
+  background: rgba(196,154,60,0.12);
+  color: var(--accent-gold);
+  border-color: var(--accent-gold-dim);
+}
+.catalog-group { margin-bottom: 22px; }
+.catalog-group-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(61,46,31,0.5);
+}
+.catalog-list { display: flex; flex-direction: column; gap: 8px; }
+.training-item {
+  background: rgba(15,11,7,0.35);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  transition: border-color 0.16s;
+}
+.training-item:hover { border-color: rgba(196,154,60,0.3); }
+.training-item.catalog-locked { opacity: 0.65; }
+.training-item.catalog-locked .ti-reward { color: var(--text-faint); }
+.ti-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ti-topic { font-family: var(--font-heading); font-size: 15.5px; font-weight: 600; }
+.ti-desc { margin: 6px 0 2px; font-style: italic; color: var(--text-secondary); font-size: 14px; }
+.ti-reward { margin: 4px 0 0; font-size: 14px; color: var(--accent-gold); display: flex; align-items: center; gap: 4px; }
+.ti-reward .ms { color: var(--accent-gold); }
+
+/* ---- crew dossier page ---- */
+.dossier-back { margin: 4px 0 12px; padding-left: 8px; }
+.dossier-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 22px;
+  padding: 26px 30px;
+  overflow: hidden;
+}
+.dossier-emblem {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 32px;
+  font-weight: 700;
+  color: rgba(255,245,225,0.92);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.25), inset 0 -3px 6px rgba(0,0,0,0.35);
+  border: 1px solid rgba(0,0,0,0.4);
+}
+.dossier-name {
+  margin: 2px 0 0;
+  font-size: 30px;
+  letter-spacing: 1.5px;
+}
+.dossier-unlock {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 10px 14px;
+  font-size: 15px;
+  border: 1px solid var(--accent-gold-dim);
+  background: rgba(196,154,60,0.07);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+}
+.dossier-unlock .ms { color: var(--accent-gold); flex-shrink: 0; margin-top: 2px; }
+
+/* ================= EMPTY STATE ================= */
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text-secondary);
+
+  .ms { opacity: 0.5; font-size: 38px; }
+  p { font-style: italic; max-width: 380px; margin: 12px auto 0; }
+}
+
+/* ================= UNDER SAIL PENNANT ================= */
+.under-sail {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+}
+.under-sail .ms { font-size: 15px; }
+
+/* ================= TABS (brass underline) ================= */
+.hk-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--bg-card-border);
+  overflow-x: auto;
+  margin-bottom: 18px;
+}
+.hk-tab {
+  background: none;
+  border: none;
+  padding: 10px 16px 9px;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+.hk-tab:hover { color: var(--text-primary); }
+.hk-tab.on { color: var(--accent-gold); border-bottom-color: var(--accent-gold); }
+
+/* ================= TOASTS (themed snackbar) ================= */
+.hk-toast {
+  --mdc-snackbar-container-color: var(--bg-card-raised);
+  --mdc-snackbar-supporting-text-color: var(--text-primary);
+  --mat-snack-bar-button-color: var(--accent-gold);
+
+  .mdc-snackbar__surface {
+    border: 1px solid var(--accent-gold-dim) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important;
+  }
+  .mdc-snackbar__label {
+    font-family: var(--font-body) !important;
+    font-size: 15px !important;
+  }
+}
+
+/* ================= HOVER / FOCUS POLISH ================= */
+button:focus-visible, [role="button"]:focus-visible, a:focus-visible {
+  outline: 1px solid var(--accent-gold);
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .dossier-head { flex-direction: column; gap: 14px; padding: 20px 18px; }
+  .dossier-emblem { width: 58px; height: 58px; font-size: 26px; }
+  .dossier-name { font-size: 24px; }
+}
+@media (max-width: 860px) {
+  .page { padding: 12px 12px 70px; }
+  .summary-value { font-size: 24px; }
+}
+@media (max-width: 480px) {
+  .crew-roster { grid-template-columns: 1fr; }
+}

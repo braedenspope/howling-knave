@@ -47,6 +47,12 @@
                   <mat-label>Reward</mat-label>
                   <textarea matInput rows="2" [(ngModel)]="editForm.reward"></textarea>
                 </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-span">
+                  <mat-label>Scene seed (DM prompt)</mat-label>
+                  <textarea matInput rows="2" [(ngModel)]="editForm.scene_seed"
+                    placeholder="She puts you in a position and tells you to hold it. Roll Wisdom."></textarea>
+                </mat-form-field>
               </div>
               <div class="form-actions">
                 <button mat-button (click)="cancelEdit()">Cancel</button>
@@ -66,6 +72,9 @@
               </div>
               <p class="training-desc">{{ training.description }}</p>
               <p class="training-reward">Reward: {{ training.reward }}</p>
+              @if (training.scene_seed) {
+                <p class="training-seed">“{{ training.scene_seed }}”</p>
+              }
               <button mat-icon-button (click)="startEdit(training)">
                 <mat-icon>edit</mat-icon>
               </button>
@@ -108,6 +117,12 @@
               <mat-form-field appearance="outline" class="full-span">
                 <mat-label>Reward</mat-label>
                 <textarea matInput rows="2" [(ngModel)]="addForm.reward"></textarea>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-span">
+                <mat-label>Scene seed (DM prompt)</mat-label>
+                <textarea matInput rows="2" [(ngModel)]="addForm.scene_seed"
+                  placeholder="She puts you in a position and tells you to hold it. Roll Wisdom."></textarea>
               </mat-form-field>
             </div>
             <div class="form-actions">

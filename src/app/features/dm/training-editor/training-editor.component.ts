@@ -16,6 +16,7 @@ interface TrainingForm {
   topic: string;
   description: string;
   reward: string;
+  scene_seed: string;
   slot_weight: SlotWeight;
   sessions_required: number;
   tier_required: number;
@@ -61,6 +62,7 @@ export class TrainingEditorComponent implements OnInit {
       topic: '',
       description: '',
       reward: '',
+      scene_seed: '',
       slot_weight: 'medium',
       sessions_required: 3,
       tier_required: 1,
@@ -73,6 +75,7 @@ export class TrainingEditorComponent implements OnInit {
       topic: training.topic,
       description: training.description,
       reward: training.reward,
+      scene_seed: training.scene_seed ?? '',
       slot_weight: training.slot_weight,
       sessions_required: training.sessions_required,
       tier_required: training.tier_required,
@@ -84,7 +87,10 @@ export class TrainingEditorComponent implements OnInit {
   }
 
   async saveEdit(id: string) {
-    await this.trainingService.updateTraining(id, this.editForm);
+    await this.trainingService.updateTraining(id, {
+      ...this.editForm,
+      scene_seed: this.editForm.scene_seed.trim() || null,
+    });
     this.editingId.set(null);
   }
 
@@ -106,6 +112,7 @@ export class TrainingEditorComponent implements OnInit {
     await this.trainingService.createTraining({
       crew_member_id: crewMemberId,
       ...this.addForm,
+      scene_seed: this.addForm.scene_seed.trim() || null,
     });
     this.addingForCrew.set(null);
   }

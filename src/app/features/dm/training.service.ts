@@ -35,6 +35,7 @@ export class TrainingService {
         topic: t.topic,
         description: t.description,
         reward: t.reward,
+        scene_seed: t.scene_seed ?? null,
         slot_weight: t.slot_weight,
         sessions_required: t.sessions_required,
         tier_required: t.tier_required,
@@ -74,17 +75,29 @@ export class TrainingService {
     }
   }
 
+  /** PostgREST raises this when a payload references a column the schema lacks. */
+  private isMissingColumn(error: { code?: string; message?: string } | null): boolean {
+    if (!error) return false;
+    return error.code === 'PGRST204' || /scene_seed/.test(error.message ?? '');
+  }
+
   async createTraining(training: Omit<Training, 'id' | 'created_at' | 'updated_at'>): Promise<string | null> {
-    const { error } = await this.sb.supabase.from('trainings').insert(training);
+    let { error } = await this.sb.supabase.from('trainings').insert(training);
+    // Gracefully degrade if the scene_seed migration hasn't been applied yet.
+    if (this.isMissingColumn(error)) {
+      const { scene_seed, ...rest } = training as Record<string, unknown>;
+      ({ error } = await this.sb.supabase.from('trainings').insert(rest));
+    }
     if (!error) await this.loadTrainings();
     return error?.message ?? null;
   }
 
   async updateTraining(id: string, updates: Partial<Training>): Promise<string | null> {
-    const { error } = await this.sb.supabase
-      .from('trainings')
-      .update(updates)
-      .eq('id', id);
+    let { error } = await this.sb.supabase.from('trainings').update(updates).eq('id', id);
+    if (this.isMissingColumn(error)) {
+      const { scene_seed, ...rest } = updates as Record<string, unknown>;
+      ({ error } = await this.sb.supabase.from('trainings').update(rest).eq('id', id));
+    }
     if (!error) await this.loadTrainings();
     return error?.message ?? null;
   }

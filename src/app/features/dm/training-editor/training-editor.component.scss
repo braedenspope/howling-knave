@@ -110,6 +110,13 @@
   margin-top: 8px;
 }
 
+.training-seed {
+  margin: 4px 0 0;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
 @media (max-width: 600px) {
   .form-grid {
     grid-template-columns: 1fr;

@@ -10,6 +10,7 @@ import { TrainingService } from '../training.service';
 import { TrainingTrackerService } from '../training-tracker.service';
 import { CREW_COLORS } from '../../../shared/data/training.data';
 import { ScheduleBlock, Day } from '../../../shared/models';
+import { ToastService } from '../../../shared/toast.service';
 
 @Component({
   selector: 'app-block-outcomes',
@@ -24,6 +25,7 @@ export class BlockOutcomesComponent implements OnInit {
     public scheduleService: ScheduleService,
     private trainingService: TrainingService,
     private tracker: TrainingTrackerService,
+    private toast: ToastService,
   ) {}
 
   async ngOnInit() {
@@ -63,13 +65,24 @@ export class BlockOutcomesComponent implements OnInit {
       successCount,
       sessionsRequired,
     );
+
+    const progress = this.tracker.getProgress(block.user_id, block.crew_member, block.training_topic);
+    const verb = successCount > 1 ? 'Critical +2' : 'Success +1';
+    const tail = progress?.completed
+      ? ` — ${block.training_topic} · MASTERED`
+      : progress
+        ? ` — ${block.training_topic} · ${progress.successes_accumulated}/${progress.successes_required}`
+        : '';
+    this.toast.show(`${verb}${tail}`);
   }
 
   async markFailure(block: ScheduleBlock) {
     await this.scheduleService.updateBlockStatus(block.id, 'failure');
+    this.toast.show(`Failure logged — ${block.training_topic}`);
   }
 
   async resetBlock(block: ScheduleBlock) {
     await this.scheduleService.updateBlockStatus(block.id, 'pending');
+    this.toast.show(`Reset to pending — ${block.training_topic}`);
   }
 }

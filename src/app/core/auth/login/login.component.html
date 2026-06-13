@@ -1,41 +1,46 @@
-<div class="auth-container">
-  <mat-card class="auth-card">
-    <mat-card-header>
-      <mat-card-title class="gold-text">Echoes of the Sundering</mat-card-title>
-      <mat-card-subtitle>Sign in to continue</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      @if (error()) {
-        <p class="error-text">{{ error() }}</p>
-      }
-      <form (ngSubmit)="onLogin()">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email</mat-label>
-          <input matInput type="email" [(ngModel)]="email" name="email" required />
-        </mat-form-field>
+<div class="auth-wrap">
+  <div class="hk-card corners auth-card fade-up">
+    <div class="compass-wrap">
+      <svg viewBox="0 0 200 200" width="110" height="110" class="compass-rose" aria-hidden="true">
+        <circle cx="100" cy="100" r="72" fill="none" stroke="currentColor" stroke-width="1" />
+        <circle cx="100" cy="100" r="96" fill="none" stroke="currentColor" stroke-width="0.75" stroke-dasharray="2 5" />
+        <polygon points="100,5 110,100 100,100 90,100" fill="currentColor" stroke="currentColor" stroke-width="1.5" />
+        <polygon points="142.4,57.6 104.95,104.95 100,100 95.05,95.05" fill="none" stroke="currentColor" stroke-width="1.5" />
+        <polygon points="195,100 100,110 100,100 100,90" fill="currentColor" stroke="currentColor" stroke-width="1.5" />
+        <polygon points="142.4,142.4 95.05,104.95 100,100 104.95,95.05" fill="none" stroke="currentColor" stroke-width="1.5" />
+        <polygon points="100,195 90,100 100,100 110,100" fill="currentColor" stroke="currentColor" stroke-width="1.5" />
+        <polygon points="57.6,142.4 95.05,95.05 100,100 104.95,104.95" fill="none" stroke="currentColor" stroke-width="1.5" />
+        <polygon points="5,100 100,90 100,100 100,110" fill="currentColor" stroke="currentColor" stroke-width="1.5" />
+        <polygon points="57.6,57.6 104.95,95.05 100,100 95.05,104.95" fill="none" stroke="currentColor" stroke-width="1.5" />
+        <circle cx="100" cy="100" r="7" fill="currentColor" />
+        <text x="100" y="14" text-anchor="middle" font-size="14" fill="currentColor" font-family="Cinzel, serif">N</text>
+      </svg>
+    </div>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Password</mat-label>
-          <input matInput type="password" [(ngModel)]="password" name="password" required />
-        </mat-form-field>
+    <p class="stamp-label auth-stamp">The voyage log of the Howling Knave</p>
+    <h1 class="auth-title gold-text">Echoes of the Sundering</h1>
+    <div class="rope-divider" style="margin: 18px 0 22px;"></div>
 
-        <button
-          mat-raised-button
-          color="primary"
-          type="submit"
-          class="full-width"
-          [disabled]="submitting()"
-        >
-          @if (submitting()) {
-            <mat-spinner diameter="20"></mat-spinner>
-          } @else {
-            Sign In
-          }
-        </button>
-      </form>
-    </mat-card-content>
-    <mat-card-actions align="end">
-      <a mat-button routerLink="/register">Create Account</a>
-    </mat-card-actions>
-  </mat-card>
+    @if (error()) {
+      <p class="error-text">{{ error() }}</p>
+    }
+
+    <form class="auth-form" (ngSubmit)="onLogin()">
+      <div class="hk-field">
+        <label for="auth-email">Email</label>
+        <input id="auth-email" type="email" name="email" [(ngModel)]="email" placeholder="you@thecrew.com" required />
+      </div>
+      <div class="hk-field">
+        <label for="auth-pass">Password</label>
+        <input id="auth-pass" type="password" name="password" [(ngModel)]="password" placeholder="••••••••" required />
+      </div>
+      <button type="submit" class="btn btn-brass" style="width: 100%; margin-top: 6px;" [disabled]="submitting()">
+        {{ submitting() ? 'Signing in…' : 'Sign In' }}
+      </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 14px;">
+      <a class="btn btn-ghost" routerLink="/register">New aboard? Create an account</a>
+    </div>
+  </div>
 </div>
