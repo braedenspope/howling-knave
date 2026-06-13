@@ -1,23 +1,20 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { UpperCasePipe } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { TrainingService } from '../../dm/training.service';
 import { RelationshipService } from '../../dm/relationship.service';
 import { AuthService } from '../../../core/auth/auth.service';
-import { CREW_LIST, CREW_COLORS } from '../../../shared/data/training.data';
-import { TrainingWithCrew, SlotWeight, SLOT_WEIGHT_UNITS } from '../../../shared/models';
+import { CREW_LIST, CREW_COLORS, TIER_NAMES } from '../../../shared/data/training.data';
+import { TrainingWithCrew, SlotWeight, SLOT_WEIGHT_UNITS, SLOT_WEIGHT_LABEL } from '../../../shared/models';
 
 export interface AddBlockDialogData {
   dayId: string;
   remainingBudget: number;
   forUserId?: string;
+  /** Feature #3 — when true, training is barred (Guner's correction). */
+  correctionActive?: boolean;
 }
 
 export interface AddBlockDialogResult {
@@ -30,14 +27,9 @@ export interface AddBlockDialogResult {
   selector: 'app-add-block-dialog',
   standalone: true,
   imports: [
-    UpperCasePipe,
     MatDialogModule,
     MatFormFieldModule,
     MatSelectModule,
-    MatInputModule,
-    MatButtonModule,
-    MatButtonToggleModule,
-    MatIconModule,
     FormsModule,
   ],
   templateUrl: './add-block-dialog.component.html',
@@ -68,6 +60,23 @@ export class AddBlockDialogComponent implements OnInit {
     if (userId) {
       this.relationshipService.loadTiers(userId);
     }
+    if (this.data.correctionActive) {
+      this.mode.set('custom');
+    }
+  }
+
+  lengthLabel(weight: string): string {
+    return `${SLOT_WEIGHT_LABEL[weight as SlotWeight]} · ${SLOT_WEIGHT_UNITS[weight as SlotWeight]}`;
+  }
+  lengthClass(weight: string): string {
+    return `wt-${weight}`;
+  }
+  tierName(tier: number): string {
+    return TIER_NAMES[tier] ?? 'Unknown';
+  }
+  tierFor(crew: string): number {
+    const userId = this.data.forUserId ?? this.auth.userId();
+    return userId ? this.relationshipService.getTierForCrewMember(userId, crew) : 1;
   }
 
   setMode(mode: 'training' | 'custom') {

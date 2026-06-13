@@ -1,11 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatTabsModule } from '@angular/material/tabs';
 import { RelationshipService } from '../relationship.service';
 import { ScheduleService } from '../../schedule/schedule.service';
 import { CREW_LIST, CREW_COLORS, TIER_NAMES, TIER_COLORS } from '../../../shared/data/training.data';
@@ -14,15 +8,7 @@ import { RelationshipTier } from '../../../shared/models';
 @Component({
   selector: 'app-relationship-tracker',
   standalone: true,
-  imports: [
-    FormsModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatTabsModule,
-  ],
+  imports: [FormsModule],
   templateUrl: './relationship-tracker.component.html',
   styleUrl: './relationship-tracker.component.scss',
 })
@@ -36,12 +22,18 @@ export class RelationshipTrackerComponent implements OnInit {
     public scheduleService: ScheduleService,
   ) {}
 
+  selectedPlayerId = signal<string | null>(null);
+
   async ngOnInit() {
-    await this.relationshipService.loadAllTiers();
+    await Promise.all([
+      this.relationshipService.loadAllTiers(),
+      this.scheduleService.loadAllUsers(),
+    ]);
+    this.selectedPlayerId.set(this.scheduleService.allUsers()[0]?.id ?? null);
   }
 
-  onPlayerTabChange(_index: number) {
-    // Tiers already loaded for all users
+  firstName(name: string): string {
+    return name.split(' ')[0];
   }
 
   getCrewColor(name: string): string {

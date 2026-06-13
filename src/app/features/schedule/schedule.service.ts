@@ -163,6 +163,30 @@ export class ScheduleService {
     return error?.message ?? null;
   }
 
+  /** Feature #2 — cover (or release) another player's ship duty. */
+  async coverDuty(blockId: string, coveringUserId: string | null): Promise<string | null> {
+    this.blocks.update(blocks =>
+      blocks.map(b => (b.id === blockId ? { ...b, covered_by: coveringUserId } : b)),
+    );
+    const { error } = await this.sb.supabase
+      .from('schedule_blocks')
+      .update({ covered_by: coveringUserId })
+      .eq('id', blockId);
+    return error?.message ?? null;
+  }
+
+  /** Feature #4 — toggle the spotlight flag on a training block. */
+  async toggleSpotlight(blockId: string, spotlight: boolean): Promise<string | null> {
+    this.blocks.update(blocks =>
+      blocks.map(b => (b.id === blockId ? { ...b, spotlight } : b)),
+    );
+    const { error } = await this.sb.supabase
+      .from('schedule_blocks')
+      .update({ spotlight })
+      .eq('id', blockId);
+    return error?.message ?? null;
+  }
+
   async insertMandatoryBlock(
     dayId: string,
     userId: string,

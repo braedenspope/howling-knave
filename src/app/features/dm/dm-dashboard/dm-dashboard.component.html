@@ -1,9 +1,17 @@
-<div class="dm-container">
-  <h1 class="gold-text dm-title">DM Dashboard</h1>
+<div class="dm-container page">
+  <div class="section-title">
+    <div class="section-title-row"><h2>The Captain's Charts</h2></div>
+    <div class="rope-divider"></div>
+  </div>
   <mat-tab-group>
-    <mat-tab label="Block Outcomes">
+    <mat-tab label="Outcomes">
       <div class="tab-content">
         <app-block-outcomes />
+      </div>
+    </mat-tab>
+    <mat-tab label="Spotlight">
+      <div class="tab-content">
+        <app-spotlight-tracker />
       </div>
     </mat-tab>
     <mat-tab label="Relationships">
@@ -14,6 +22,11 @@
     <mat-tab label="Ship Duties">
       <div class="tab-content">
         <app-duty-injector />
+      </div>
+    </mat-tab>
+    <mat-tab label="Guner's Ledger">
+      <div class="tab-content">
+        <app-duty-ledger />
       </div>
     </mat-tab>
     <mat-tab label="Trainings">

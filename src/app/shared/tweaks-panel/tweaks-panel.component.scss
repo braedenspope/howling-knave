@@ -1,0 +1,57 @@
+:host { display: contents; }
+
+.tweaks-fab {
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  z-index: 300;
+  width: 44px;
+  height: 44px;
+  background: var(--bg-card-raised);
+  border: 1px solid var(--accent-gold-dim);
+  color: var(--accent-gold);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+
+  &:hover { background: var(--bg-card-raised); color: var(--accent-gold); filter: brightness(1.2); }
+}
+
+.tweaks-panel {
+  position: fixed;
+  bottom: 72px;
+  right: 18px;
+  z-index: 300;
+  width: 280px;
+  max-width: calc(100vw - 36px);
+  padding: 16px 18px;
+}
+
+.tweak-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0;
+  border-top: 1px solid rgba(61, 46, 31, 0.4);
+
+  &:first-of-type { border-top: none; }
+
+  &.toggle {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  input[type='range'] { accent-color: var(--accent-gold); width: 100%; }
+}
+
+.compass-watermark {
+  position: fixed;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 520px;
+  height: 520px;
+  color: var(--accent-gold);
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 0;
+}

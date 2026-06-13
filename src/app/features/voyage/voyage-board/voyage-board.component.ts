@@ -4,9 +4,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DayRowComponent } from '../../schedule/day-row/day-row.component';
 import { VoyageService } from '../voyage.service';
 import { ScheduleService } from '../../schedule/schedule.service';
+import { ConfirmationService } from '../../schedule/confirmation.service';
+import { CorrectionService } from '../../dm/correction.service';
 import { TrainingService } from '../../dm/training.service';
+import { TrainingTrackerService } from '../../dm/training-tracker.service';
 import { AuthService } from '../../../core/auth/auth.service';
-import { CREW_COLORS } from '../../../shared/data/training.data';
 
 @Component({
   selector: 'app-voyage-board',
@@ -23,7 +25,10 @@ export class VoyageBoardComponent implements OnInit, OnDestroy {
   constructor(
     public voyageService: VoyageService,
     public scheduleService: ScheduleService,
+    private confirmations: ConfirmationService,
+    private corrections: CorrectionService,
     private trainingService: TrainingService,
+    private tracker: TrainingTrackerService,
     private auth: AuthService,
   ) {
     // React to active voyage changes — load days and subscribe to blocks
@@ -33,12 +38,17 @@ export class VoyageBoardComponent implements OnInit, OnDestroy {
         await this.voyageService.loadDays(voyage.id);
         this.voyageService.subscribeToDays(voyage.id);
         this.scheduleService.subscribeToBlocks(voyage.id);
+        this.confirmations.subscribe(voyage.id);
+        this.corrections.subscribe();
 
         // Load blocks once days are available
         const days = this.voyageService.days();
         if (days.length > 0) {
           const dayIds = days.map(d => d.id);
-          await this.scheduleService.loadBlocks(dayIds);
+          await Promise.all([
+            this.scheduleService.loadBlocks(dayIds),
+            this.confirmations.load(dayIds),
+          ]);
         }
       }
     });
@@ -50,6 +60,8 @@ export class VoyageBoardComponent implements OnInit, OnDestroy {
       this.scheduleService.loadAllUsers(),
       this.trainingService.loadCrewMembers(),
       this.trainingService.loadTrainings(),
+      this.tracker.loadAllProgress(),
+      this.corrections.loadAll(),
     ]);
 
     this.voyageService.subscribeToVoyages();
@@ -60,9 +72,14 @@ export class VoyageBoardComponent implements OnInit, OnDestroy {
       await this.voyageService.loadDays(voyage.id);
       this.voyageService.subscribeToDays(voyage.id);
       this.scheduleService.subscribeToBlocks(voyage.id);
+      this.confirmations.subscribe(voyage.id);
+      this.corrections.subscribe();
       const dayIds = this.voyageService.days().map(d => d.id);
       if (dayIds.length > 0) {
-        await this.scheduleService.loadBlocks(dayIds);
+        await Promise.all([
+          this.scheduleService.loadBlocks(dayIds),
+          this.confirmations.load(dayIds),
+        ]);
       }
     }
   }
@@ -70,5 +87,7 @@ export class VoyageBoardComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.voyageService.unsubscribe();
     this.scheduleService.unsubscribe();
+    this.confirmations.unsubscribe();
+    this.corrections.unsubscribe();
   }
 }

@@ -1,68 +1,203 @@
-<mat-card class="day-card">
+<div class="hk-card corners day-card">
   <div class="day-header">
-    <h3 class="day-title gold-text">Day {{ day().day_number }}</h3>
-    @if (day().mandatory_duty) {
-      <span class="duty-badge" [matTooltip]="day().mandatory_duty?.consequence_description ?? ''">
-        <mat-icon>warning</mat-icon>
-        {{ day().mandatory_duty?.task_description }}
-      </span>
-      @if (isDm()) {
-        <button
-          mat-icon-button
-          class="remove-duty-btn"
-          (click)="onRemoveDuty()"
-          matTooltip="Remove duty from all players"
-          color="warn"
-        >
-          <mat-icon>close</mat-icon>
-        </button>
+    <div class="day-title-wrap">
+      <h3 class="day-title gold-text">Day {{ day().day_number }}</h3>
+      <span class="stamp-label">8 hour blocks · sleep assumed</span>
+    </div>
+    <div class="day-seals">
+      @for (u of users(); track u.id) {
+        @if (isSealed(u.id)) {
+          <div class="wax-seal pressed" [style]="sealStyle(u.id)" [title]="u.character_name + ' has sealed'">
+            <span [style]="sealTextStyle(u.id)">{{ sealInitial(u.id) }}</span>
+          </div>
+        } @else {
+          <div class="seal-slot" [title]="u.character_name + ' has not sealed'"></div>
+        }
       }
+    </div>
+    @if (isLocked()) {
+      <span class="locked-stamp">Schedule Locked</span>
     }
   </div>
 
-  @for (user of users(); track user.id) {
-    <div class="player-row">
-      <div class="player-info">
-        <span class="character-name">{{ user.character_name }}</span>
-        <span class="display-name">{{ user.display_name }}</span>
-      </div>
-      <div class="slots-grid">
-        @for (item of getSlotItems(user.id); track item.slotIndex) {
-          @if (item.type === 'block') {
-            <div
-              class="slot-block"
-              [style.grid-column]="'span ' + item.span"
-              [class.is-dragging]="draggingBlock()?.id === item.block!.id || (draggingBlock()?.is_mandatory && item.block!.is_mandatory && item.block!.day_id === draggingBlock()?.day_id)"
-              [attr.draggable]="item.block!.is_mandatory ? isDm() : canEdit(user.id)"
-              (dragstart)="onDragStart($event, item.block!)"
-              (dragend)="onDragEnd()"
-            >
-              <app-training-block
-                [block]="item.block!"
-                [canRemove]="canEdit(user.id) && !item.block!.is_mandatory"
-                (remove)="onRemoveBlock($event)"
-              />
-            </div>
-          } @else {
-            <div
-              class="slot-empty"
-              [class.slot-interactive]="canEdit(user.id)"
-              [class.drop-target]="dragOverSlot() === item.slotIndex && canDropAt(user.id, item.slotIndex)"
-              [class.drag-active]="draggingBlock() !== null"
-              [class.drop-valid]="draggingBlock() !== null && canDropAt(user.id, item.slotIndex)"
-              (click)="!draggingBlock() && canEdit(user.id) ? openAddDialog(user.id, item.slotIndex) : null"
-              (dragover)="onDragOver($event, user.id, item.slotIndex)"
-              (dragleave)="onDragLeave(item.slotIndex)"
-              (drop)="onDrop($event, user.id, item.slotIndex)"
-            >
-              @if (canEdit(user.id) && !draggingBlock()) {
-                <mat-icon>add</mat-icon>
+  @if (isMobile()) {
+    <!-- ===================== MOBILE: ship's-log timeline ===================== -->
+    <div class="tl-rows">
+      @for (u of users(); track u.id) {
+        @let mine = isMe(u.id);
+        <div class="tl-player" [class.is-me]="mine">
+          <div class="tl-player-head" [class.collapsible]="!mine"
+            (click)="!mine ? toggleExpanded(u.id) : null">
+            <span class="character-name">{{ mine ? 'Your log' : u.character_name.split(' ')[0] }}</span>
+            @if (isCorrected(u.id)) { <span class="correction-chip"><span class="ms sm">gavel</span> Correction</span> }
+            @if (!mine) {
+              <div class="mini-bar">
+                @for (seg of miniBar(u.id); track $index) {
+                  <span class="mini-seg" [style.background]="seg.color || 'rgba(15,11,7,0.5)'"></span>
+                }
+              </div>
+              <span class="ms sm">{{ isExpanded(u.id) ? 'expand_less' : 'expand_more' }}</span>
+            }
+          </div>
+
+          @if (mine || isDm()) {
+            <button class="seal-action" [class.confirm]="!isSealed(u.id)" [class.withdraw]="isSealed(u.id)"
+              (click)="toggleSeal(u.id)">
+              <span class="ms sm">{{ isSealed(u.id) ? 'lock_open' : 'approval' }}</span>
+              {{ isSealed(u.id) ? 'Withdraw seal' : 'Press your seal' }}
+            </button>
+          }
+
+          @if (mine || isExpanded(u.id)) {
+            <div class="tl-list">
+              @for (item of getSlotItems(u.id); track item.slotIndex) {
+                @if (item.type === 'block') {
+                  @let b = item.block!;
+                  <div class="tl-item" [class.tl-duty]="b.is_mandatory"
+                    [style.border-left-color]="b.is_mandatory ? 'var(--accent-copper)' : crewColor(b.crew_member)">
+                    <span class="tl-hour">{{ roman(item.slotIndex) }}</span>
+                    <div class="tl-body">
+                      @if (b.is_mandatory) {
+                        <span class="tl-topic">{{ b.training_topic }}</span>
+                        <span class="duty-tag">{{ isCovered(b) ? 'Covered · ' + coveredByName(b) : 'Ship duty' }}</span>
+                      } @else {
+                        <span class="tl-crew" [style.color]="crewColor(b.crew_member)">{{ b.crew_member }}</span>
+                        <span class="tl-topic">{{ b.training_topic }}</span>
+                      }
+                    </div>
+                    <div class="tl-end">
+                      @if (canFlag(b)) {
+                        <button class="flag-btn" [class.flagged]="b.spotlight" (click)="onToggleSpotlight(b)" title="Flag for the table">
+                          <span class="ms sm">flag</span>
+                        </button>
+                      }
+                      @if (canCover(b) && !isCovered(b)) {
+                        <button class="cover-btn-tl" (click)="onCover(b)">Cover</button>
+                      }
+                      @if (canEdit(u.id) && !b.is_mandatory) {
+                        <button class="btn-icon tl-remove" (click)="onRemoveBlock(b)" title="Remove"><span class="ms sm">close</span></button>
+                      }
+                    </div>
+                  </div>
+                } @else {
+                  <div class="tl-item tl-empty" [class.interactive]="canEdit(u.id)"
+                    (click)="canEdit(u.id) ? openAddDialog(u.id, item.slotIndex) : null">
+                    <span class="tl-hour">{{ roman(item.slotIndex) }}</span>
+                    @if (canEdit(u.id)) {
+                      <span class="tl-add"><span class="ms sm">add</span> Open hour — tap to plan</span>
+                    } @else {
+                      <span class="tl-add muted">Open</span>
+                    }
+                  </div>
+                }
               }
-              <span class="slot-number">{{ item.slotIndex + 1 }}</span>
             </div>
           }
-        }
-      </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <!-- ===================== DESKTOP: 8-block grid ===================== -->
+    <div class="day-rows">
+      @for (u of users(); track u.id) {
+        <div class="player-row" [class.is-me]="isMe(u.id)">
+          <div class="player-info">
+            <span class="character-name">{{ u.character_name }}</span>
+            <span class="display-name">{{ u.display_name }}</span>
+            @if (isCorrected(u.id)) {
+              <span class="correction-chip"><span class="ms sm">gavel</span> Correction detail</span>
+            }
+            @if (isMe(u.id) || isDm()) {
+              <button class="seal-action" [class.confirm]="!isSealed(u.id)" [class.withdraw]="isSealed(u.id)"
+                (click)="toggleSeal(u.id)">
+                <span class="ms sm">{{ isSealed(u.id) ? 'lock_open' : 'approval' }}</span>
+                {{ isSealed(u.id) ? 'Withdraw seal' : 'Press your seal' }}
+              </button>
+            }
+          </div>
+
+          <div class="slots-grid">
+            @for (item of getSlotItems(u.id); track item.slotIndex) {
+              @if (item.type === 'block') {
+                @let b = item.block!;
+                @if (b.is_mandatory) {
+                  <!-- ship duty -->
+                  <div class="slot-cell duty-cell" [class.covering]="isCovered(b)" [style.grid-column]="'span ' + item.span"
+                    [attr.draggable]="isDm() && !isLocked()" (dragstart)="onDragStart($event, b)" (dragend)="onDragEnd()">
+                    <div class="duty-task">{{ b.training_topic }}</div>
+                    <span class="duty-tag">{{ isCovered(b) ? 'Covered · ' + coveredByName(b) : 'Ship duty' }}</span>
+                    @if (canCover(b) && !isCovered(b)) {
+                      <button class="cover-btn" (click)="onCover(b)">Cover</button>
+                    } @else if (isCovered(b) && b.covered_by === currentUserId()) {
+                      <button class="cover-btn" (click)="onUncover(b)">Release</button>
+                    }
+                  </div>
+                } @else if (isDm() && isTraining(b)) {
+                  <!-- DM: clickable to mark outcome -->
+                  <div class="slot-cell block-cell dm-clickable" [style.grid-column]="'span ' + item.span"
+                    [style.border-left]="'3px solid ' + crewColor(b.crew_member)"
+                    [matMenuTriggerFor]="outcomeMenu" [matMenuTriggerData]="{ block: b }">
+                    <div class="block-cell-top">
+                      <span class="block-crew" [style.color]="crewColor(b.crew_member)">{{ b.crew_member }}</span>
+                      @if (b.status === 'success') { <span class="ms sm status-success">check_circle</span> }
+                      @else if (b.status === 'failure') { <span class="ms sm status-failure">cancel</span> }
+                    </div>
+                    <span class="block-topic">{{ b.training_topic }}</span>
+                    <div class="block-cell-bottom">
+                      <span class="wt-badge" [class]="lengthClass(b.slot_weight)">{{ lengthLabel(b.slot_weight) }}</span>
+                      @if (b.spotlight) { <span class="ms sm" style="color: var(--accent-gold); font-size: 13px;">flag</span> }
+                    </div>
+                  </div>
+                } @else {
+                  <!-- training / independent block -->
+                  <div class="slot-cell block-cell" [style.grid-column]="'span ' + item.span"
+                    [style.border-left]="'3px solid ' + (isIndependent(b) ? 'var(--text-faint)' : crewColor(b.crew_member))"
+                    [attr.draggable]="canEdit(u.id)" (dragstart)="onDragStart($event, b)" (dragend)="onDragEnd()">
+                    <div class="block-cell-top">
+                      <span class="block-crew" [style.color]="isIndependent(b) ? 'var(--text-secondary)' : crewColor(b.crew_member)">{{ b.crew_member }}</span>
+                      @if (canFlag(b)) {
+                        <button class="flag-btn" [class.flagged]="b.spotlight" (click)="onToggleSpotlight(b)" title="Flag for the table">
+                          <span class="ms sm">flag</span>
+                        </button>
+                      }
+                    </div>
+                    <span class="block-topic">{{ b.training_topic }}</span>
+                    <div class="block-cell-bottom">
+                      <span class="wt-badge" [class]="lengthClass(b.slot_weight)">{{ lengthLabel(b.slot_weight) }}</span>
+                    </div>
+                    @if (canEdit(u.id)) {
+                      <button class="cell-remove" (click)="onRemoveBlock(b)" title="Remove"><span class="ms">close</span></button>
+                    }
+                  </div>
+                }
+              } @else {
+                <!-- empty -->
+                <div class="slot-cell empty-cell" [class.interactive]="canEdit(u.id)"
+                  [class.drag-over]="dragOverSlot() === item.slotIndex && canDropAt(u.id, item.slotIndex)"
+                  (click)="!draggingBlock() && canEdit(u.id) ? openAddDialog(u.id, item.slotIndex) : null"
+                  (dragover)="onDragOver($event, u.id, item.slotIndex)"
+                  (dragleave)="onDragLeave(item.slotIndex)"
+                  (drop)="onDrop($event, u.id, item.slotIndex)">
+                  <span class="slot-roman">{{ roman(item.slotIndex) }}</span>
+                  @if (canEdit(u.id) && !draggingBlock()) {
+                    <span class="ms empty-add">add</span>
+                  }
+                </div>
+              }
+            }
+          </div>
+        </div>
+      }
     </div>
   }
-</mat-card>
+</div>
+
+<!-- DM outcome menu -->
+<mat-menu #outcomeMenu="matMenu" class="hk-outcome-menu">
+  <ng-template matMenuContent let-block="block">
+    <button mat-menu-item (click)="markOutcome(block, 2)"><span class="ms sm" style="color: var(--accent-gold);">star</span>&nbsp; Critical — double success</button>
+    <button mat-menu-item (click)="markOutcome(block, 1)"><span class="ms sm status-success">check</span>&nbsp; Success</button>
+    <button mat-menu-item (click)="markFailure(block)"><span class="ms sm status-failure">close</span>&nbsp; Failure</button>
+    <button mat-menu-item (click)="resetOutcome(block)"><span class="ms sm">restart_alt</span>&nbsp; Reset to pending</button>
+  </ng-template>
+</mat-menu>

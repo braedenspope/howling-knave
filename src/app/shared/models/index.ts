@@ -32,6 +32,31 @@ export interface Day {
   voyage_id: string;
   day_number: number;
   mandatory_duty: MandatoryDuty | null;
+  /** True once every player has sealed this day (feature #1). */
+  locked?: boolean;
+}
+
+export interface DayConfirmation {
+  id: string;
+  day_id: string;
+  user_id: string;
+  sealed_at: string;
+}
+
+export interface Correction {
+  id: string;
+  day_id: string;
+  user_id: string;
+  reason: string | null;
+  created_at: string;
+}
+
+export interface SpotlightLogEntry {
+  id: string;
+  user_id: string;
+  voyage_id: string;
+  block_id: string | null;
+  created_at: string;
 }
 
 export interface CrewMember {
@@ -50,6 +75,10 @@ export interface ScheduleBlock {
   slot_position: number;
   status: BlockStatus;
   is_mandatory: boolean;
+  /** Coverer for a ship duty (feature #2). */
+  covered_by?: string | null;
+  /** Player flagged this training for the table (feature #4). */
+  spotlight?: boolean;
   created_at: string;
   updated_at: string;
 }

@@ -1,21 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { UpperCasePipe } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatChipsModule } from '@angular/material/chips';
 import { ScheduleService } from '../../schedule/schedule.service';
 import { VoyageService } from '../../voyage/voyage.service';
 import { TrainingService } from '../training.service';
 import { TrainingTrackerService } from '../training-tracker.service';
 import { CREW_COLORS } from '../../../shared/data/training.data';
-import { ScheduleBlock, Day } from '../../../shared/models';
+import { ScheduleBlock, Day, SLOT_WEIGHT_LABEL, SLOT_WEIGHT_UNITS, SlotWeight } from '../../../shared/models';
 import { ToastService } from '../../../shared/toast.service';
 
 @Component({
   selector: 'app-block-outcomes',
   standalone: true,
-  imports: [UpperCasePipe, MatButtonModule, MatIconModule, MatTooltipModule, MatChipsModule],
+  imports: [],
   templateUrl: './block-outcomes.component.html',
   styleUrl: './block-outcomes.component.scss',
 })
@@ -29,15 +24,46 @@ export class BlockOutcomesComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
-    await this.tracker.loadAllProgress();
+    await Promise.all([
+      this.tracker.loadAllProgress(),
+      this.voyageService.loadVoyages(),
+      this.scheduleService.loadAllUsers(),
+    ]);
+    const voyage = this.voyageService.activeVoyage();
+    if (voyage) {
+      await this.voyageService.loadDays(voyage.id);
+      await this.scheduleService.loadBlocks(this.voyageService.days().map(d => d.id));
+    }
   }
 
   getBlocksForDayUser(dayId: string, userId: string): ScheduleBlock[] {
-    return this.scheduleService.getBlocksForDayUser(dayId, userId);
+    return this.scheduleService.getBlocksForDayUser(dayId, userId)
+      .filter(b => !b.is_mandatory && b.crew_member !== 'Independent');
+  }
+
+  hasOutcomes(dayId: string): boolean {
+    return this.scheduleService.allUsers().some(u => this.getBlocksForDayUser(dayId, u.id).length > 0);
   }
 
   getCrewColor(name: string): string {
     return CREW_COLORS[name] ?? '#666';
+  }
+
+  lengthLabel(weight: SlotWeight): string {
+    return `${SLOT_WEIGHT_LABEL[weight]} · ${SLOT_WEIGHT_UNITS[weight]}`;
+  }
+  lengthClass(weight: SlotWeight): string {
+    return `wt-${weight}`;
+  }
+  statusClass(block: ScheduleBlock): string {
+    if (block.status === 'success') return 'outcome-success';
+    if (block.status === 'failure') return 'outcome-failure';
+    return 'outcome-pending';
+  }
+  statusLabel(block: ScheduleBlock): string {
+    if (block.status === 'success') return 'Success';
+    if (block.status === 'failure') return 'Failed';
+    return 'Pending';
   }
 
   getProgressLabel(block: ScheduleBlock): string {

@@ -4,6 +4,8 @@ import { BlockOutcomesComponent } from '../block-outcomes/block-outcomes.compone
 import { RelationshipTrackerComponent } from '../relationship-tracker/relationship-tracker.component';
 import { DutyInjectorComponent } from '../duty-injector/duty-injector.component';
 import { TrainingEditorComponent } from '../training-editor/training-editor.component';
+import { SpotlightTrackerComponent } from '../spotlight-tracker/spotlight-tracker.component';
+import { DutyLedgerComponent } from '../duty-ledger/duty-ledger.component';
 
 @Component({
   selector: 'app-dm-dashboard',
@@ -14,6 +16,8 @@ import { TrainingEditorComponent } from '../training-editor/training-editor.comp
     RelationshipTrackerComponent,
     DutyInjectorComponent,
     TrainingEditorComponent,
+    SpotlightTrackerComponent,
+    DutyLedgerComponent,
   ],
   templateUrl: './dm-dashboard.component.html',
   styleUrl: './dm-dashboard.component.scss',

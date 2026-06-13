@@ -1,19 +1,28 @@
-<h2 mat-dialog-title class="gold-text">Add Block</h2>
+<h2 mat-dialog-title class="gold-text">Plan the hour</h2>
 <mat-dialog-content>
-  <p class="budget-info">Remaining budget: {{ data.remainingBudget }} units</p>
+  @if (data.correctionActive) {
+    <div class="correction-note">
+      <span class="ms">gavel</span>
+      <span>Guner has this crew member on correction detail today — training is barred. An independent activity is still open to them.</span>
+    </div>
+  }
 
-  <mat-button-toggle-group [value]="mode()" (change)="setMode($event.value)" class="mode-toggle">
-    <mat-button-toggle value="training">Crew Training</mat-button-toggle>
-    <mat-button-toggle value="custom">Custom Event</mat-button-toggle>
-  </mat-button-toggle-group>
+  <p class="budget-info stamp-label">{{ data.remainingBudget }} contiguous block{{ data.remainingBudget === 1 ? '' : 's' }} free here</p>
 
-  @if (mode() === 'training') {
+  @if (!data.correctionActive) {
+    <div class="hk-tabs" style="margin-bottom: 14px;">
+      <button class="hk-tab" [class.on]="mode() === 'training'" (click)="setMode('training')">Crew Training</button>
+      <button class="hk-tab" [class.on]="mode() === 'custom'" (click)="setMode('custom')">Independent</button>
+    </div>
+  }
+
+  @if (mode() === 'training' && !data.correctionActive) {
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Crew Member</mat-label>
+      <mat-label>Crew member</mat-label>
       <mat-select [(ngModel)]="selectedCrew" (ngModelChange)="onCrewChange()">
         @for (crew of crewList; track crew) {
           <mat-option [value]="crew">
-            <span class="crew-dot" [style.background]="getCrewColor(crew)"></span>
+            <span class="crew-dot" [style.background]="getCrewColor(crew)" style="display: inline-block; margin-right: 6px;"></span>
             {{ crew }}
           </mat-option>
         }
@@ -21,82 +30,49 @@
     </mat-form-field>
 
     @if (selectedCrew) {
-      <div class="training-options">
+      <p class="dialog-section-label">{{ selectedCrew }} · {{ tierName(tierFor(selectedCrew)) }}</p>
+      <div class="option-list">
         @for (training of availableTrainings(); track training.id) {
-          <div
-            class="training-option"
-            [class.disabled]="!training.affordable || !training.available"
-            [class.selected]="selectedTraining()?.id === training.id"
-            (click)="selectTraining(training)"
-            [style.border-left-color]="getCrewColor(selectedCrew)"
-          >
-            <div class="training-header">
-              <span class="training-topic">{{ training.topic }}</span>
-              <span class="weight-badge" [class]="'weight-' + training.slot_weight">
-                {{ training.slot_weight | uppercase }}
-              </span>
+          @let blocked = !training.available || !training.affordable;
+          <button class="training-option" [class.blocked]="blocked"
+            [style.border-left]="'3px solid ' + getCrewColor(selectedCrew)"
+            [class.chosen]="selectedTraining()?.id === training.id"
+            (click)="selectTraining(training)" [disabled]="blocked">
+            <div class="to-main">
+              <span class="to-topic">{{ training.topic }}</span>
+              <span class="wt-badge" [class]="lengthClass(training.slot_weight)">{{ lengthLabel(training.slot_weight) }}</span>
+              <span class="stamp-label">{{ training.sessions_required }} sessions</span>
             </div>
-            <p class="training-desc">{{ training.description }}</p>
-            <div class="training-meta">
-              <span class="reward">{{ training.reward }}</span>
-              <span class="sessions">{{ training.sessions_required }} session{{ training.sessions_required > 1 ? 's' : '' }}</span>
-            </div>
+            <span class="to-desc">{{ training.description }}</span>
             @if (!training.available) {
-              <span class="lock-reason">Requires higher relationship tier</span>
+              <span class="to-note blocked-note"><span class="ms sm">lock</span> Requires a deeper relationship</span>
             } @else if (!training.affordable) {
-              <span class="lock-reason">Not enough budget ({{ getCost(training.slot_weight) }} units)</span>
+              <span class="to-note blocked-note"><span class="ms sm">schedule</span> Needs {{ getCost(training.slot_weight) }} blocks — only {{ data.remainingBudget }} free</span>
             }
-          </div>
+          </button>
         } @empty {
-          <p class="empty-state">No trainings available for this crew member.</p>
+          <div class="empty-state"><span class="ms">school</span><p>Nothing available with {{ selectedCrew }} yet. Build the relationship first.</p></div>
         }
       </div>
     }
   } @else {
     <div class="custom-form">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Activity</mat-label>
-        <input matInput [(ngModel)]="customTopic" placeholder="What are you doing?" />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Crew Member (optional)</mat-label>
-        <mat-select [(ngModel)]="customCrew">
-          <mat-option value="">None</mat-option>
-          @for (crew of crewList; track crew) {
-            <mat-option [value]="crew">
-              <span class="crew-dot" [style.background]="getCrewColor(crew)"></span>
-              {{ crew }}
-            </mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
+      <div class="hk-field">
+        <label>Activity</label>
+        <input [(ngModel)]="customTopic" placeholder="Study, meditate, weapon practice…" />
+      </div>
       <div class="weight-select">
-        <span class="weight-label">Time Cost</span>
-        <mat-button-toggle-group [(ngModel)]="customWeight" class="weight-toggles">
-          <mat-button-toggle value="light" [disabled]="getCost('light') > data.remainingBudget">
-            Light ({{ getCost('light') }})
-          </mat-button-toggle>
-          <mat-button-toggle value="medium" [disabled]="getCost('medium') > data.remainingBudget">
-            Medium ({{ getCost('medium') }})
-          </mat-button-toggle>
-          <mat-button-toggle value="heavy" [disabled]="getCost('heavy') > data.remainingBudget">
-            Heavy ({{ getCost('heavy') }})
-          </mat-button-toggle>
-        </mat-button-toggle-group>
+        <span class="stamp-label">Time cost</span>
+        <div class="hk-tabs" style="margin: 6px 0 0; border: none;">
+          <button class="hk-tab" [class.on]="customWeight === 'light'" [disabled]="getCost('light') > data.remainingBudget" (click)="customWeight = 'light'">Short · 1</button>
+          <button class="hk-tab" [class.on]="customWeight === 'medium'" [disabled]="getCost('medium') > data.remainingBudget" (click)="customWeight = 'medium'">Medium · 2</button>
+          <button class="hk-tab" [class.on]="customWeight === 'heavy'" [disabled]="getCost('heavy') > data.remainingBudget" (click)="customWeight = 'heavy'">Long · 4</button>
+        </div>
       </div>
     </div>
   }
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close>Cancel</button>
-  <button
-    mat-raised-button
-    color="primary"
-    [disabled]="!canConfirm()"
-    (click)="confirm()"
-  >
-    Add Block
-  </button>
+  <button class="btn btn-ghost" mat-dialog-close>Cancel</button>
+  <button class="btn btn-brass" [disabled]="!canConfirm()" (click)="confirm()">Add to the day</button>
 </mat-dialog-actions>

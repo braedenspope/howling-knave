@@ -1,58 +1,45 @@
+<p class="dm-hint">
+  Resolve each training session in the montage pass — Critical doubles progress, Success marks one,
+  Failure holds. You can also mark outcomes straight from the board.
+</p>
+
 @for (day of voyageService.days(); track day.id) {
-  <div class="day-section">
-    <h3 class="gold-text day-label">Day {{ day.day_number }}</h3>
+  @if (hasOutcomes(day.id)) {
+    <div class="section-title">
+      <div class="section-title-row"><h2>Day {{ day.day_number }}</h2></div>
+      <div class="rope-divider"></div>
+    </div>
 
     @for (user of scheduleService.allUsers(); track user.id) {
       @if (getBlocksForDayUser(day.id, user.id).length > 0) {
-        <div class="player-section">
-          <span class="player-name">{{ user.character_name }}</span>
-          <div class="blocks-list">
-            @for (block of getBlocksForDayUser(day.id, user.id); track block.id) {
-              <div class="outcome-block" [style.border-left-color]="getCrewColor(block.crew_member)">
-                <div class="block-info">
-                  <span class="crew">{{ block.crew_member }}</span>
-                  <span class="topic">{{ block.training_topic }}</span>
-                  <span class="weight-badge" [class]="'weight-' + block.slot_weight">
-                    {{ block.slot_weight | uppercase }}
-                  </span>
-                  @if (getProgressLabel(block)) {
-                    <span class="progress-label">{{ getProgressLabel(block) }}</span>
-                  }
-                  @if (isMastered(block)) {
-                    <span class="mastered-badge">MASTERED</span>
-                  }
-                </div>
-                <div class="outcome-actions">
-                  <button mat-icon-button
-                    matTooltip="+2 Double Success"
-                    class="action-double"
-                    (click)="markOutcome(block, 2)">
-                    <mat-icon>star</mat-icon>
-                  </button>
-                  <button mat-icon-button
-                    matTooltip="Success (+1)"
-                    class="action-success"
-                    (click)="markOutcome(block, 1)">
-                    <mat-icon>check</mat-icon>
-                  </button>
-                  <button mat-icon-button
-                    matTooltip="Failure"
-                    class="action-failure"
-                    (click)="markFailure(block)">
-                    <mat-icon>close</mat-icon>
-                  </button>
-                  <button mat-icon-button
-                    matTooltip="Reset to Pending"
-                    class="action-reset"
-                    (click)="resetBlock(block)">
-                    <mat-icon>refresh</mat-icon>
-                  </button>
-                </div>
+        <p class="dialog-section-label">{{ user.character_name }}</p>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;">
+          @for (block of getBlocksForDayUser(day.id, user.id); track block.id) {
+            <div class="outcome-row" [style.border-left-color]="getCrewColor(block.crew_member)">
+              <div class="outcome-info">
+                <span class="outcome-status" [class]="statusClass(block)">{{ statusLabel(block) }}</span>
+                <span class="crew-dot" [style.background]="getCrewColor(block.crew_member)"></span>
+                <span class="block-crew" [style.color]="getCrewColor(block.crew_member)">{{ block.crew_member }}</span>
+                <span class="block-topic" style="-webkit-line-clamp: 1;">{{ block.training_topic }}</span>
+                <span class="wt-badge" [class]="lengthClass(block.slot_weight)">{{ lengthLabel(block.slot_weight) }}</span>
+                @if (getProgressLabel(block)) { <span class="stamp-label">{{ getProgressLabel(block) }}</span> }
+                @if (isMastered(block)) { <span class="mastered-badge">Mastered</span> }
+                @if (block.spotlight) { <span class="flagged-tag"><span class="ms sm">flag</span> Flagged</span> }
               </div>
-            }
-          </div>
+              <div class="outcome-actions">
+                <button class="btn-icon oc-double" title="Critical — double success" (click)="markOutcome(block, 2)"><span class="ms sm">star</span></button>
+                <button class="btn-icon oc-success" title="Success (+1)" (click)="markOutcome(block, 1)"><span class="ms sm">check</span></button>
+                <button class="btn-icon oc-failure" title="Failure" (click)="markFailure(block)"><span class="ms sm">close</span></button>
+                <button class="btn-icon" title="Reset to pending" (click)="resetBlock(block)"><span class="ms sm">restart_alt</span></button>
+              </div>
+            </div>
+          }
         </div>
       }
     }
-  </div>
+  }
+}
+
+@if (voyageService.days().length === 0) {
+  <div class="empty-state"><span class="ms">sailing</span><p>No active voyage. Declare a crossing to resolve sessions.</p></div>
 }
