@@ -2,6 +2,7 @@ import { Injectable, NgZone, signal } from '@angular/core';
 import { SupabaseService } from '../../core/supabase/supabase.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { ScheduleBlock, SlotWeight, SLOT_WEIGHT_UNITS, DAY_BUDGET } from '../../shared/models';
+import { DUTY_TASKS, DEFAULT_DUTY_HOURS } from '../../shared/data/training.data';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
 @Injectable({ providedIn: 'root' })
@@ -206,6 +207,55 @@ export class ScheduleService {
       is_mandatory: true,
     });
     return error?.message ?? null;
+  }
+
+  /**
+   * Randomly place ship-duty hours for a single day — each player gets their
+   * own `hoursPerPlayer` distinct 1-block duties in random slots, drawn from
+   * the duty-task pool. Clears any existing duties on the day first.
+   */
+  async placeRandomDuties(
+    dayId: string,
+    hoursPerPlayer: number = DEFAULT_DUTY_HOURS,
+    users?: { id: string }[],
+  ): Promise<string | null> {
+    const players = users ?? this.allUsers();
+    if (players.length === 0) return null;
+
+    await this.removeMandatoryBlocks(dayId);
+
+    const count = Math.max(0, Math.min(hoursPerPlayer, DAY_BUDGET));
+    for (const user of players) {
+      const slots = this.pickRandomSlots(DAY_BUDGET, count);
+      for (const slot of slots) {
+        const task = DUTY_TASKS[Math.floor(Math.random() * DUTY_TASKS.length)];
+        const err = await this.insertMandatoryBlock(dayId, user.id, 'Ship Duty', task, 'light', slot);
+        if (err) return err;
+      }
+    }
+    return null;
+  }
+
+  /** Roll duties across every day of a voyage (used when a crossing is declared). */
+  async placeRandomDutiesForDays(
+    dayIds: string[],
+    hoursPerPlayer: number = DEFAULT_DUTY_HOURS,
+    users?: { id: string }[],
+  ): Promise<string | null> {
+    for (const dayId of dayIds) {
+      const err = await this.placeRandomDuties(dayId, hoursPerPlayer, users);
+      if (err) return err;
+    }
+    return null;
+  }
+
+  private pickRandomSlots(total: number, count: number): number[] {
+    const pool = Array.from({ length: total }, (_, i) => i);
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    return pool.slice(0, count).sort((a, b) => a - b);
   }
 
   async removeMandatoryBlocks(dayId: string): Promise<string | null> {

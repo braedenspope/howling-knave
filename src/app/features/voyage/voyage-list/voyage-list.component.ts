@@ -81,13 +81,21 @@ export class VoyageListComponent implements OnInit {
     this.creating.set(true);
     this.error.set(null);
     const err = await this.voyageService.createVoyage(this.newName, this.newDayCount);
-    this.creating.set(false);
     if (err) {
+      this.creating.set(false);
       this.error.set(err);
-    } else {
-      this.newName = '';
-      this.newDayCount = 7;
+      return;
     }
+    this.newName = '';
+    this.newDayCount = 7;
+
+    // Declare the crossing: place ship-duty hours at random before schedules open.
+    const voyage = this.voyageService.activeVoyage();
+    if (voyage) {
+      const days = await this.voyageService.loadDaysForVoyage(voyage.id);
+      await this.scheduleService.placeRandomDutiesForDays(days.map(d => d.id));
+    }
+    this.creating.set(false);
   }
 
   async setActive(voyageId: string) {

@@ -28,6 +28,21 @@ export const CREW_LIST = [
 
 export type CrewName = typeof CREW_LIST[number];
 
+/** Pool of ship-duty tasks drawn from when the app rolls the watch each day. */
+export const DUTY_TASKS = [
+  'Stand watch — forecastle',
+  'Haul rigging — mainmast',
+  'Run cargo below decks',
+  'Assist navigation — chart room',
+  'Swab and tar — weather deck',
+  "Stand watch — crow's nest",
+  'Galley supply run',
+  'Pump the bilge',
+] as const;
+
+/** Default ship-duty hours placed per player per day. */
+export const DEFAULT_DUTY_HOURS = 2;
+
 export interface CrewMeta {
   role: string;
   line: string;

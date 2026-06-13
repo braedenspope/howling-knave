@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,8 +9,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { VoyageService } from '../../voyage/voyage.service';
 import { ScheduleService } from '../../schedule/schedule.service';
-import { CREW_LIST } from '../../../shared/data/training.data';
+import { CREW_LIST, DEFAULT_DUTY_HOURS } from '../../../shared/data/training.data';
 import { MandatoryDuty, SlotWeight } from '../../../shared/models';
+import { ToastService } from '../../../shared/toast.service';
 
 @Component({
   selector: 'app-duty-injector',
@@ -28,9 +29,11 @@ import { MandatoryDuty, SlotWeight } from '../../../shared/models';
   templateUrl: './duty-injector.component.html',
   styleUrl: './duty-injector.component.scss',
 })
-export class DutyInjectorComponent {
+export class DutyInjectorComponent implements OnInit {
   crewList = CREW_LIST;
   editingDay = signal<string | null>(null);
+  dutyHours = signal(DEFAULT_DUTY_HOURS);
+  rolling = signal(false);
 
   dutyCrew = '';
   dutyDescription = '';
@@ -42,7 +45,41 @@ export class DutyInjectorComponent {
   constructor(
     public voyageService: VoyageService,
     private scheduleService: ScheduleService,
+    private toast: ToastService,
   ) {}
+
+  async ngOnInit() {
+    await Promise.all([
+      this.voyageService.loadVoyages(),
+      this.scheduleService.loadAllUsers(),
+    ]);
+    const voyage = this.voyageService.activeVoyage();
+    if (voyage) {
+      await this.voyageService.loadDays(voyage.id);
+      await this.scheduleService.loadBlocks(this.voyageService.days().map(d => d.id));
+    }
+  }
+
+  setHours(n: number) {
+    this.dutyHours.set(Math.max(1, Math.min(3, n)));
+  }
+
+  async rollDay(dayId: string) {
+    this.rolling.set(true);
+    await this.scheduleService.placeRandomDuties(dayId, this.dutyHours());
+    const day = this.voyageService.days().find(d => d.id === dayId);
+    this.rolling.set(false);
+    this.toast.show(`Watch rolled — Day ${day?.day_number}, ${this.dutyHours()} duties each`);
+  }
+
+  async rollAll() {
+    const days = this.voyageService.days();
+    if (days.length === 0) return;
+    this.rolling.set(true);
+    await this.scheduleService.placeRandomDutiesForDays(days.map(d => d.id), this.dutyHours());
+    this.rolling.set(false);
+    this.toast.show(`Watch rolled for all ${days.length} days — ${this.dutyHours()} duties per player`);
+  }
 
   startEdit(dayId: string) {
     this.editingDay.set(dayId);

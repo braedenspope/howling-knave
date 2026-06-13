@@ -1,6 +1,27 @@
+<p class="dm-hint">
+  Ship duties are placed at random for each crewmate when a crossing is declared. Re-roll the watch
+  here, or set a specific duty by hand below. Players plan their remaining hours around them.
+</p>
+
+<div class="hk-card corners" style="padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+  <span class="stamp-label">Duty hours per player</span>
+  <div class="day-stepper" style="display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--bg-card-border); border-radius: var(--radius); padding: 2px 6px;">
+    <button class="btn-icon" (click)="setHours(dutyHours() - 1)" [disabled]="dutyHours() <= 1"><span class="ms sm">remove</span></button>
+    <span class="stamp-label">{{ dutyHours() }}</span>
+    <button class="btn-icon" (click)="setHours(dutyHours() + 1)" [disabled]="dutyHours() >= 3"><span class="ms sm">add</span></button>
+  </div>
+  <button class="btn btn-brass" [disabled]="rolling() || voyageService.days().length === 0" (click)="rollAll()">
+    <span class="ms sm">casino</span> Roll the watch — all days
+  </button>
+</div>
+
 @for (day of voyageService.days(); track day.id) {
   <div class="duty-day-section">
-    <h3 class="gold-text">Day {{ day.day_number }}</h3>
+    <h3 class="gold-text">Day {{ day.day_number }}
+      <button class="btn btn-copper" style="margin-left: 10px; padding: 4px 12px;" [disabled]="rolling()" (click)="rollDay(day.id)">
+        <span class="ms sm">casino</span> Roll
+      </button>
+    </h3>
 
     @if (day.mandatory_duty) {
       <div class="current-duty">
