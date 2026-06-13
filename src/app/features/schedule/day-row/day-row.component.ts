@@ -6,6 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { AddBlockDialogComponent, AddBlockDialogResult } from '../add-block-dialog/add-block-dialog.component';
 import { ScheduleService } from '../schedule.service';
+import { DutyRequestService } from '../duty-request.service';
 import { VoyageService } from '../../voyage/voyage.service';
 import { ConfirmationService } from '../confirmation.service';
 import { CorrectionService } from '../../dm/correction.service';
@@ -54,6 +55,7 @@ export class DayRowComponent {
 
   constructor(
     private scheduleService: ScheduleService,
+    public requests: DutyRequestService,
     private voyageService: VoyageService,
     private confirmations: ConfirmationService,
     private corrections: CorrectionService,
@@ -141,7 +143,6 @@ export class DayRowComponent {
     const occupied = new Set<number>();
     for (const block of blocks) {
       if (block.id === excludeBlockId) continue;
-      if (this.draggingBlock()?.is_mandatory && block.is_mandatory) continue;
       const span = SLOT_WEIGHT_UNITS[block.slot_weight];
       for (let s = 0; s < span; s++) occupied.add(block.slot_position + s);
     }
@@ -157,7 +158,7 @@ export class DayRowComponent {
       const block = blocks.find(b => b.slot_position === i);
       if (block) {
         const span = SLOT_WEIGHT_UNITS[block.slot_weight];
-        const isDragged = dragging && (block.id === dragging.id || (dragging.is_mandatory && block.is_mandatory));
+        const isDragged = !!dragging && block.id === dragging.id;
         if (isDragged) {
           for (let s = 0; s < span; s++) items.push({ type: 'empty', slotIndex: i + s, span: 1 });
         } else {
@@ -186,11 +187,9 @@ export class DayRowComponent {
     if (this.isLocked()) return false;
     const block = this.draggingBlock();
     if (!block) return false;
-    if (!block.is_mandatory && block.user_id !== userId) return false;
+    // A block (duty or training) can only move within its own owner's row.
+    if (block.user_id !== userId) return false;
     const span = SLOT_WEIGHT_UNITS[block.slot_weight];
-    if (block.is_mandatory) {
-      return this.users().every(user => this.getContiguousEmpty(user.id, slotIndex, block.id) >= span);
-    }
     return this.getContiguousEmpty(userId, slotIndex, block.id) >= span;
   }
 
@@ -198,6 +197,7 @@ export class DayRowComponent {
   onDragStart(event: DragEvent, block: ScheduleBlock) {
     if (this.isLocked()) { event.preventDefault(); return; }
     if (block.is_mandatory) {
+      // Only the DM repositions ship duties; players hand them off instead.
       if (!this.isDm()) { event.preventDefault(); return; }
     } else if (!this.canEdit(block.user_id)) {
       event.preventDefault(); return;
@@ -221,13 +221,10 @@ export class DayRowComponent {
     if (!block || !this.canDropAt(userId, slotIndex)) return;
     this.draggingBlock.set(null);
     this.dragOverSlot.set(null);
-    if (block.is_mandatory) {
-      await this.scheduleService.moveMandatoryBlocks(this.day().id, slotIndex);
-    } else {
-      this.scheduleService.blocks.update(blocks =>
-        blocks.map(b => b.id === block.id ? { ...b, slot_position: slotIndex } : b));
-      await this.scheduleService.updateBlockPosition(block.id, slotIndex);
-    }
+    // Duties and trainings alike move individually within the owner's row.
+    this.scheduleService.blocks.update(blocks =>
+      blocks.map(b => b.id === block.id ? { ...b, slot_position: slotIndex } : b));
+    await this.scheduleService.updateBlockPosition(block.id, slotIndex);
   }
 
   // ----- remove / add -----
@@ -266,26 +263,50 @@ export class DayRowComponent {
     });
   }
 
-  // ----- covering (feature #2) -----
-  canCover(block: ScheduleBlock): boolean {
-    return block.is_mandatory && !this.isLocked() && block.user_id !== this.currentUserId() && !this.isDm();
+  // ----- duty hand-off / take-on (feature #2) -----
+  /** True when the current player holds this duty and can hand it off. */
+  canHandOff(block: ScheduleBlock): boolean {
+    return block.is_mandatory && !this.isLocked() && block.user_id === this.currentUserId();
   }
+  /** True when this is someone else's duty the current player can take on. */
+  canTake(block: ScheduleBlock): boolean {
+    return block.is_mandatory && !this.isLocked()
+      && block.user_id !== this.currentUserId() && !this.isDm();
+  }
+  /** A duty currently carried by someone other than its original owner. */
   isCovered(block: ScheduleBlock): boolean {
-    return !!block.covered_by;
+    return !!block.covered_by && block.covered_by !== block.user_id;
   }
   coveredByName(block: ScheduleBlock): string {
     const u = this.users().find(x => x.id === block.covered_by);
-    return u?.character_name?.split(' ')[0] ?? 'someone';
+    return u?.character_name?.split(' ')[0] ?? 'a crewmate';
   }
-  async onCover(block: ScheduleBlock) {
+
+  private firstFreeSlot(userId: string): number {
+    const occupied = this.getOccupied(userId);
+    for (let i = 0; i < DAY_BUDGET; i++) {
+      if (!occupied.has(i)) return i;
+    }
+    return -1;
+  }
+
+  /** Open the request picker so the holder can ask a crewmate to take it. */
+  requestHandOff(block: ScheduleBlock) {
+    this.requests.startCompose(block);
+  }
+
+  /** A crewmate volunteers to take someone else's duty directly. */
+  async onTake(block: ScheduleBlock) {
     const me = this.currentUserId();
     if (!me) return;
-    await this.scheduleService.coverDuty(block.id, me);
+    const slot = this.firstFreeSlot(me);
+    if (slot < 0) {
+      this.toast.show('You have no free hour to take this watch');
+      return;
+    }
     const owner = this.users().find(u => u.id === block.user_id)?.character_name?.split(' ')[0] ?? 'a crewmate';
-    this.toast.show(`You covered ${owner}'s watch`);
-  }
-  async onUncover(block: ScheduleBlock) {
-    await this.scheduleService.coverDuty(block.id, null);
+    await this.scheduleService.reassignDuty(block, me, slot);
+    this.toast.show(`You took ${owner}'s watch`);
   }
 
   // ----- spotlight (feature #4) -----

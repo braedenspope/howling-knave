@@ -71,8 +71,10 @@
                           <span class="ms sm">flag</span>
                         </button>
                       }
-                      @if (canCover(b) && !isCovered(b)) {
-                        <button class="cover-btn-tl" (click)="onCover(b)">Cover</button>
+                      @if (canTake(b)) {
+                        <button class="cover-btn-tl" (click)="onTake(b)">Take</button>
+                      } @else if (canHandOff(b)) {
+                        <button class="cover-btn-tl" (click)="requestHandOff(b)">Request</button>
                       }
                       @if (canEdit(u.id) && !b.is_mandatory) {
                         <button class="btn-icon tl-remove" (click)="onRemoveBlock(b)" title="Remove"><span class="ms sm">close</span></button>
@@ -123,13 +125,14 @@
                 @if (b.is_mandatory) {
                   <!-- ship duty -->
                   <div class="slot-cell duty-cell" [class.covering]="isCovered(b)" [style.grid-column]="'span ' + item.span"
-                    [attr.draggable]="isDm() && !isLocked()" (dragstart)="onDragStart($event, b)" (dragend)="onDragEnd()">
+                    [attr.draggable]="isDm() && !isLocked()" (dragstart)="onDragStart($event, b)" (dragend)="onDragEnd()"
+                    [title]="isDm() ? 'Drag to reposition this watch' : ''">
                     <div class="duty-task">{{ b.training_topic }}</div>
-                    <span class="duty-tag">{{ isCovered(b) ? 'Covered · ' + coveredByName(b) : 'Ship duty' }}</span>
-                    @if (canCover(b) && !isCovered(b)) {
-                      <button class="cover-btn" (click)="onCover(b)">Cover</button>
-                    } @else if (isCovered(b) && b.covered_by === currentUserId()) {
-                      <button class="cover-btn" (click)="onUncover(b)">Release</button>
+                    <span class="duty-tag">{{ isCovered(b) ? 'Covering ' + coveredByName(b) + '\'s watch' : 'Ship duty' }}</span>
+                    @if (canTake(b)) {
+                      <button class="cover-btn" (click)="onTake(b)">Take</button>
+                    } @else if (canHandOff(b)) {
+                      <button class="cover-btn" (click)="requestHandOff(b)">Request hand-off</button>
                     }
                   </div>
                 } @else if (isDm() && isTraining(b)) {

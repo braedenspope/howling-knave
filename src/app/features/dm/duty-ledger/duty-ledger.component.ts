@@ -87,8 +87,10 @@ export class DutyLedgerComponent implements OnInit {
     return this.scheduleService.allUsers().map(u => ({
       id: u.id,
       name: u.character_name,
-      given: blocks.filter(b => b.covered_by === u.id).length,
-      received: blocks.filter(b => b.is_mandatory && b.user_id === u.id && b.covered_by && b.covered_by !== u.id).length,
+      // duties this player is carrying that originally belonged to someone else
+      given: blocks.filter(b => b.is_mandatory && b.user_id === u.id && b.covered_by && b.covered_by !== u.id).length,
+      // this player's own duties now carried by someone else
+      received: blocks.filter(b => b.is_mandatory && b.covered_by === u.id && b.user_id !== u.id).length,
     }));
   });
 

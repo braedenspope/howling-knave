@@ -164,15 +164,30 @@ export class ScheduleService {
     return error?.message ?? null;
   }
 
-  /** Feature #2 — cover (or release) another player's ship duty. */
-  async coverDuty(blockId: string, coveringUserId: string | null): Promise<string | null> {
+  /**
+   * Feature #2 — hand a ship duty to another player's row (or take it onto
+   * your own). The duty moves to `newUserId` at `newSlotPosition`; `covered_by`
+   * remembers the original owner so the ledger can track who carried whom.
+   */
+  async reassignDuty(
+    block: ScheduleBlock,
+    newUserId: string,
+    newSlotPosition: number,
+  ): Promise<string | null> {
+    const originalOwner = block.covered_by ?? block.user_id;
+    const coveredBy = newUserId === originalOwner ? null : originalOwner;
+
     this.blocks.update(blocks =>
-      blocks.map(b => (b.id === blockId ? { ...b, covered_by: coveringUserId } : b)),
+      blocks.map(b =>
+        b.id === block.id
+          ? { ...b, user_id: newUserId, covered_by: coveredBy, slot_position: newSlotPosition }
+          : b,
+      ),
     );
     const { error } = await this.sb.supabase
       .from('schedule_blocks')
-      .update({ covered_by: coveringUserId })
-      .eq('id', blockId);
+      .update({ user_id: newUserId, covered_by: coveredBy, slot_position: newSlotPosition })
+      .eq('id', block.id);
     return error?.message ?? null;
   }
 

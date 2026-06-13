@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from './core/auth/auth.service';
 import { VoyageService } from './features/voyage/voyage.service';
 import { TweaksPanelComponent } from './shared/tweaks-panel/tweaks-panel.component';
+import { DutyRequestModalsComponent } from './features/schedule/duty-request-modals/duty-request-modals.component';
 
 @Component({
   selector: 'app-root',
@@ -18,6 +19,7 @@ import { TweaksPanelComponent } from './shared/tweaks-panel/tweaks-panel.compone
     MatButtonModule,
     MatIconModule,
     TweaksPanelComponent,
+    DutyRequestModalsComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',

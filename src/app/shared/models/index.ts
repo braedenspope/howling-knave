@@ -51,6 +51,19 @@ export interface Correction {
   created_at: string;
 }
 
+export type DutyRequestStatus = 'pending' | 'accepted' | 'denied' | 'cancelled';
+
+export interface DutyRequest {
+  id: string;
+  block_id: string;
+  day_id: string;
+  from_user: string;
+  to_user: string;
+  status: DutyRequestStatus;
+  created_at: string;
+  resolved_at: string | null;
+}
+
 export interface SpotlightLogEntry {
   id: string;
   user_id: string;

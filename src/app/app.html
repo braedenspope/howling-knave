@@ -77,4 +77,8 @@
   <router-outlet />
 </main>
 
+@if (auth.isAuthed()) {
+  <app-duty-request-modals />
+}
+
 <app-tweaks-panel />
