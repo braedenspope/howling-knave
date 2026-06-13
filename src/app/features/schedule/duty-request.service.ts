@@ -7,7 +7,6 @@ import {
   DutyRequest,
   DutyRequestStatus,
   ScheduleBlock,
-  DAY_BUDGET,
   SLOT_WEIGHT_UNITS,
 } from '../../shared/models';
 import { RealtimeChannel } from '@supabase/supabase-js';
@@ -108,19 +107,19 @@ export class DutyRequestService {
 
   // ----- responses -----
   async accept(req: DutyRequest): Promise<void> {
-    // Pull the day's current blocks so we move the right duty into a free hour.
+    // Pull the day's current blocks so we move the right duty.
     const dayBlocks = await this.schedule.loadBlocksByDayIds([req.day_id]);
     const block = dayBlocks.find(b => b.id === req.block_id);
     if (!block) {
       await this.setStatus(req, 'denied'); // duty vanished — treat as a no
       return;
     }
-    const slot = this.firstFreeSlot(dayBlocks, req.to_user);
-    if (slot < 0) {
-      this.toast.show('No free hour to take this watch — ask them to clear a slot.');
+    // The duty keeps its hour — it can only move to a crewmate whose same hour is free.
+    if (!this.slotFreeFor(dayBlocks, req.to_user, block.slot_position)) {
+      this.toast.show('That hour is no longer free for you — decline, or clear the slot first.');
       return; // leave pending so the requester still sees "waiting"
     }
-    await this.schedule.reassignDuty(block, req.to_user, slot);
+    await this.schedule.reassignDuty(block, req.to_user, block.slot_position);
     await this.setStatus(req, 'accepted');
     this.toast.show('You took on the watch.');
   }
@@ -150,15 +149,12 @@ export class DutyRequestService {
     await this.load();
   }
 
-  private firstFreeSlot(dayBlocks: ScheduleBlock[], userId: string): number {
-    const occupied = new Set<number>();
-    for (const b of dayBlocks.filter(x => x.user_id === userId)) {
+  /** Is `slot` free for `userId` on this day (i.e. the duty can land in the same hour)? */
+  slotFreeFor(dayBlocks: ScheduleBlock[], userId: string, slot: number): boolean {
+    return !dayBlocks.some(b => {
+      if (b.user_id !== userId) return false;
       const span = SLOT_WEIGHT_UNITS[b.slot_weight];
-      for (let s = 0; s < span; s++) occupied.add(b.slot_position + s);
-    }
-    for (let i = 0; i < DAY_BUDGET; i++) {
-      if (!occupied.has(i)) return i;
-    }
-    return -1;
+      return slot >= b.slot_position && slot < b.slot_position + span;
+    });
   }
 }

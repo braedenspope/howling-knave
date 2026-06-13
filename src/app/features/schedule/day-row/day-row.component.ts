@@ -263,15 +263,10 @@ export class DayRowComponent {
     });
   }
 
-  // ----- duty hand-off / take-on (feature #2) -----
-  /** True when the current player holds this duty and can hand it off. */
+  // ----- duty hand-off (feature #2) -----
+  /** True when the current player holds this duty and can request a hand-off. */
   canHandOff(block: ScheduleBlock): boolean {
     return block.is_mandatory && !this.isLocked() && block.user_id === this.currentUserId();
-  }
-  /** True when this is someone else's duty the current player can take on. */
-  canTake(block: ScheduleBlock): boolean {
-    return block.is_mandatory && !this.isLocked()
-      && block.user_id !== this.currentUserId() && !this.isDm();
   }
   /** A duty currently carried by someone other than its original owner. */
   isCovered(block: ScheduleBlock): boolean {
@@ -282,31 +277,9 @@ export class DayRowComponent {
     return u?.character_name?.split(' ')[0] ?? 'a crewmate';
   }
 
-  private firstFreeSlot(userId: string): number {
-    const occupied = this.getOccupied(userId);
-    for (let i = 0; i < DAY_BUDGET; i++) {
-      if (!occupied.has(i)) return i;
-    }
-    return -1;
-  }
-
   /** Open the request picker so the holder can ask a crewmate to take it. */
   requestHandOff(block: ScheduleBlock) {
     this.requests.startCompose(block);
-  }
-
-  /** A crewmate volunteers to take someone else's duty directly. */
-  async onTake(block: ScheduleBlock) {
-    const me = this.currentUserId();
-    if (!me) return;
-    const slot = this.firstFreeSlot(me);
-    if (slot < 0) {
-      this.toast.show('You have no free hour to take this watch');
-      return;
-    }
-    const owner = this.users().find(u => u.id === block.user_id)?.character_name?.split(' ')[0] ?? 'a crewmate';
-    await this.scheduleService.reassignDuty(block, me, slot);
-    this.toast.show(`You took ${owner}'s watch`);
   }
 
   // ----- spotlight (feature #4) -----

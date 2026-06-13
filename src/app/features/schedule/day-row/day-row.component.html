@@ -71,9 +71,7 @@
                           <span class="ms sm">flag</span>
                         </button>
                       }
-                      @if (canTake(b)) {
-                        <button class="cover-btn-tl" (click)="onTake(b)">Take</button>
-                      } @else if (canHandOff(b)) {
+                      @if (canHandOff(b)) {
                         <button class="cover-btn-tl" (click)="requestHandOff(b)">Request</button>
                       }
                       @if (canEdit(u.id) && !b.is_mandatory) {
@@ -129,9 +127,7 @@
                     [title]="isDm() ? 'Drag to reposition this watch' : ''">
                     <div class="duty-task">{{ b.training_topic }}</div>
                     <span class="duty-tag">{{ isCovered(b) ? 'Covering ' + coveredByName(b) + '\'s watch' : 'Ship duty' }}</span>
-                    @if (canTake(b)) {
-                      <button class="cover-btn" (click)="onTake(b)">Take</button>
-                    } @else if (canHandOff(b)) {
+                    @if (canHandOff(b)) {
                       <button class="cover-btn" (click)="requestHandOff(b)">Request hand-off</button>
                     }
                   </div>

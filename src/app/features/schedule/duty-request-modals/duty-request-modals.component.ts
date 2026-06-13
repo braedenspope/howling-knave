@@ -2,7 +2,9 @@ import { Component, OnInit, computed } from '@angular/core';
 import { DutyRequestService } from '../duty-request.service';
 import { ScheduleService } from '../schedule.service';
 import { AuthService } from '../../../core/auth/auth.service';
-import { DutyRequest } from '../../../shared/models';
+import { DutyRequest, SLOT_WEIGHT_UNITS } from '../../../shared/models';
+
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
 
 type ModalState =
   | { kind: 'compose' }
@@ -21,15 +23,22 @@ type ModalState =
           @switch (m.kind) {
 
             @case ('compose') {
-              <p class="stamp-label">Ship duty</p>
+              <p class="stamp-label">Ship duty · hour {{ composeHour() }}</p>
               <h3>Ask a crewmate to take your watch</h3>
-              <p class="hk-modal-sub">{{ composeTask() }} — they'll be asked to accept.</p>
+              <p class="hk-modal-sub">{{ composeTask() }} — it keeps its hour, so only crew with hour {{ composeHour() }} free can take it.</p>
               <div class="request-target-list">
-                @for (u of targets(); track u.id) {
-                  <button class="training-option" (click)="requests.send(u.id)">
-                    <span class="to-topic">{{ u.character_name }}</span>
-                    <span class="to-desc">{{ u.display_name }}</span>
-                  </button>
+                @for (row of targetRows(); track row.user.id) {
+                  @if (row.eligible) {
+                    <button class="training-option" (click)="requests.send(row.user.id)">
+                      <span class="to-topic">{{ row.user.character_name }}</span>
+                      <span class="to-desc">{{ row.user.display_name }}</span>
+                    </button>
+                  } @else {
+                    <button class="training-option blocked" disabled>
+                      <span class="to-topic">{{ row.user.character_name }}</span>
+                      <span class="to-note blocked-note"><span class="ms sm">block</span> Hour {{ composeHour() }} already filled</span>
+                    </button>
+                  }
                 } @empty {
                   <p class="hk-modal-sub">No other crew aboard to ask.</p>
                 }
@@ -104,13 +113,33 @@ export class DutyRequestModalsComponent implements OnInit {
     return null;
   });
 
-  readonly targets = computed(() => {
+  /** Candidate crewmates with whether the duty's hour is free in their row. */
+  readonly targetRows = computed(() => {
+    const block = this.requests.composeBlock();
     const me = this.auth.userId();
-    return this.schedule.allUsers().filter(u => u.id !== me);
+    if (!block) return [];
+    const dayBlocks = this.schedule.blocks().filter(b => b.day_id === block.day_id);
+    return this.schedule
+      .allUsers()
+      .filter(u => u.id !== me)
+      .map(u => ({
+        user: u,
+        eligible: !dayBlocks.some(
+          b =>
+            b.user_id === u.id &&
+            block.slot_position >= b.slot_position &&
+            block.slot_position < b.slot_position + SLOT_WEIGHT_UNITS[b.slot_weight],
+        ),
+      }));
   });
 
   composeTask(): string {
     return this.requests.composeBlock()?.training_topic ?? 'a ship duty';
+  }
+
+  composeHour(): string {
+    const slot = this.requests.composeBlock()?.slot_position ?? 0;
+    return ROMAN[slot] ?? `${slot + 1}`;
   }
 
   name(userId: string): string {
