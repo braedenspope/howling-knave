@@ -61,7 +61,11 @@
                   (click)="selectSession(s)" [disabled]="unaffordable">
                   <span class="so-num">{{ s.session_number }}</span>
                   <span class="wt-badge" [class]="lengthClass(s.length)">{{ lengthLabel(s.length) }}</span>
-                  <span class="so-roll">{{ s.roll_type }}</span>
+                  @if (showRolls()) {
+                    <span class="so-roll">{{ s.roll_type }}</span>
+                  } @else {
+                    <span class="so-roll">Session {{ s.session_number }}</span>
+                  }
                   <span class="so-pp">+{{ s.pp_success }} / +{{ s.pp_fail }} PP</span>
                 </button>
               }

@@ -22,6 +22,10 @@
         <mat-icon>trending_up</mat-icon>
         <span class="nav-label">Progress</span>
       </a>
+      <a mat-button routerLink="/guide" routerLinkActive="active-link">
+        <mat-icon>help_outline</mat-icon>
+        <span class="nav-label">Guide</span>
+      </a>
       @if (auth.isDm()) {
         <a mat-button routerLink="/dm" routerLinkActive="active-link">
           <mat-icon>shield</mat-icon>
@@ -56,6 +60,10 @@
       <a mat-button routerLink="/progress" routerLinkActive="active-link" (click)="closeMenu()">
         <mat-icon>trending_up</mat-icon>
         <span>Progress</span>
+      </a>
+      <a mat-button routerLink="/guide" routerLinkActive="active-link" (click)="closeMenu()">
+        <mat-icon>help_outline</mat-icon>
+        <span>Guide</span>
       </a>
       @if (auth.isDm()) {
         <a mat-button routerLink="/dm" routerLinkActive="active-link" (click)="closeMenu()">

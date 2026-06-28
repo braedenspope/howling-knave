@@ -38,6 +38,12 @@ export const routes: Routes = [
       import('./features/progress/player-progress/player-progress.component').then(m => m.PlayerProgressComponent),
   },
   {
+    path: 'guide',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/guide/guide.component').then(m => m.GuideComponent),
+  },
+  {
     path: 'dm',
     canActivate: [authGuard, dmGuard],
     loadComponent: () =>

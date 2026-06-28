@@ -1,0 +1,128 @@
+<div class="page guide">
+  <div class="section-title">
+    <div class="section-title-row"><h2>How Training Works</h2></div>
+    <div class="rope-divider"></div>
+  </div>
+
+  <p class="guide-lead">
+    The crew of the Howling Knave will teach you what they know — but only if you put in the hours.
+    Here is how the work pays off.
+  </p>
+
+  <!-- ============ THE DAY ============ -->
+  <div class="hk-card corners guide-block">
+    <div class="gb-head"><span class="ms">schedule</span><h3>Your day is eight hours</h3></div>
+    <p>
+      Each day on the board is <strong>eight one-hour blocks</strong> (sleep is assumed). Some hours get
+      claimed by <em>ship duties</em> — the work that keeps you afloat. Whatever is left is yours to spend
+      training with the crew.
+    </p>
+    <div class="day-strip">
+      @for (b of dayBlocks; track b) {
+        <span class="day-cell" [class.duty]="b < 2">
+          @if (b < 2) { <span class="ms sm">anchor</span> }
+        </span>
+      }
+    </div>
+    <p class="caption"><span class="swatch duty"></span> Ship duty &nbsp;·&nbsp; <span class="swatch free"></span> Free to train</p>
+  </div>
+
+  <!-- ============ SESSION LENGTHS ============ -->
+  <div class="guide-block">
+    <div class="gb-head"><span class="ms">timer</span><h3>Pick a session length</h3></div>
+    <p class="gb-sub">A longer session costs more of your day, but moves you further. The crewmate decides what you'll work on — you decide how long.</p>
+    <div class="length-grid">
+      @for (l of lengths; track l.key) {
+        <div class="hk-card corners length-card">
+          <span class="wt-badge" [class]="lengthClass(l.key)">{{ l.label }}</span>
+          <div class="len-cost">
+            @for (c of range(l.cost); track c) { <span class="blockpip on"></span> }
+            @for (c of range(4 - l.cost); track c) { <span class="blockpip"></span> }
+          </div>
+          <span class="len-hours">{{ l.hours }} hour{{ l.hours === 1 ? '' : 's' }}</span>
+          <p class="len-blurb">{{ l.blurb }}</p>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ============ PROGRESS POINTS ============ -->
+  <div class="hk-card corners guide-block">
+    <div class="gb-head"><span class="ms">trending_up</span><h3>Earn Progress Points</h3></div>
+    <p>
+      Every session you sit through earns <strong>Progress Points (PP)</strong>. How many depends on the
+      length of the session — and on how it goes at the table.
+    </p>
+    <div class="pp-table">
+      <div class="pp-row pp-head">
+        <span>Session</span><span>Success</span><span>Setback</span>
+      </div>
+      @for (l of lengths; track l.key) {
+        <div class="pp-row">
+          <span><span class="wt-badge" [class]="lengthClass(l.key)">{{ l.label }}</span></span>
+          <span class="pp-val good">+{{ l.success }} PP</span>
+          <span class="pp-val" [class.muted]="l.fail === 0">{{ l.fail > 0 ? '+' + l.fail + ' PP' : 'nothing' }}</span>
+        </div>
+      }
+    </div>
+    <p class="note">
+      <span class="ms sm">info</span>
+      Even a setback in a Medium or Long session leaves something behind — sustained effort always counts.
+      A short lesson that doesn't land, though, means you'll need to come back and try again.
+    </p>
+  </div>
+
+  <!-- ============ THRESHOLDS ============ -->
+  <div class="guide-block">
+    <div class="gb-head"><span class="ms">military_tech</span><h3>Fill the bar, earn the benefit</h3></div>
+    <p class="gb-sub">Each training has a goal — a number of Progress Points that unlocks its reward for good. Keep training until the bar is full.</p>
+    <div class="thr-grid">
+      @for (t of thresholds; track t.pp) {
+        <div class="hk-card corners thr-card">
+          <div class="thr-pips">
+            @for (i of range(t.pp); track i) { <span class="pip filled"></span> }
+          </div>
+          <span class="thr-pp gold-text">{{ t.pp }} PP</span>
+          <span class="thr-label">{{ t.label }}</span>
+          <p class="len-blurb">{{ t.blurb }}</p>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ============ RELATIONSHIPS ============ -->
+  <div class="hk-card corners guide-block">
+    <div class="gb-head"><span class="ms">favorite</span><h3>The closer you get, the more they'll teach</h3></div>
+    <p>
+      Train with someone, share the watch, earn their trust — and your <strong>relationship</strong> with them
+      deepens. New training paths open as you grow closer.
+    </p>
+    <div class="tier-track">
+      @for (t of tiers; track t.n) {
+        <div class="tier-step">
+          <span class="pip" [style.background]="t.color" [style.border-color]="t.color"></span>
+          <span class="tier-name" [style.color]="t.color">{{ t.name }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ============ TIPS ============ -->
+  <div class="tips-grid">
+    <div class="hk-card corners tip-card">
+      <span class="ms">flag</span>
+      <h4>Flag it for the table</h4>
+      <p>Hit the flag on a planned session to tell the DM you'd love to actually play it out, not just montage past it.</p>
+    </div>
+    <div class="hk-card corners tip-card">
+      <span class="ms">approval</span>
+      <h4>Seal your day</h4>
+      <p>Happy with your plan? Press your seal. When everyone has sealed, the day locks and the crossing can begin.</p>
+    </div>
+    <div class="hk-card corners tip-card">
+      <span class="ms">groups</span>
+      <h4>Train together</h4>
+      <p>Several of you can join the same session — each of you rolls and progresses on your own.</p>
+    </div>
+  </div>
+</div>

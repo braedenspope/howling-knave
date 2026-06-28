@@ -478,14 +478,19 @@ button:focus-visible, [role="button"]:focus-visible, a:focus-visible {
 .flag-btn:hover { color: var(--accent-gold); }
 .flag-btn.flagged { color: var(--accent-gold); }
 .cell-remove {
-  position: absolute; top: 3px; right: 3px; width: 20px; height: 20px;
-  display: none; align-items: center; justify-content: center;
+  position: absolute; top: 3px; right: 3px; width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
   background: rgba(15,11,7,0.85); border: 1px solid var(--bg-card-border);
   border-radius: 50%; color: var(--text-secondary); padding: 0;
+  opacity: 0.55; transition: opacity 0.15s, color 0.15s, border-color 0.15s;
 }
-.cell-remove .ms { font-size: 13px; }
-.block-cell:hover .cell-remove { display: flex; }
-.cell-remove:hover { color: var(--failure-red); border-color: var(--failure-red); }
+.cell-remove .ms { font-size: 14px; }
+.block-cell:hover .cell-remove { opacity: 1; }
+.cell-remove:hover { opacity: 1; color: var(--failure-red); border-color: var(--failure-red); }
+// Touch devices have no hover — keep the control clearly visible.
+@media (hover: none) {
+  .cell-remove { opacity: 0.9; }
+}
 .block-status-icon { display: flex; align-items: center; }
 
 .dm-clickable { cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }

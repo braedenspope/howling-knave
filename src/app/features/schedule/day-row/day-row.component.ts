@@ -302,10 +302,14 @@ export class DayRowComponent {
     return p ? `${p.pp_accumulated}/${p.threshold_pp} PP` : '';
   }
 
-  /** Short "S2 · Insight" label for a training block, when its session is known. */
+  /**
+   * Short label for a training block's session. The DM sees the roll
+   * ("S2 · Insight"); players only see which session it is.
+   */
   sessionTag(block: ScheduleBlock): string {
     const s = this.sessionFor(block);
-    return s ? `S${s.session_number} · ${s.roll_type}` : '';
+    if (!s) return '';
+    return this.isDm() ? `S${s.session_number} · ${s.roll_type}` : `Session ${s.session_number}`;
   }
 
   /** The prescribed session this block represents, if known. */

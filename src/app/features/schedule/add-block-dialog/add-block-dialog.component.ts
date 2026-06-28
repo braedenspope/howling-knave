@@ -45,6 +45,9 @@ export class AddBlockDialogComponent implements OnInit {
 
   mode = signal<'training' | 'custom'>('training');
 
+  /** Only the DM should see the roll a session calls for. */
+  showRolls = (): boolean => this.auth.isDm();
+
   // Training mode
   crewList = CREW_LIST;
   selectedCrew = '';
