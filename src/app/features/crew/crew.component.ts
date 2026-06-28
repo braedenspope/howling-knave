@@ -23,7 +23,10 @@ type StatusKind = 'mastered' | 'progress' | 'locked' | 'available';
 
 interface PathStatus {
   kind: StatusKind;
-  successes: number;
+  /** Progress Points accumulated toward the threshold. */
+  pp: number;
+  /** PP threshold to unlock the benefit. */
+  threshold: number;
   /** true when this locked path unlocks at exactly the next tier */
   next: boolean;
 }
@@ -146,15 +149,15 @@ export class CrewComponent implements OnInit {
     const id = this.viewId();
     const prog = id ? this.tracker.getProgress(id, crew, t.topic) : undefined;
     if (prog?.completed) {
-      return { kind: 'mastered', successes: prog.successes_accumulated, next: false };
+      return { kind: 'mastered', pp: prog.pp_accumulated, threshold: t.threshold_pp, next: false };
     }
     if (prog) {
-      return { kind: 'progress', successes: prog.successes_accumulated, next: false };
+      return { kind: 'progress', pp: prog.pp_accumulated, threshold: t.threshold_pp, next: false };
     }
     if (tier < t.tier_required) {
-      return { kind: 'locked', successes: 0, next: t.tier_required === tier + 1 };
+      return { kind: 'locked', pp: 0, threshold: t.threshold_pp, next: t.tier_required === tier + 1 };
     }
-    return { kind: 'available', successes: 0, next: false };
+    return { kind: 'available', pp: 0, threshold: t.threshold_pp, next: false };
   }
 
   lengthLabel(weight: SlotWeight): string {
@@ -176,8 +179,8 @@ export class CrewComponent implements OnInit {
       .map(t => (id ? this.tracker.getProgress(id, crew, t.topic) : undefined))
       .filter((p): p is NonNullable<typeof p> => !!p);
     const mastered = progs.filter(p => p.completed).length;
-    const successes = progs.reduce((a, p) => a + p.successes_accumulated, 0);
-    return { pathCount: paths.length, mastered, successes };
+    const pp = progs.reduce((a, p) => a + p.pp_accumulated, 0);
+    return { pathCount: paths.length, mastered, pp };
   }
 
   nextUnlocks(crew: string): TrainingWithCrew[] {

@@ -37,8 +37,8 @@
         <span class="stamp-label">Mastered</span>
       </div>
       <div class="summary-item">
-        <span class="summary-value">{{ dossierStats(crew).successes }}</span>
-        <span class="stamp-label">Successes logged</span>
+        <span class="summary-value">{{ dossierStats(crew).pp }}</span>
+        <span class="stamp-label">Progress Points</span>
       </div>
     </div>
 
@@ -176,10 +176,10 @@
                       @case ('mastered') { <span class="mastered-badge">Mastered</span> }
                       @case ('progress') {
                         <span class="cr-state">
-                          @for (i of pipArray(t.sessions_required); track i) {
-                            <span class="pip" [class.filled]="i < st.successes"></span>
+                          @for (i of pipArray(t.threshold_pp); track i) {
+                            <span class="pip" [class.filled]="i < st.pp"></span>
                           }
-                          {{ st.successes }}/{{ t.sessions_required }}
+                          {{ st.pp }}/{{ t.threshold_pp }} PP
                         </span>
                       }
                       @case ('locked') {
@@ -208,10 +208,10 @@
     @case ('mastered') { <span class="mastered-badge" style="margin-left: auto;">Mastered</span> }
     @case ('progress') {
       <span class="cr-state" style="margin-left: auto;">
-        @for (i of pipArray(t.sessions_required); track i) {
-          <span class="pip" [class.filled]="i < st.successes"></span>
+        @for (i of pipArray(t.threshold_pp); track i) {
+          <span class="pip" [class.filled]="i < st.pp"></span>
         }
-        {{ st.successes }}/{{ t.sessions_required }}
+        {{ st.pp }}/{{ t.threshold_pp }} PP
       </span>
     }
     @case ('locked') {

@@ -12,6 +12,7 @@
       <div class="trainings-list">
         @for (training of trainingService.getTrainingsForCrew(crew.id); track training.id) {
           @if (editingId() === training.id) {
+            <!-- ============ EDIT FORM ============ -->
             <div class="training-form">
               <div class="form-grid">
                 <mat-form-field appearance="outline">
@@ -20,17 +21,8 @@
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
-                  <mat-label>Weight</mat-label>
-                  <mat-select [(ngModel)]="editForm.slot_weight">
-                    <mat-option value="heavy">Heavy</mat-option>
-                    <mat-option value="medium">Medium</mat-option>
-                    <mat-option value="light">Light</mat-option>
-                  </mat-select>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline">
-                  <mat-label>Sessions (1–5)</mat-label>
-                  <input matInput type="number" [(ngModel)]="editForm.sessions_required" min="1" max="5" />
+                  <mat-label>Threshold PP (3–5)</mat-label>
+                  <input matInput type="number" [(ngModel)]="editForm.threshold_pp" min="1" max="9" />
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
@@ -39,21 +31,73 @@
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="full-span">
+                  <mat-label>Benefit / Reward</mat-label>
+                  <textarea matInput rows="2" [(ngModel)]="editForm.reward"></textarea>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-span">
                   <mat-label>Description</mat-label>
                   <textarea matInput rows="2" [(ngModel)]="editForm.description"></textarea>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="full-span">
-                  <mat-label>Reward</mat-label>
-                  <textarea matInput rows="2" [(ngModel)]="editForm.reward"></textarea>
+                  <mat-label>Narrative thread (DM)</mat-label>
+                  <textarea matInput rows="3" [(ngModel)]="editForm.narrative_thread"></textarea>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="full-span">
-                  <mat-label>Scene seed (DM prompt)</mat-label>
-                  <textarea matInput rows="2" [(ngModel)]="editForm.scene_seed"
-                    placeholder="She puts you in a position and tells you to hold it. Roll Wisdom."></textarea>
+                  <mat-label>Scene seed (montage prompt)</mat-label>
+                  <textarea matInput rows="2" [(ngModel)]="editForm.scene_seed"></textarea>
                 </mat-form-field>
               </div>
+
+              <!-- sessions -->
+              <p class="form-section-label">Sessions</p>
+              @for (s of editForm.sessions; track $index) {
+                <div class="session-edit-row">
+                  <span class="se-num">{{ $index + 1 }}</span>
+                  <mat-form-field appearance="outline" class="se-len">
+                    <mat-label>Length</mat-label>
+                    <mat-select [(ngModel)]="s.length" (ngModelChange)="onLengthChange(s)">
+                      <mat-option value="light">Short · 1</mat-option>
+                      <mat-option value="medium">Medium · 2</mat-option>
+                      <mat-option value="heavy">Long · 4</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="se-roll">
+                    <mat-label>Roll</mat-label>
+                    <input matInput [(ngModel)]="s.roll_type" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="se-pp">
+                    <mat-label>+ Success</mat-label>
+                    <input matInput type="number" [(ngModel)]="s.pp_success" min="0" max="9" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="se-pp">
+                    <mat-label>+ Fail</mat-label>
+                    <input matInput type="number" [(ngModel)]="s.pp_fail" min="0" max="9" />
+                  </mat-form-field>
+                  <button mat-icon-button color="warn" (click)="removeSession(editForm, $index)">
+                    <mat-icon>remove_circle_outline</mat-icon>
+                  </button>
+                </div>
+              }
+              <button mat-stroked-button class="add-session-btn" (click)="addSession(editForm)">
+                <mat-icon>add</mat-icon> Add session
+              </button>
+
+              <!-- hidden bonus -->
+              <p class="form-section-label">Hidden bonus (optional)</p>
+              <div class="form-grid">
+                <mat-form-field appearance="outline" class="full-span">
+                  <mat-label>For character (leave blank for none)</mat-label>
+                  <input matInput [(ngModel)]="editForm.hidden_character" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="full-span">
+                  <mat-label>Hidden bonus text</mat-label>
+                  <textarea matInput rows="4" [(ngModel)]="editForm.hidden_body"></textarea>
+                </mat-form-field>
+              </div>
+
               <div class="form-actions">
                 <button mat-button (click)="cancelEdit()">Cancel</button>
                 <button mat-raised-button color="primary" (click)="saveEdit(training.id)">Save</button>
@@ -61,17 +105,35 @@
               </div>
             </div>
           } @else {
+            <!-- ============ DISPLAY ============ -->
             <div class="training-item">
               <div class="training-info">
                 <span class="training-topic">{{ training.topic }}</span>
                 <span class="badge tier-badge">Tier {{ training.tier_required }}</span>
-                <span class="badge" [class]="'weight-' + training.slot_weight">
-                  {{ training.slot_weight | uppercase }}
-                </span>
+                <span class="badge threshold-badge">{{ training.threshold_pp }} PP</span>
                 <span class="badge sessions-badge">{{ training.sessions_required }}s</span>
+                @if (training.hidden_bonus) {
+                  <span class="badge hidden-badge" [title]="'Hidden bonus for ' + training.hidden_bonus.character_name">★ {{ training.hidden_bonus.character_name }}</span>
+                }
               </div>
               <p class="training-desc">{{ training.description }}</p>
               <p class="training-reward">Reward: {{ training.reward }}</p>
+
+              @if (training.sessions.length) {
+                <div class="session-list">
+                  @for (s of training.sessions; track s.id) {
+                    <span class="session-pill">
+                      <strong>{{ s.session_number }}.</strong>
+                      {{ lengthLabel[s.length] }} · {{ s.roll_type }}
+                      <em>+{{ s.pp_success }}/+{{ s.pp_fail }}</em>
+                    </span>
+                  }
+                </div>
+              }
+
+              @if (training.narrative_thread) {
+                <p class="training-narrative">{{ training.narrative_thread }}</p>
+              }
               @if (training.scene_seed) {
                 <p class="training-seed">“{{ training.scene_seed }}”</p>
               }
@@ -83,6 +145,7 @@
         }
 
         @if (addingForCrew() === crew.id) {
+          <!-- ============ ADD FORM ============ -->
           <div class="training-form">
             <div class="form-grid">
               <mat-form-field appearance="outline">
@@ -91,17 +154,8 @@
               </mat-form-field>
 
               <mat-form-field appearance="outline">
-                <mat-label>Weight</mat-label>
-                <mat-select [(ngModel)]="addForm.slot_weight">
-                  <mat-option value="heavy">Heavy</mat-option>
-                  <mat-option value="medium">Medium</mat-option>
-                  <mat-option value="light">Light</mat-option>
-                </mat-select>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline">
-                <mat-label>Sessions (1–5)</mat-label>
-                <input matInput type="number" [(ngModel)]="addForm.sessions_required" min="1" max="5" />
+                <mat-label>Threshold PP (3–5)</mat-label>
+                <input matInput type="number" [(ngModel)]="addForm.threshold_pp" min="1" max="9" />
               </mat-form-field>
 
               <mat-form-field appearance="outline">
@@ -110,21 +164,71 @@
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="full-span">
+                <mat-label>Benefit / Reward</mat-label>
+                <textarea matInput rows="2" [(ngModel)]="addForm.reward"></textarea>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-span">
                 <mat-label>Description</mat-label>
                 <textarea matInput rows="2" [(ngModel)]="addForm.description"></textarea>
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="full-span">
-                <mat-label>Reward</mat-label>
-                <textarea matInput rows="2" [(ngModel)]="addForm.reward"></textarea>
+                <mat-label>Narrative thread (DM)</mat-label>
+                <textarea matInput rows="3" [(ngModel)]="addForm.narrative_thread"></textarea>
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="full-span">
-                <mat-label>Scene seed (DM prompt)</mat-label>
-                <textarea matInput rows="2" [(ngModel)]="addForm.scene_seed"
-                  placeholder="She puts you in a position and tells you to hold it. Roll Wisdom."></textarea>
+                <mat-label>Scene seed (montage prompt)</mat-label>
+                <textarea matInput rows="2" [(ngModel)]="addForm.scene_seed"></textarea>
               </mat-form-field>
             </div>
+
+            <p class="form-section-label">Sessions</p>
+            @for (s of addForm.sessions; track $index) {
+              <div class="session-edit-row">
+                <span class="se-num">{{ $index + 1 }}</span>
+                <mat-form-field appearance="outline" class="se-len">
+                  <mat-label>Length</mat-label>
+                  <mat-select [(ngModel)]="s.length" (ngModelChange)="onLengthChange(s)">
+                    <mat-option value="light">Short · 1</mat-option>
+                    <mat-option value="medium">Medium · 2</mat-option>
+                    <mat-option value="heavy">Long · 4</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="se-roll">
+                  <mat-label>Roll</mat-label>
+                  <input matInput [(ngModel)]="s.roll_type" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="se-pp">
+                  <mat-label>+ Success</mat-label>
+                  <input matInput type="number" [(ngModel)]="s.pp_success" min="0" max="9" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="se-pp">
+                  <mat-label>+ Fail</mat-label>
+                  <input matInput type="number" [(ngModel)]="s.pp_fail" min="0" max="9" />
+                </mat-form-field>
+                <button mat-icon-button color="warn" (click)="removeSession(addForm, $index)">
+                  <mat-icon>remove_circle_outline</mat-icon>
+                </button>
+              </div>
+            }
+            <button mat-stroked-button class="add-session-btn" (click)="addSession(addForm)">
+              <mat-icon>add</mat-icon> Add session
+            </button>
+
+            <p class="form-section-label">Hidden bonus (optional)</p>
+            <div class="form-grid">
+              <mat-form-field appearance="outline" class="full-span">
+                <mat-label>For character (leave blank for none)</mat-label>
+                <input matInput [(ngModel)]="addForm.hidden_character" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-span">
+                <mat-label>Hidden bonus text</mat-label>
+                <textarea matInput rows="4" [(ngModel)]="addForm.hidden_body"></textarea>
+              </mat-form-field>
+            </div>
+
             <div class="form-actions">
               <button mat-button (click)="cancelAdd()">Cancel</button>
               <button mat-raised-button color="primary" (click)="saveNewTraining(crew.id)">Add</button>

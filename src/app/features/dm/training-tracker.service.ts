@@ -33,26 +33,30 @@ export class TrainingTrackerService {
     return this.progress().filter(p => p.user_id === userId);
   }
 
-  async recordSuccess(
+  /**
+   * Apply a Progress-Point delta (positive for an outcome, negative to undo a
+   * reset). PP is clamped to [0, threshold]; completion flips at >= threshold.
+   */
+  async applyPp(
     userId: string,
     crewMember: string,
     topic: string,
-    successCount: number,
-    sessionsRequired: number,
+    deltaPp: number,
+    thresholdPp: number,
   ): Promise<string | null> {
     const existing = this.getProgress(userId, crewMember, topic);
 
     if (existing) {
-      const newAccumulated = Math.min(
-        existing.successes_accumulated + successCount,
-        sessionsRequired,
-      );
-      const completed = newAccumulated >= sessionsRequired;
+      const newAccumulated = Math.max(0, Math.min(existing.pp_accumulated + deltaPp, thresholdPp));
+      const completed = newAccumulated >= thresholdPp;
 
       const { error } = await this.sb.supabase
         .from('training_progress')
         .update({
+          pp_accumulated: newAccumulated,
+          threshold_pp: thresholdPp,
           successes_accumulated: newAccumulated,
+          successes_required: thresholdPp,
           completed,
           last_trained_at: new Date().toISOString(),
         })
@@ -60,23 +64,26 @@ export class TrainingTrackerService {
 
       if (!error) await this.loadAllProgress();
       return error?.message ?? null;
-    } else {
-      const completed = successCount >= sessionsRequired;
-      const { error } = await this.sb.supabase
-        .from('training_progress')
-        .insert({
-          user_id: userId,
-          crew_member: crewMember,
-          training_topic: topic,
-          successes_accumulated: Math.min(successCount, sessionsRequired),
-          successes_required: sessionsRequired,
-          completed,
-          last_trained_at: new Date().toISOString(),
-        });
-
-      if (!error) await this.loadAllProgress();
-      return error?.message ?? null;
     }
+
+    const accumulated = Math.max(0, Math.min(deltaPp, thresholdPp));
+    const completed = accumulated >= thresholdPp;
+    const { error } = await this.sb.supabase
+      .from('training_progress')
+      .insert({
+        user_id: userId,
+        crew_member: crewMember,
+        training_topic: topic,
+        pp_accumulated: accumulated,
+        threshold_pp: thresholdPp,
+        successes_accumulated: accumulated,
+        successes_required: thresholdPp,
+        completed,
+        last_trained_at: new Date().toISOString(),
+      });
+
+    if (!error) await this.loadAllProgress();
+    return error?.message ?? null;
   }
 
   async resetProgress(
@@ -90,6 +97,7 @@ export class TrainingTrackerService {
     const { error } = await this.sb.supabase
       .from('training_progress')
       .update({
+        pp_accumulated: 0,
         successes_accumulated: 0,
         completed: false,
       })

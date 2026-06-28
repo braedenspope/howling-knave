@@ -115,6 +115,7 @@ export class ScheduleService {
     slotWeight: SlotWeight,
     forUserId?: string,
     atPosition?: number,
+    sessionNumber?: number | null,
   ): Promise<string | null> {
     const userId = forUserId ?? this.auth.userId();
     if (!userId) return 'Not authenticated';
@@ -135,6 +136,7 @@ export class ScheduleService {
       training_topic: trainingTopic,
       slot_weight: slotWeight,
       slot_position: position,
+      session_number: sessionNumber ?? null,
     });
 
     return error?.message ?? null;

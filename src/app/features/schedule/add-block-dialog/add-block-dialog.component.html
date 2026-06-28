@@ -40,16 +40,33 @@
             (click)="selectTraining(training)" [disabled]="blocked">
             <div class="to-main">
               <span class="to-topic">{{ training.topic }}</span>
-              <span class="wt-badge" [class]="lengthClass(training.slot_weight)">{{ lengthLabel(training.slot_weight) }}</span>
-              <span class="stamp-label">{{ training.sessions_required }} sessions</span>
+              <span class="stamp-label">{{ training.threshold_pp }} PP · {{ training.sessions_required }} sessions</span>
             </div>
             <span class="to-desc">{{ training.description }}</span>
+            <span class="to-note"><span class="ms sm">military_tech</span> {{ training.reward }}</span>
             @if (!training.available) {
               <span class="to-note blocked-note"><span class="ms sm">lock</span> Requires a deeper relationship</span>
             } @else if (!training.affordable) {
-              <span class="to-note blocked-note"><span class="ms sm">schedule</span> Needs {{ getCost(training.slot_weight) }} blocks — only {{ data.remainingBudget }} free</span>
+              <span class="to-note blocked-note"><span class="ms sm">schedule</span> No session fits — only {{ data.remainingBudget }} free</span>
             }
           </button>
+
+          @if (selectedTraining()?.id === training.id && training.sessions.length > 0) {
+            <div class="session-picker">
+              <p class="stamp-label" style="margin: 2px 0 4px;">Which session?</p>
+              @for (s of training.sessions; track s.id) {
+                @let unaffordable = !sessionAffordable(s);
+                <button class="session-option" [class.blocked]="unaffordable"
+                  [class.chosen]="selectedSession()?.id === s.id"
+                  (click)="selectSession(s)" [disabled]="unaffordable">
+                  <span class="so-num">{{ s.session_number }}</span>
+                  <span class="wt-badge" [class]="lengthClass(s.length)">{{ lengthLabel(s.length) }}</span>
+                  <span class="so-roll">{{ s.roll_type }}</span>
+                  <span class="so-pp">+{{ s.pp_success }} / +{{ s.pp_fail }} PP</span>
+                </button>
+              }
+            </div>
+          }
         } @empty {
           <div class="empty-state"><span class="ms">school</span><p>Nothing available with {{ selectedCrew }} yet. Build the relationship first.</p></div>
         }

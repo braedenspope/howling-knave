@@ -144,6 +144,8 @@
                     <span class="block-topic">{{ b.training_topic }}</span>
                     <div class="block-cell-bottom">
                       <span class="wt-badge" [class]="lengthClass(b.slot_weight)">{{ lengthLabel(b.slot_weight) }}</span>
+                      @if (sessionTag(b)) { <span class="stamp-label">{{ sessionTag(b) }}</span> }
+                      @if (progressLabel(b)) { <span class="stamp-label">{{ progressLabel(b) }}</span> }
                       @if (b.spotlight) { <span class="ms sm" style="color: var(--accent-gold); font-size: 13px;">flag</span> }
                     </div>
                   </div>
@@ -163,6 +165,7 @@
                     <span class="block-topic">{{ b.training_topic }}</span>
                     <div class="block-cell-bottom">
                       <span class="wt-badge" [class]="lengthClass(b.slot_weight)">{{ lengthLabel(b.slot_weight) }}</span>
+                      @if (sessionTag(b)) { <span class="stamp-label">{{ sessionTag(b) }}</span> }
                     </div>
                     @if (canEdit(u.id)) {
                       <button class="cell-remove" (click)="onRemoveBlock(b)" title="Remove"><span class="ms">close</span></button>
@@ -194,8 +197,7 @@
 <!-- DM outcome menu -->
 <mat-menu #outcomeMenu="matMenu" class="hk-outcome-menu">
   <ng-template matMenuContent let-block="block">
-    <button mat-menu-item (click)="markOutcome(block, 2)"><span class="ms sm" style="color: var(--accent-gold);">star</span>&nbsp; Critical — double success</button>
-    <button mat-menu-item (click)="markOutcome(block, 1)"><span class="ms sm status-success">check</span>&nbsp; Success</button>
+    <button mat-menu-item (click)="markSuccess(block)"><span class="ms sm status-success">check</span>&nbsp; Success</button>
     <button mat-menu-item (click)="markFailure(block)"><span class="ms sm status-failure">close</span>&nbsp; Failure</button>
     <button mat-menu-item (click)="resetOutcome(block)"><span class="ms sm">restart_alt</span>&nbsp; Reset to pending</button>
   </ng-template>

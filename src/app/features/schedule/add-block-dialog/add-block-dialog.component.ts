@@ -7,7 +7,7 @@ import { TrainingService } from '../../dm/training.service';
 import { RelationshipService } from '../../dm/relationship.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { CREW_LIST, CREW_COLORS, TIER_NAMES } from '../../../shared/data/training.data';
-import { TrainingWithCrew, SlotWeight, SLOT_WEIGHT_UNITS, SLOT_WEIGHT_LABEL } from '../../../shared/models';
+import { TrainingWithCrew, TrainingSession, SlotWeight, SLOT_WEIGHT_UNITS, SLOT_WEIGHT_LABEL } from '../../../shared/models';
 
 export interface AddBlockDialogData {
   dayId: string;
@@ -21,6 +21,7 @@ export interface AddBlockDialogResult {
   crewMember: string;
   trainingTopic: string;
   slotWeight: SlotWeight;
+  sessionNumber?: number | null;
 }
 
 @Component({
@@ -48,6 +49,7 @@ export class AddBlockDialogComponent implements OnInit {
   crewList = CREW_LIST;
   selectedCrew = '';
   selectedTraining = signal<(TrainingWithCrew & { available: boolean; affordable: boolean }) | null>(null);
+  selectedSession = signal<TrainingSession | null>(null);
   availableTrainings = signal<(TrainingWithCrew & { available: boolean; affordable: boolean })[]>([]);
 
   // Custom mode
@@ -97,6 +99,7 @@ export class AddBlockDialogComponent implements OnInit {
 
   onCrewChange() {
     this.selectedTraining.set(null);
+    this.selectedSession.set(null);
     const userId = this.data.forUserId ?? this.auth.userId();
     if (!userId || !this.selectedCrew) {
       this.availableTrainings.set([]);
@@ -114,11 +117,26 @@ export class AddBlockDialogComponent implements OnInit {
   selectTraining(training: TrainingWithCrew & { available: boolean; affordable: boolean }) {
     if (!training.available || !training.affordable) return;
     this.selectedTraining.set(training);
+    // Default to the first session that fits the free space, else the first.
+    const fit = training.sessions.find(s => this.sessionAffordable(s));
+    this.selectedSession.set(fit ?? training.sessions[0] ?? null);
+  }
+
+  sessionCost(session: TrainingSession): number {
+    return SLOT_WEIGHT_UNITS[session.length];
+  }
+  sessionAffordable(session: TrainingSession): boolean {
+    return this.sessionCost(session) <= this.data.remainingBudget;
+  }
+  selectSession(session: TrainingSession) {
+    if (!this.sessionAffordable(session)) return;
+    this.selectedSession.set(session);
   }
 
   canConfirm(): boolean {
     if (this.mode() === 'training') {
-      return !!this.selectedTraining();
+      const s = this.selectedSession();
+      return !!this.selectedTraining() && !!s && this.sessionAffordable(s);
     }
     return !!this.customTopic.trim() && this.isCustomAffordable();
   }
@@ -129,10 +147,12 @@ export class AddBlockDialogComponent implements OnInit {
     let result: AddBlockDialogResult;
     if (this.mode() === 'training') {
       const t = this.selectedTraining()!;
+      const s = this.selectedSession()!;
       result = {
         crewMember: this.selectedCrew,
         trainingTopic: t.topic,
-        slotWeight: t.slot_weight,
+        slotWeight: s.length,
+        sessionNumber: s.session_number,
       };
     } else {
       result = {

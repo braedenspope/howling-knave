@@ -84,6 +84,8 @@ export interface ScheduleBlock {
   user_id: string;
   crew_member: string;
   training_topic: string;
+  /** Which session of the training path this block represents (1-based). */
+  session_number?: number | null;
   slot_weight: SlotWeight;
   slot_position: number;
   status: BlockStatus;
@@ -110,10 +112,39 @@ export interface TrainingProgress {
   user_id: string;
   crew_member: string;
   training_topic: string;
+  /** Progress Points earned toward this training's threshold. */
+  pp_accumulated: number;
+  /** PP threshold required to unlock the benefit (3 / 4 / 5). */
+  threshold_pp: number;
+  /** Legacy success-count columns, kept populated for back-compat. */
   successes_accumulated: number;
   successes_required: number;
   last_trained_at: string | null;
   completed: boolean;
+}
+
+/**
+ * One prescribed session within a training path: a length (which sets the
+ * block cost), the roll the DM calls for, and the Progress Points it grants
+ * on success vs. failure.
+ */
+export interface TrainingSession {
+  id: string;
+  training_id: string;
+  session_number: number;
+  /** Stored as a slot weight; renders as Short / Medium / Long. */
+  length: SlotWeight;
+  roll_type: string;
+  pp_success: number;
+  pp_fail: number;
+}
+
+/** A bonus that unlocks only for one specific player character. */
+export interface TrainingHiddenBonus {
+  id: string;
+  training_id: string;
+  character_name: string;
+  body: string;
 }
 
 export interface Training {
@@ -124,9 +155,14 @@ export interface Training {
   reward: string;
   /** DM-facing scene prompt read at the table during the montage. */
   scene_seed: string | null;
+  /** DM-facing narrative arc that plays out across the sessions. */
+  narrative_thread: string | null;
+  /** Representative length (first session); per-session lengths live on `sessions`. */
   slot_weight: SlotWeight;
   sessions_required: number;
   tier_required: number;
+  /** Progress Points needed to unlock the benefit. */
+  threshold_pp: number;
   created_at: string;
   updated_at: string;
 }
@@ -134,7 +170,20 @@ export interface Training {
 export interface TrainingWithCrew extends Training {
   crew_member_name: string;
   crew_member_role: string;
+  sessions: TrainingSession[];
+  hidden_bonus: TrainingHiddenBonus | null;
 }
+
+/**
+ * Progress Points awarded by session length, per the campaign rules:
+ * Short +1/+0, Medium +2/+1, Long +3/+1. Used as a fallback when a block has
+ * no specific session attached.
+ */
+export const SESSION_PP: Record<SlotWeight, { success: number; fail: number }> = {
+  light: { success: 1, fail: 0 },
+  medium: { success: 2, fail: 1 },
+  heavy: { success: 3, fail: 1 },
+};
 
 export const SLOT_WEIGHT_UNITS: Record<SlotWeight, number> = {
   heavy: 4,

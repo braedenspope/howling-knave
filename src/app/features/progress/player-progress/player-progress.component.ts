@@ -73,7 +73,7 @@ export class PlayerProgressComponent implements OnInit {
 
   masteredCount = computed(() => this.myProgress().filter(p => p.completed).length);
   inProgressCount = computed(() =>
-    this.myProgress().filter(p => !p.completed && p.successes_accumulated > 0).length,
+    this.myProgress().filter(p => !p.completed && p.pp_accumulated > 0).length,
   );
 
   earnedAbilities = computed<EarnedAbility[]>(() => {

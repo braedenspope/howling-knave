@@ -1,6 +1,6 @@
 <p class="dm-hint">
-  Resolve each training session in the montage pass — Critical doubles progress, Success marks one,
-  Failure holds. You can also mark outcomes straight from the board.
+  Resolve each training session in the montage pass — Progress Points are awarded by session length
+  (Short +1/+0, Medium +2/+1, Long +3/+1) toward each path's threshold. You can also mark outcomes straight from the board.
 </p>
 
 @for (day of voyageService.days(); track day.id) {
@@ -27,8 +27,7 @@
                 @if (block.spotlight) { <span class="flagged-tag"><span class="ms sm">flag</span> Flagged</span> }
               </div>
               <div class="outcome-actions">
-                <button class="btn-icon oc-double" title="Critical — double success" (click)="markOutcome(block, 2)"><span class="ms sm">star</span></button>
-                <button class="btn-icon oc-success" title="Success (+1)" (click)="markOutcome(block, 1)"><span class="ms sm">check</span></button>
+                <button class="btn-icon oc-success" title="Success" (click)="markSuccess(block)"><span class="ms sm">check</span></button>
                 <button class="btn-icon oc-failure" title="Failure" (click)="markFailure(block)"><span class="ms sm">close</span></button>
                 <button class="btn-icon" title="Reset to pending" (click)="resetBlock(block)"><span class="ms sm">restart_alt</span></button>
               </div>

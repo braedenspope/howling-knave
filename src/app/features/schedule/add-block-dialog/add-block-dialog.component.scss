@@ -140,6 +140,49 @@
   padding: 24px 0;
 }
 
+.session-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 2px 0 6px;
+  padding: 8px 10px;
+  background: rgba(20,15,10,0.45);
+  border-radius: 3px;
+}
+
+.session-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid rgba(120,100,70,0.25);
+  border-radius: 3px;
+  background: rgba(36,28,20,0.4);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover:not(.blocked) { background: rgba(36,28,20,0.75); }
+  &.chosen { background: rgba(196,154,60,0.12); border-color: var(--accent-gold); }
+  &.blocked { opacity: 0.4; cursor: not-allowed; }
+
+  .so-num {
+    font-family: var(--font-data);
+    font-weight: 700;
+    width: 18px;
+    text-align: center;
+    color: var(--accent-gold);
+  }
+  .so-roll { flex: 1; font-size: 12px; }
+  .so-pp {
+    font-family: var(--font-data);
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+}
+
 @media (max-width: 600px) {
   .mode-toggle mat-button-toggle { font-size: 11px; }
   .training-options { max-height: 300px; }

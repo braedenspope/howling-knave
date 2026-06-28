@@ -4,7 +4,7 @@ import { VoyageService } from '../../voyage/voyage.service';
 import { TrainingService } from '../training.service';
 import { TrainingTrackerService } from '../training-tracker.service';
 import { CREW_COLORS } from '../../../shared/data/training.data';
-import { ScheduleBlock, Day, SLOT_WEIGHT_LABEL, SLOT_WEIGHT_UNITS, SlotWeight } from '../../../shared/models';
+import { ScheduleBlock, Day, SLOT_WEIGHT_LABEL, SLOT_WEIGHT_UNITS, SlotWeight, SESSION_PP, TrainingSession } from '../../../shared/models';
 import { ToastService } from '../../../shared/toast.service';
 
 @Component({
@@ -69,7 +69,7 @@ export class BlockOutcomesComponent implements OnInit {
   getProgressLabel(block: ScheduleBlock): string {
     const progress = this.tracker.getProgress(block.user_id, block.crew_member, block.training_topic);
     if (!progress) return '';
-    return `${progress.successes_accumulated}/${progress.successes_required}`;
+    return `${progress.pp_accumulated}/${progress.threshold_pp} PP`;
   }
 
   isMastered(block: ScheduleBlock): boolean {
@@ -77,38 +77,55 @@ export class BlockOutcomesComponent implements OnInit {
     return progress?.completed ?? false;
   }
 
-  async markOutcome(block: ScheduleBlock, successCount: number) {
-    // Find sessions_required from trainings
-    const training = this.trainingService.getTrainingsForCrewByName(block.crew_member)
-      .find(t => t.topic === block.training_topic);
-    const sessionsRequired = training?.sessions_required ?? 3;
+  private sessionFor(block: ScheduleBlock): TrainingSession | undefined {
+    if (!block.session_number) return undefined;
+    return this.trainingService.getTraining(block.crew_member, block.training_topic)
+      ?.sessions.find(s => s.session_number === block.session_number);
+  }
+  private ppFor(block: ScheduleBlock, outcome: 'success' | 'failure'): number {
+    const session = this.sessionFor(block);
+    if (session) return outcome === 'success' ? session.pp_success : session.pp_fail;
+    const rule = SESSION_PP[block.slot_weight];
+    return outcome === 'success' ? rule.success : rule.fail;
+  }
+  private thresholdFor(block: ScheduleBlock): number {
+    return this.trainingService.getTraining(block.crew_member, block.training_topic)?.threshold_pp ?? 3;
+  }
 
+  async markSuccess(block: ScheduleBlock) {
+    const pp = this.ppFor(block, 'success');
     await this.scheduleService.updateBlockStatus(block.id, 'success');
-    await this.tracker.recordSuccess(
-      block.user_id,
-      block.crew_member,
-      block.training_topic,
-      successCount,
-      sessionsRequired,
-    );
+    await this.tracker.applyPp(block.user_id, block.crew_member, block.training_topic, pp, this.thresholdFor(block));
 
     const progress = this.tracker.getProgress(block.user_id, block.crew_member, block.training_topic);
-    const verb = successCount > 1 ? 'Critical +2' : 'Success +1';
     const tail = progress?.completed
-      ? ` — ${block.training_topic} · MASTERED`
+      ? ` — ${block.training_topic} · UNLOCKED`
       : progress
-        ? ` — ${block.training_topic} · ${progress.successes_accumulated}/${progress.successes_required}`
+        ? ` — ${block.training_topic} · ${progress.pp_accumulated}/${progress.threshold_pp} PP`
         : '';
-    this.toast.show(`${verb}${tail}`);
+    this.toast.show(`Success +${pp}${tail}`);
   }
 
   async markFailure(block: ScheduleBlock) {
+    const pp = this.ppFor(block, 'failure');
     await this.scheduleService.updateBlockStatus(block.id, 'failure');
-    this.toast.show(`Failure logged — ${block.training_topic}`);
+    if (pp > 0) {
+      await this.tracker.applyPp(block.user_id, block.crew_member, block.training_topic, pp, this.thresholdFor(block));
+    }
+    const progress = this.tracker.getProgress(block.user_id, block.crew_member, block.training_topic);
+    this.toast.show(pp > 0
+      ? `Failure +${pp} — ${block.training_topic}${progress ? ' · ' + progress.pp_accumulated + '/' + progress.threshold_pp + ' PP' : ''}`
+      : `Failure — ${block.training_topic} · no progress`);
   }
 
   async resetBlock(block: ScheduleBlock) {
+    const undo = block.status === 'success' ? -this.ppFor(block, 'success')
+      : block.status === 'failure' ? -this.ppFor(block, 'failure')
+      : 0;
     await this.scheduleService.updateBlockStatus(block.id, 'pending');
+    if (undo !== 0) {
+      await this.tracker.applyPp(block.user_id, block.crew_member, block.training_topic, undo, this.thresholdFor(block));
+    }
     this.toast.show(`Reset to pending — ${block.training_topic}`);
   }
 }

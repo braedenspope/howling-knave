@@ -15,7 +15,7 @@ import { TrainingTrackerService } from '../../dm/training-tracker.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ToastService } from '../../../shared/toast.service';
 import { CREW_COLORS, TIER_NAMES } from '../../../shared/data/training.data';
-import { Day, ScheduleBlock, DAY_BUDGET, SLOT_WEIGHT_UNITS, SLOT_WEIGHT_LABEL } from '../../../shared/models';
+import { Day, ScheduleBlock, DAY_BUDGET, SLOT_WEIGHT_UNITS, SLOT_WEIGHT_LABEL, SESSION_PP, TrainingSession } from '../../../shared/models';
 
 export interface SlotItem {
   type: 'block' | 'empty';
@@ -255,6 +255,7 @@ export class DayRowComponent {
       if (!result) return;
       const err = await this.scheduleService.addBlock(
         this.day().id, result.crewMember, result.trainingTopic, result.slotWeight, userId, atSlot,
+        result.sessionNumber ?? null,
       );
       if (!err) {
         await this.withdrawSealIfNeeded(userId);
@@ -298,26 +299,61 @@ export class DayRowComponent {
   }
   progressLabel(block: ScheduleBlock): string {
     const p = this.tracker.getProgress(block.user_id, block.crew_member, block.training_topic);
-    return p ? `${p.successes_accumulated}/${p.successes_required}` : '';
+    return p ? `${p.pp_accumulated}/${p.threshold_pp} PP` : '';
   }
-  async markOutcome(block: ScheduleBlock, count: number) {
-    const training = this.trainingService.getTrainingsForCrewByName(block.crew_member)
-      .find(t => t.topic === block.training_topic);
-    const required = training?.sessions_required ?? 3;
+
+  /** Short "S2 · Insight" label for a training block, when its session is known. */
+  sessionTag(block: ScheduleBlock): string {
+    const s = this.sessionFor(block);
+    return s ? `S${s.session_number} · ${s.roll_type}` : '';
+  }
+
+  /** The prescribed session this block represents, if known. */
+  private sessionFor(block: ScheduleBlock): TrainingSession | undefined {
+    if (!block.session_number) return undefined;
+    return this.trainingService.getTraining(block.crew_member, block.training_topic)
+      ?.sessions.find(s => s.session_number === block.session_number);
+  }
+  /** PP this block grants for the given outcome (session-specific, else by length). */
+  private ppFor(block: ScheduleBlock, outcome: 'success' | 'failure'): number {
+    const session = this.sessionFor(block);
+    if (session) return outcome === 'success' ? session.pp_success : session.pp_fail;
+    const rule = SESSION_PP[block.slot_weight];
+    return outcome === 'success' ? rule.success : rule.fail;
+  }
+  private thresholdFor(block: ScheduleBlock): number {
+    return this.trainingService.getTraining(block.crew_member, block.training_topic)?.threshold_pp ?? 3;
+  }
+
+  async markSuccess(block: ScheduleBlock) {
+    const pp = this.ppFor(block, 'success');
     await this.scheduleService.updateBlockStatus(block.id, 'success');
-    await this.tracker.recordSuccess(block.user_id, block.crew_member, block.training_topic, count, required);
+    await this.tracker.applyPp(block.user_id, block.crew_member, block.training_topic, pp, this.thresholdFor(block));
     const p = this.tracker.getProgress(block.user_id, block.crew_member, block.training_topic);
-    const verb = count > 1 ? 'Critical +2' : 'Success +1';
-    this.toast.show(p?.completed ? `${verb} — ${block.training_topic} · MASTERED`
-      : `${verb} — ${block.training_topic}${p ? ' · ' + p.successes_accumulated + '/' + p.successes_required : ''}`);
+    this.toast.show(p?.completed
+      ? `Success +${pp} — ${block.training_topic} · UNLOCKED`
+      : `Success +${pp} — ${block.training_topic}${p ? ' · ' + p.pp_accumulated + '/' + p.threshold_pp + ' PP' : ''}`);
   }
   async markFailure(block: ScheduleBlock) {
+    const pp = this.ppFor(block, 'failure');
     await this.scheduleService.updateBlockStatus(block.id, 'failure');
-    this.toast.show(`Failure logged — ${block.training_topic}`);
+    if (pp > 0) {
+      await this.tracker.applyPp(block.user_id, block.crew_member, block.training_topic, pp, this.thresholdFor(block));
+    }
+    const p = this.tracker.getProgress(block.user_id, block.crew_member, block.training_topic);
+    this.toast.show(pp > 0
+      ? `Failure +${pp} — ${block.training_topic}${p ? ' · ' + p.pp_accumulated + '/' + p.threshold_pp + ' PP' : ''}`
+      : `Failure — ${block.training_topic} · no progress`);
   }
   async resetOutcome(block: ScheduleBlock) {
+    // Undo exactly the PP this block previously granted.
+    const undo = block.status === 'success' ? -this.ppFor(block, 'success')
+      : block.status === 'failure' ? -this.ppFor(block, 'failure')
+      : 0;
     await this.scheduleService.updateBlockStatus(block.id, 'pending');
-    await this.tracker.resetProgress(block.user_id, block.crew_member, block.training_topic);
+    if (undo !== 0) {
+      await this.tracker.applyPp(block.user_id, block.crew_member, block.training_topic, undo, this.thresholdFor(block));
+    }
     this.toast.show(`Reset to pending — ${block.training_topic}`);
   }
 
