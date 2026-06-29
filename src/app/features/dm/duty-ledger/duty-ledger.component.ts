@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, signal, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { VoyageService } from '../../voyage/voyage.service';
 import { ScheduleService } from '../../schedule/schedule.service';
@@ -59,6 +59,13 @@ import { ToastService } from '../../../shared/toast.service';
   styles: [':host { display: block; }'],
 })
 export class DutyLedgerComponent implements OnInit {
+  /**
+   * When embedded on the board, the host already loads (and live-subscribes to)
+   * voyages, users, corrections, days, and blocks. Re-fetching here would toggle
+   * the board's shared `loading` signal and thrash this panel, so we skip it.
+   */
+  embedded = input(false);
+
   days = signal<Day[]>([]);
   selectedDay = signal<Record<string, string | undefined>>({});
 
@@ -70,6 +77,18 @@ export class DutyLedgerComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
+    if (this.embedded()) {
+      // Mirror the day list the board already loaded; don't re-fetch anything.
+      const days = this.voyageService.days();
+      if (days.length) {
+        this.days.set(days);
+      } else {
+        const voyage = this.voyageService.activeVoyage();
+        if (voyage) this.days.set(await this.voyageService.loadDaysForVoyage(voyage.id));
+      }
+      return;
+    }
+
     await Promise.all([
       this.voyageService.loadVoyages(),
       this.scheduleService.loadAllUsers(),

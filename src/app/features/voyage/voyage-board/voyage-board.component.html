@@ -53,7 +53,7 @@
           <button class="btn-icon" (click)="closeLedger()" aria-label="Collapse" title="Collapse"><span class="ms">chevron_left</span></button>
         </div>
         <div class="ledger-drawer-body">
-          <app-duty-ledger />
+          <app-duty-ledger [embedded]="true" />
         </div>
       </aside>
     }
