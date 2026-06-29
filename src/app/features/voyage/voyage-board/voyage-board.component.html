@@ -38,4 +38,25 @@
       }
     </div>
   </div>
+
+  <!-- ===================== DM: Guner's Ledger side panel ===================== -->
+  @if (auth.isDm()) {
+    <button class="ledger-tab" (click)="toggleLedger()" title="Guner's Ledger">
+      <span class="ms">gavel</span>
+      <span class="ledger-tab-label">Guner's Ledger</span>
+    </button>
+
+    @if (ledgerOpen()) {
+      <div class="ledger-backdrop" (click)="closeLedger()"></div>
+      <aside class="ledger-drawer">
+        <div class="ledger-drawer-head">
+          <h2 class="gold-text"><span class="ms sm">gavel</span> Guner's Ledger</h2>
+          <button class="btn-icon" (click)="closeLedger()" aria-label="Close"><span class="ms">close</span></button>
+        </div>
+        <div class="ledger-drawer-body">
+          <app-duty-ledger />
+        </div>
+      </aside>
+    }
+  }
 }

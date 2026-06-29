@@ -266,6 +266,53 @@ export class ScheduleService {
     return null;
   }
 
+  /**
+   * Feature #3 — Guner's correction detail. Resets the corrected player's day
+   * (clearing their training / independent blocks and their own duties, while
+   * leaving any watch they're covering for someone else intact) and places
+   * `count` one-block ship duties — half the day by default (4 of 8).
+   */
+  async assignCorrectionDuties(
+    dayId: string,
+    userId: string,
+    count: number = DAY_BUDGET / 2,
+  ): Promise<string | null> {
+    const keepCovering = (b: ScheduleBlock) =>
+      b.is_mandatory && !!b.covered_by && b.covered_by !== userId;
+
+    const { error: delErr } = await this.sb.supabase
+      .from('schedule_blocks')
+      .delete()
+      .eq('day_id', dayId)
+      .eq('user_id', userId)
+      .or(`covered_by.is.null,covered_by.eq.${userId}`);
+    if (delErr) return delErr.message;
+
+    this.blocks.update(blocks =>
+      blocks.filter(b => !(b.day_id === dayId && b.user_id === userId && !keepCovering(b))),
+    );
+
+    // Place duties only in slots a kept (covering) duty doesn't already hold.
+    const occupied = new Set<number>();
+    for (const b of this.getBlocksForDayUser(dayId, userId)) {
+      const span = SLOT_WEIGHT_UNITS[b.slot_weight];
+      for (let s = 0; s < span; s++) occupied.add(b.slot_position + s);
+    }
+    const free = Array.from({ length: DAY_BUDGET }, (_, i) => i).filter(i => !occupied.has(i));
+    for (let i = free.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [free[i], free[j]] = [free[j], free[i]];
+    }
+    const slots = free.slice(0, Math.max(0, Math.min(count, DAY_BUDGET))).sort((a, b) => a - b);
+
+    for (const slot of slots) {
+      const task = DUTY_TASKS[Math.floor(Math.random() * DUTY_TASKS.length)];
+      const err = await this.insertMandatoryBlock(dayId, userId, 'Ship Duty', task, 'light', slot);
+      if (err) return err;
+    }
+    return null;
+  }
+
   private pickRandomSlots(total: number, count: number): number[] {
     const pool = Array.from({ length: total }, (_, i) => i);
     for (let i = pool.length - 1; i > 0; i--) {

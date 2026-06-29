@@ -13,7 +13,8 @@ import { ToastService } from '../../../shared/toast.service';
   template: `
     <p class="dm-hint">
       Guner Aldric tracks who carries their weight. When someone leans on the crew too long, he acts:
-      lock their training for a day. It is not a punishment from the DM — it is Guner being Guner.
+      their training is barred for a day and half their watch (4 of 8 hours) goes to ship duties.
+      It is not a punishment from the DM — it is Guner being Guner.
     </p>
 
     <div class="section-title">
@@ -102,8 +103,9 @@ export class DutyLedgerComponent implements OnInit {
     const dayId = this.selectedDay()[userId];
     if (!dayId) return;
     await this.correction.setCorrection(dayId, userId, "Guner's correction detail");
+    await this.scheduleService.assignCorrectionDuties(dayId, userId);
     const day = this.days().find(d => d.id === dayId);
-    this.toast.show(`Guner has words for ${name.split(' ')[0]}. Day ${day?.day_number} training is locked.`);
+    this.toast.show(`Guner has words for ${name.split(' ')[0]}. Day ${day?.day_number}: training barred, half the day on ship duties.`);
   }
 
   async clear(userId: string) {

@@ -1,7 +1,8 @@
-import { Component, OnInit, OnDestroy, effect, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, effect, computed, signal } from '@angular/core';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DayRowComponent } from '../../schedule/day-row/day-row.component';
+import { DutyLedgerComponent } from '../../dm/duty-ledger/duty-ledger.component';
 import { VoyageService } from '../voyage.service';
 import { ScheduleService } from '../../schedule/schedule.service';
 import { ConfirmationService } from '../../schedule/confirmation.service';
@@ -17,11 +18,19 @@ import { AuthService } from '../../../core/auth/auth.service';
     MatChipsModule,
     MatProgressSpinnerModule,
     DayRowComponent,
+    DutyLedgerComponent,
   ],
   templateUrl: './voyage-board.component.html',
   styleUrl: './voyage-board.component.scss',
 })
 export class VoyageBoardComponent implements OnInit, OnDestroy {
+  /** DM-only Guner's Ledger side panel. */
+  readonly ledgerOpen = signal(false);
+  readonly isDm = computed(() => this.auth.isDm());
+
+  toggleLedger() { this.ledgerOpen.update(v => !v); }
+  closeLedger() { this.ledgerOpen.set(false); }
+
   constructor(
     public voyageService: VoyageService,
     public scheduleService: ScheduleService,
@@ -29,7 +38,7 @@ export class VoyageBoardComponent implements OnInit, OnDestroy {
     private corrections: CorrectionService,
     private trainingService: TrainingService,
     private tracker: TrainingTrackerService,
-    private auth: AuthService,
+    public auth: AuthService,
   ) {
     // React to active voyage changes — load days and subscribe to blocks
     effect(async () => {
