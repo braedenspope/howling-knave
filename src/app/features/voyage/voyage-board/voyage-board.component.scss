@@ -101,25 +101,25 @@
   &:hover { background: rgba(184,115,51,0.18); padding-left: 16px; }
 }
 
-.ledger-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  background: rgba(0,0,0,0.55);
-  animation: ledger-fade 0.15s ease-out;
+// Board shifts right to make room for the docked panel — it stays visible.
+.board-container {
+  transition: margin-left 0.2s ease;
+}
+.board-container.ledger-shift {
+  margin-left: 380px;
 }
 
-.ledger-drawer {
+.ledger-panel {
   position: fixed;
-  top: 0;
+  top: 64px;
   left: 0;
-  z-index: 51;
-  height: 100%;
-  width: min(460px, 94vw);
+  bottom: 0;
+  z-index: 40;
+  width: 380px;
   background: var(--bg-nav, #15100a);
   background-image: var(--wood-grain);
   border-right: 1px solid var(--accent-copper);
-  box-shadow: 6px 0 22px rgba(0,0,0,0.6);
+  box-shadow: 6px 0 22px rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
   animation: ledger-slide 0.2s ease-out;
@@ -155,10 +155,6 @@
   from { transform: translateX(-100%); }
   to { transform: translateX(0); }
 }
-@keyframes ledger-fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
 
 @media (max-width: 860px) {
   .ledger-tab {
@@ -169,4 +165,7 @@
     border-radius: 50%;
     border-left: 1px solid var(--accent-copper);
   }
+  // Too narrow to dock beside the board — the panel overlays instead.
+  .ledger-panel { width: min(340px, 92vw); top: 56px; }
+  .board-container.ledger-shift { margin-left: 0; }
 }
