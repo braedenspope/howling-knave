@@ -569,6 +569,53 @@ button { cursor: pointer; }
 }
 .fade-up { animation: fade-up 0.3s ease both; }
 
+@keyframes block-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes pop-in {
+  0% { opacity: 0; transform: scale(0.4); }
+  60% { opacity: 1; transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+/* ---- Page / route entrance ---- */
+.page { animation: fade-up 0.32s ease both; }
+
+/* ---- Scheduled blocks ease in as they load / are added ---- */
+.block-cell, .duty-cell, .tl-item:not(.tl-empty) {
+  animation: block-in 0.22s ease both;
+}
+
+/* ---- Outcome marks & badges pop when they appear ---- */
+.status-success, .status-failure, .mastered-badge, .correction-chip {
+  animation: pop-in 0.28s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+/* ---- Progress / tier pips fill smoothly ---- */
+.pip, .blockpip {
+  transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+}
+
+/* ---- Tactile press on the app's own controls ---- */
+.btn:active, .btn-icon:active, .hk-tab:active, .filter-chip:active, .training-option:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+/* ---- Clickable cards lift a touch on hover ---- */
+.hk-card.clickable {
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+.hk-card.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.42);
+}
+
+/* ---- Empty slots invite a click ---- */
+.empty-cell.interactive, .tl-item.tl-empty.interactive {
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

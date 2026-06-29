@@ -21,9 +21,9 @@
       <mat-label>Crew member</mat-label>
       <mat-select [(ngModel)]="selectedCrew" (ngModelChange)="onCrewChange()">
         @for (crew of crewList; track crew) {
-          <mat-option [value]="crew">
+          <mat-option [value]="crew" [disabled]="isCrewTaken(crew)">
             <span class="crew-dot" [style.background]="getCrewColor(crew)" style="display: inline-block; margin-right: 6px;"></span>
-            {{ crew }}
+            {{ crew }}@if (isCrewTaken(crew)) { <span class="stamp-label"> · already today</span> }
           </mat-option>
         }
       </mat-select>

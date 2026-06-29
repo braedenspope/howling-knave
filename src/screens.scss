@@ -363,6 +363,7 @@
     border: 1px solid var(--accent-gold-dim) !important;
     border-radius: var(--radius) !important;
     box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important;
+    animation: toast-in 0.26s cubic-bezier(0.2, 1.1, 0.4, 1) both;
   }
   .mdc-snackbar__label {
     font-family: var(--font-body) !important;

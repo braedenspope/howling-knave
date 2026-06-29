@@ -190,7 +190,24 @@ export class DayRowComponent {
     // A block (duty or training) can only move within its own owner's row.
     if (block.user_id !== userId) return false;
     const span = SLOT_WEIGHT_UNITS[block.slot_weight];
-    return this.getContiguousEmpty(userId, slotIndex, block.id) >= span;
+    if (this.getContiguousEmpty(userId, slotIndex, block.id) < span) return false;
+
+    // A crew member can't run two different trainings in overlapping hours —
+    // block drops that would put this training over another of the same crew.
+    if (!block.is_mandatory && block.crew_member !== 'Independent') {
+      const end = slotIndex + span;
+      const clash = this.scheduleService.blocks().some(b =>
+        b.id !== block.id &&
+        b.day_id === this.day().id &&
+        !b.is_mandatory &&
+        b.crew_member === block.crew_member &&
+        b.training_topic !== block.training_topic &&
+        b.slot_position < end &&
+        b.slot_position + SLOT_WEIGHT_UNITS[b.slot_weight] > slotIndex,
+      );
+      if (clash) return false;
+    }
+    return true;
   }
 
   // ----- drag -----
@@ -239,6 +256,10 @@ export class DayRowComponent {
     const contiguous = this.getContiguousEmpty(userId, atSlot);
     if (contiguous <= 0) return;
 
+    const takenCrew = this.getPlayerBlocks(userId)
+      .filter(b => !b.is_mandatory && b.crew_member !== 'Independent')
+      .map(b => b.crew_member);
+
     const dialogRef = this.dialog.open(AddBlockDialogComponent, {
       width: '560px',
       maxWidth: '95vw',
@@ -248,6 +269,7 @@ export class DayRowComponent {
         remainingBudget: contiguous,
         forUserId: userId,
         correctionActive: this.isCorrected(userId),
+        takenCrew,
       },
     });
 
@@ -260,6 +282,8 @@ export class DayRowComponent {
       if (!err) {
         await this.withdrawSealIfNeeded(userId);
         this.toast.show(`Scheduled — ${result.trainingTopic} with ${result.crewMember}`);
+      } else {
+        this.toast.show(err);
       }
     });
   }

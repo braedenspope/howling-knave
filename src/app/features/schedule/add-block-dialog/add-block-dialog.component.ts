@@ -15,6 +15,8 @@ export interface AddBlockDialogData {
   forUserId?: string;
   /** Feature #3 — when true, training is barred (Guner's correction). */
   correctionActive?: boolean;
+  /** Crew already booked for a training this day — only one per crew per day. */
+  takenCrew?: string[];
 }
 
 export interface AddBlockDialogResult {
@@ -90,6 +92,11 @@ export class AddBlockDialogComponent implements OnInit {
 
   getCrewColor(name: string): string {
     return CREW_COLORS[name] ?? '#666';
+  }
+
+  /** True when this crew member already has a training booked for the day. */
+  isCrewTaken(crew: string): boolean {
+    return (this.data.takenCrew ?? []).includes(crew);
   }
 
   getCost(weight: string): number {

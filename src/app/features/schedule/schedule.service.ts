@@ -120,6 +120,13 @@ export class ScheduleService {
     const userId = forUserId ?? this.auth.userId();
     if (!userId) return 'Not authenticated';
 
+    // One training per crew member per day (independent activities may repeat).
+    if (crewMember !== 'Independent') {
+      const already = this.getBlocksForDayUser(dayId, userId)
+        .some(b => !b.is_mandatory && b.crew_member === crewMember);
+      if (already) return `Already training with ${crewMember} today`;
+    }
+
     const remaining = this.getRemainingBudget(dayId, userId);
     const cost = SLOT_WEIGHT_UNITS[slotWeight];
     if (cost > remaining) return 'Not enough budget remaining';
@@ -128,6 +135,21 @@ export class ScheduleService {
     const position = atPosition ?? (currentBlocks.length > 0
       ? Math.max(...currentBlocks.map(b => b.slot_position)) + 1
       : 0);
+
+    // A crew member can't run two *different* trainings in overlapping hours.
+    // (Several players joining the *same* training at the same time is fine.)
+    if (crewMember !== 'Independent') {
+      const end = position + cost;
+      const clash = this.blocks().some(b =>
+        b.day_id === dayId &&
+        !b.is_mandatory &&
+        b.crew_member === crewMember &&
+        b.training_topic !== trainingTopic &&
+        b.slot_position < end &&
+        b.slot_position + SLOT_WEIGHT_UNITS[b.slot_weight] > position,
+      );
+      if (clash) return `${crewMember} is already teaching another training at that hour`;
+    }
 
     const { error } = await this.sb.supabase.from('schedule_blocks').insert({
       day_id: dayId,
