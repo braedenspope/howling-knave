@@ -66,9 +66,9 @@
             </div>
             <div class="progress-row-pips">
               @for (i of pipArray(row.progress.threshold_pp); track i) {
-                <span class="pip" [class.filled]="i < row.progress.pp_accumulated" [class.mastered]="row.progress.completed"></span>
+                <span class="pip" [class.filled]="row.progress.completed || i < row.progress.pp_accumulated" [class.mastered]="row.progress.completed"></span>
               }
-              <span class="stamp-label">{{ row.progress.pp_accumulated }}/{{ row.progress.threshold_pp }} PP</span>
+              <span class="stamp-label">{{ row.progress.completed ? row.progress.threshold_pp : row.progress.pp_accumulated }}/{{ row.progress.threshold_pp }} PP</span>
             </div>
             @if (row.training) {
               <p class="progress-reward">{{ row.progress.completed ? row.training.reward : row.training.description }}</p>

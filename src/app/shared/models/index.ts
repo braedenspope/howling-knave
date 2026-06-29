@@ -116,6 +116,8 @@ export interface TrainingProgress {
   pp_accumulated: number;
   /** PP threshold required to unlock the benefit (3 / 4 / 5). */
   threshold_pp: number;
+  /** Failed Short sessions logged; the third short session auto-completes the training. */
+  short_fails: number;
   /** Legacy success-count columns, kept populated for back-compat. */
   successes_accumulated: number;
   successes_required: number;
