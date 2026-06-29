@@ -74,7 +74,7 @@
                       @if (canHandOff(b)) {
                         <button class="cover-btn-tl" (click)="requestHandOff(b)">Request</button>
                       }
-                      @if (canEdit(u.id) && !b.is_mandatory) {
+                      @if ((canEdit(u.id) || isDm()) && !b.is_mandatory) {
                         <button class="btn-icon tl-remove" (click)="onRemoveBlock(b)" title="Remove"><span class="ms sm">close</span></button>
                       }
                     </div>
@@ -167,7 +167,7 @@
                       <span class="wt-badge" [class]="lengthClass(b.slot_weight)">{{ lengthLabel(b.slot_weight) }}</span>
                       @if (sessionTag(b)) { <span class="stamp-label">{{ sessionTag(b) }}</span> }
                     </div>
-                    @if (canEdit(u.id)) {
+                    @if (canEdit(u.id) || isDm()) {
                       <button class="cell-remove" (click)="onRemoveBlock(b)" title="Remove"><span class="ms">close</span></button>
                     }
                   </div>
@@ -200,5 +200,6 @@
     <button mat-menu-item (click)="markSuccess(block)"><span class="ms sm status-success">check</span>&nbsp; Success</button>
     <button mat-menu-item (click)="markFailure(block)"><span class="ms sm status-failure">close</span>&nbsp; Failure</button>
     <button mat-menu-item (click)="resetOutcome(block)"><span class="ms sm">restart_alt</span>&nbsp; Reset to pending</button>
+    <button mat-menu-item (click)="onRemoveBlock(block)"><span class="ms sm status-failure">delete</span>&nbsp; Remove from board</button>
   </ng-template>
 </mat-menu>
