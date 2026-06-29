@@ -365,6 +365,15 @@
     box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important;
     animation: toast-in 0.26s cubic-bezier(0.2, 1.1, 0.4, 1) both;
   }
+
+  &.hk-toast-warn .mdc-snackbar__surface {
+    border-color: #c45a4a !important;
+    border-left: 4px solid #c45a4a !important;
+    background: linear-gradient(rgba(166,61,47,0.12), rgba(166,61,47,0.12)), var(--bg-card-raised) !important;
+  }
+  &.hk-toast-warn .mdc-snackbar__label {
+    color: #f0d8c8 !important;
+  }
   .mdc-snackbar__label {
     font-family: var(--font-body) !important;
     font-size: 15px !important;

@@ -210,14 +210,38 @@ export class DayRowComponent {
     return true;
   }
 
+  /** Why a block can't be dropped at a slot — for an explanatory warning. */
+  private dropReason(block: ScheduleBlock, userId: string, slotIndex: number): string {
+    if (this.isLocked()) return 'The day is sealed — withdraw a seal before rearranging it.';
+    if (block.user_id !== userId) return 'A block can only move within its own owner’s row.';
+    const span = SLOT_WEIGHT_UNITS[block.slot_weight];
+    if (this.getContiguousEmpty(userId, slotIndex, block.id) < span) {
+      return `Not enough open hours here — that block needs ${span}.`;
+    }
+    if (!block.is_mandatory && block.crew_member !== 'Independent') {
+      return `${block.crew_member} is already teaching another training at that hour.`;
+    }
+    return 'That move isn’t allowed here.';
+  }
+
   // ----- drag -----
   onDragStart(event: DragEvent, block: ScheduleBlock) {
-    if (this.isLocked()) { event.preventDefault(); return; }
+    if (this.isLocked()) {
+      event.preventDefault();
+      this.toast.warn('The day is sealed — withdraw a seal to make changes.');
+      return;
+    }
     if (block.is_mandatory) {
       // Only the DM repositions ship duties; players hand them off instead.
-      if (!this.isDm()) { event.preventDefault(); return; }
+      if (!this.isDm()) {
+        event.preventDefault();
+        this.toast.warn('Ship duties are set by the DM — use “Request hand-off” to pass one on.');
+        return;
+      }
     } else if (!this.canEdit(block.user_id)) {
-      event.preventDefault(); return;
+      event.preventDefault();
+      this.toast.warn('You can only move blocks on your own schedule.');
+      return;
     }
     this.draggingBlock.set(block);
     if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
@@ -235,7 +259,13 @@ export class DayRowComponent {
   async onDrop(event: DragEvent, userId: string, slotIndex: number) {
     event.preventDefault();
     const block = this.draggingBlock();
-    if (!block || !this.canDropAt(userId, slotIndex)) return;
+    if (!block) return;
+    if (!this.canDropAt(userId, slotIndex)) {
+      this.toast.warn(this.dropReason(block, userId, slotIndex));
+      this.draggingBlock.set(null);
+      this.dragOverSlot.set(null);
+      return;
+    }
     this.draggingBlock.set(null);
     this.dragOverSlot.set(null);
     // Duties and trainings alike move individually within the owner's row.
@@ -251,10 +281,26 @@ export class DayRowComponent {
     await this.withdrawSealIfNeeded(block.user_id);
   }
 
+  /** Empty-slot tap — open the planner, or explain why it's unavailable. */
+  onEmptySlotClick(userId: string, atSlot: number) {
+    if (this.isLocked()) {
+      this.toast.warn('The day is sealed — withdraw a seal to change the schedule.');
+      return;
+    }
+    if (!this.canEdit(userId)) {
+      this.toast.warn('You can only edit your own schedule.');
+      return;
+    }
+    this.openAddDialog(userId, atSlot);
+  }
+
   openAddDialog(userId: string, atSlot: number) {
     if (!this.canEdit(userId)) return;
     const contiguous = this.getContiguousEmpty(userId, atSlot);
-    if (contiguous <= 0) return;
+    if (contiguous <= 0) {
+      this.toast.warn('No open hours here — clear a block to make room.');
+      return;
+    }
 
     const takenCrew = this.getPlayerBlocks(userId)
       .filter(b => !b.is_mandatory && b.crew_member !== 'Independent')

@@ -18,4 +18,17 @@ export class ToastService {
       verticalPosition: 'bottom',
     });
   }
+
+  /**
+   * A blocked-action warning — visually distinct (red accent) and held a little
+   * longer so the player can read why something couldn't be done.
+   */
+  warn(message: string, durationMs = 4500): void {
+    this.snack.open(message, '', {
+      duration: durationMs,
+      panelClass: ['hk-toast', 'hk-toast-warn'],
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+    });
+  }
 }

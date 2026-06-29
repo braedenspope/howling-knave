@@ -81,7 +81,7 @@
                   </div>
                 } @else {
                   <div class="tl-item tl-empty" [class.interactive]="canEdit(u.id)"
-                    (click)="canEdit(u.id) ? openAddDialog(u.id, item.slotIndex) : null">
+                    (click)="onEmptySlotClick(u.id, item.slotIndex)">
                     <span class="tl-hour">{{ roman(item.slotIndex) }}</span>
                     @if (canEdit(u.id)) {
                       <span class="tl-add"><span class="ms sm">add</span> Open hour — tap to plan</span>
@@ -176,7 +176,7 @@
                 <!-- empty -->
                 <div class="slot-cell empty-cell" [class.interactive]="canEdit(u.id)"
                   [class.drag-over]="dragOverSlot() === item.slotIndex && canDropAt(u.id, item.slotIndex)"
-                  (click)="!draggingBlock() && canEdit(u.id) ? openAddDialog(u.id, item.slotIndex) : null"
+                  (click)="!draggingBlock() ? onEmptySlotClick(u.id, item.slotIndex) : null"
                   (dragover)="onDragOver($event, u.id, item.slotIndex)"
                   (dragleave)="onDragLeave(item.slotIndex)"
                   (drop)="onDrop($event, u.id, item.slotIndex)">
