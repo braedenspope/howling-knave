@@ -50,17 +50,17 @@ export interface CrewMeta {
 
 /** Role + one-line character read for each crew member (Crew roster / dossiers). */
 export const CREW_META: Record<string, CrewMeta> = {
-  'Anna Rose':       { role: 'Captain',             line: 'Runs the ship like a held breath — nothing happens she hasn’t already noticed.' },
-  'Guner Aldric':    { role: 'First Mate',          line: 'Observes, remembers, and at some point — acts.' },
+  'Anna Rose':       { role: 'Captain',             line: 'Runs the ship like a held breath — nothing happens she hasn\'t already noticed.' },
+  'Guner Aldric':    { role: 'First Mate',          line: 'There is a procedure. Then there\'s Anna. Two years in, he\'s stopped being sure which one he trusts.' },
   'Rachel Rose':     { role: "Ship's Surgeon",      line: 'Stops the bleeding first. Everything else is conversation.' },
-  'Lehiri Stars':    { role: 'Navigator',           line: 'Knows the fixed lights by name, and a few that move.' },
-  'Toji Brassboot':  { role: 'Quartermaster',       line: 'If it’s broken, bring it to her. If it explodes, bring it faster.' },
+  'Lehiri Stars':    { role: 'Navigator',           line: 'Plots the safest course and the fastest one. Never says which she\'s giving you.' },
+  'Toji Brassboot':  { role: 'Quartermaster',       line: 'Argues with the engine. Usually wins.' },
   'Porter Tomas':    { role: 'Cargo Master',        line: 'Knows what everything weighs and what it’s worth in three ports.' },
-  'Shanoa Buckler':  { role: 'Master-at-Arms',      line: 'Teaches patience the hard way — by making you hold it.' },
-  'Ardor':           { role: 'Passenger',           line: 'Speaks rarely. The pauses say more.' },
-  'Bryce Morrison':  { role: "Bosun's Apprentice",  line: 'Trying his best, usually at the worst possible moment.' },
-  'Elro Boldfall':   { role: "Ship's Cook",         line: 'Insists the galley is harder than swordwork. May be right.' },
-  'Delvin Moss':     { role: 'Deckhand · Herbalist', line: 'Quiet hands, green thumbs, salt-stained pockets.' },
+  'Shanoa Buckler':  { role: 'Master-at-Arms',      line: 'New aboard, sharp on the glass. Watches the Empire\'s flag like it might still recognize her.' },
+  'Ardor':           { role: 'Passenger',           line: 'Charming, useful, paid in full — and nobody\'s quite sure why he\'s still aboard.' },
+  'Bryce Morrison':  { role: "Bosun's Apprentice",  line: 'Means well. Arrives late. Stays anyway.' },
+  'Elro Boldfall':   { role: "Ship's Cook",         line: 'Feeds the wound before it\'s named. Forgets to feed himself.' },
+  'Delvin Moss':     { role: 'Deckhand · Herbalist', line: 'Always has what the ship needs. Always pours one more than he should.' },
 };
 
 export const TIER_NAMES: Record<number, string> = {
