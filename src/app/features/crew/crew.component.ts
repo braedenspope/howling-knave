@@ -112,7 +112,7 @@ export class CrewComponent implements OnInit {
         .getTrainingsForCrewByName(crew)
         .map(t => ({ training: t, status: this.statusFor(crew, t, tier) }))
         .filter(p => f === 'all' || p.status.kind === f);
-      return { crew, role: CREW_META[crew]?.role ?? '', tier, paths };
+      return { crew, role: this.crewRole(crew), tier, paths };
     }).filter(g => g.paths.length > 0);
   });
 
@@ -121,7 +121,10 @@ export class CrewComponent implements OnInit {
     return CREW_COLORS[name] ?? '#666';
   }
   crewRole(name: string): string {
-    return CREW_META[name]?.role ?? '';
+    // Single source of truth: the database crew_members.role (falls back to
+    // the static roster only until the live data has loaded).
+    const fromDb = this.training.crewMembers().find(c => c.name === name)?.role;
+    return fromDb ?? CREW_META[name]?.role ?? '';
   }
   crewLine(name: string): string {
     return CREW_META[name]?.line ?? '';
