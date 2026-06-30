@@ -31,31 +31,31 @@ export interface TrainingDetailData {
     </div>
   `,
   styles: [`
-    .td-modal { position: relative; padding: 4px 2px; }
+    .td-modal { position: relative; padding: 8px 6px 6px; }
     .td-close {
-      position: absolute; top: -2px; right: -2px;
+      position: absolute; top: -4px; right: -4px;
       background: none; border: none; color: var(--text-secondary);
-      cursor: pointer; padding: 4px; line-height: 0; border-radius: 50%;
+      cursor: pointer; padding: 6px; line-height: 0; border-radius: 50%;
     }
     .td-close:hover { color: var(--accent-gold); }
-    .td-close .ms { font-size: 20px; }
-    .td-crew { margin: 0 0 2px; }
-    .td-title { margin: 0 0 10px; font-size: 22px; letter-spacing: 0.5px; padding-right: 22px; }
-    .td-badges { display: flex; gap: 6px; margin-bottom: 12px; }
+    .td-close .ms { font-size: 24px; }
+    .td-crew { margin: 0 0 4px; font-size: 13px; }
+    .td-title { margin: 0 0 16px; font-size: 32px; letter-spacing: 0.5px; padding-right: 30px; line-height: 1.1; }
+    .td-badges { display: flex; gap: 8px; margin-bottom: 18px; }
     .td-badge {
-      font-family: var(--font-data); font-size: 10px; font-weight: 700;
-      letter-spacing: 0.5px; padding: 2px 8px; border-radius: 2px;
+      font-family: var(--font-data); font-size: 12px; font-weight: 700;
+      letter-spacing: 0.5px; padding: 4px 12px; border-radius: 3px;
       background: rgba(255,255,255,0.06); color: var(--text-secondary);
     }
     .td-badge.threshold { background: rgba(196,154,60,0.18); color: var(--accent-gold); }
     .td-reward {
-      display: flex; align-items: center; gap: 6px;
-      font-family: var(--font-body); font-size: 14px; color: var(--text-primary);
-      margin: 0 0 12px;
-      .ms { color: var(--accent-gold); }
+      display: flex; align-items: center; gap: 8px;
+      font-family: var(--font-body); font-size: 18px; color: var(--text-primary);
+      margin: 0 0 18px;
+      .ms { color: var(--accent-gold); font-size: 22px; }
     }
     .td-desc {
-      font-size: 14px; line-height: 1.55; color: var(--text-secondary);
+      font-size: 18px; line-height: 1.7; color: var(--text-secondary);
       font-style: italic; margin: 0;
     }
   `],

@@ -205,8 +205,8 @@ export class CrewComponent implements OnInit {
 
   openTraining(t: TrainingWithCrew) {
     this.dialog.open(TrainingDetailDialogComponent, {
-      width: '420px',
-      maxWidth: '92vw',
+      width: '640px',
+      maxWidth: '94vw',
       panelClass: 'hk-dialog',
       data: { training: t, color: this.crewColor(t.crew_member_name) },
     });
