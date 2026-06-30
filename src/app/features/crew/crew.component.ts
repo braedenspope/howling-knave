@@ -1,5 +1,7 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { TrainingDetailDialogComponent } from './training-detail-dialog/training-detail-dialog.component';
 import { TrainingService } from '../dm/training.service';
 import { RelationshipService } from '../dm/relationship.service';
 import { TrainingTrackerService } from '../dm/training-tracker.service';
@@ -49,13 +51,14 @@ const CATALOG_FILTERS: { id: 'all' | StatusKind; label: string }[] = [
 @Component({
   selector: 'app-crew',
   standalone: true,
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, MatDialogModule],
   templateUrl: './crew.component.html',
   styleUrl: './crew.component.scss',
 })
 export class CrewComponent implements OnInit {
   readonly tierNames = TIER_NAMES;
   readonly catalogFilters = CATALOG_FILTERS;
+  private dialog = inject(MatDialog);
 
   // view state
   readonly view = signal<'roster' | 'catalog'>('roster');
@@ -198,6 +201,15 @@ export class CrewComponent implements OnInit {
 
   firstName(crew: string): string {
     return crew.split(' ')[0];
+  }
+
+  openTraining(t: TrainingWithCrew) {
+    this.dialog.open(TrainingDetailDialogComponent, {
+      width: '420px',
+      maxWidth: '92vw',
+      panelClass: 'hk-dialog',
+      data: { training: t, color: this.crewColor(t.crew_member_name) },
+    });
   }
 
   // ----- actions -----

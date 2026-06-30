@@ -60,7 +60,10 @@
     } @else {
       <div style="display: flex; flex-direction: column; gap: 10px;">
         @for (t of pathsFor(crew); track t.id) {
-          <div class="training-item" [class.catalog-locked]="statusFor(crew, t, tierOf(crew)).kind === 'locked'">
+          <div class="training-item clickable" [class.catalog-locked]="statusFor(crew, t, tierOf(crew)).kind === 'locked'"
+            role="button" tabindex="0" (click)="openTraining(t)"
+            (keydown.enter)="openTraining(t)" (keydown.space)="openTraining(t)"
+            title="View training details">
             <div class="ti-head">
               <span class="ti-topic">{{ t.topic }}</span>
               <span class="wt-badge" [class]="lengthClass(t.slot_weight)">{{ lengthLabel(t.slot_weight) }}</span>
@@ -68,7 +71,6 @@
               <ng-container [ngTemplateOutlet]="statusChip"
                 [ngTemplateOutletContext]="{ st: statusFor(crew, t, tierOf(crew)), t: t }"></ng-container>
             </div>
-            <p class="ti-desc">{{ t.description }}</p>
             <p class="ti-reward"><span class="ms sm">military_tech</span>{{ t.reward }}</p>
           </div>
         }
@@ -124,7 +126,10 @@
             </div>
             <div class="catalog-list">
               @for (p of g.paths; track p.training.id) {
-                <div class="training-item" [class.catalog-locked]="p.status.kind === 'locked'">
+                <div class="training-item clickable" [class.catalog-locked]="p.status.kind === 'locked'"
+                  role="button" tabindex="0" (click)="openTraining(p.training)"
+                  (keydown.enter)="openTraining(p.training)" (keydown.space)="openTraining(p.training)"
+                  title="View training details">
                   <div class="ti-head">
                     <span class="ti-topic">{{ p.training.topic }}</span>
                     <span class="wt-badge" [class]="lengthClass(p.training.slot_weight)">{{ lengthLabel(p.training.slot_weight) }}</span>
@@ -132,7 +137,6 @@
                     <ng-container [ngTemplateOutlet]="statusChip"
                       [ngTemplateOutletContext]="{ st: p.status, t: p.training }"></ng-container>
                   </div>
-                  <p class="ti-desc">{{ p.training.description }}</p>
                   <p class="ti-reward"><span class="ms sm">military_tech</span>{{ p.training.reward }}</p>
                 </div>
               }
