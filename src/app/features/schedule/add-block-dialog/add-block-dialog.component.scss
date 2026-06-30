@@ -180,7 +180,60 @@
     font-family: var(--font-data);
     font-size: 11px;
     color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+
+    &.done { color: #6a9a5a; }
+    .ms { font-size: 14px; }
   }
+
+  &.is-done { opacity: 0.65; }
+}
+
+/* ---- two-step: training -> session ---- */
+.go-note {
+  color: var(--accent-gold) !important;
+  opacity: 0.85;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--accent-gold);
+  font-family: var(--font-heading);
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  padding: 2px 2px 2px 0;
+  margin-bottom: 10px;
+
+  &:hover { text-decoration: underline; }
+  .ms { font-size: 16px; }
+}
+
+.session-head {
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: rgba(36, 28, 20, 0.45);
+  border-radius: 3px;
+  animation: step-in 0.2s ease both;
+
+  .sh-crew {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 12px;
+    letter-spacing: 0.3px;
+    margin: 3px 0;
+  }
+}
+.session-picker { animation: step-in 0.22s ease both; }
+
+@keyframes step-in {
+  from { opacity: 0; transform: translateX(14px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @media (max-width: 600px) {

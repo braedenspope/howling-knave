@@ -5,6 +5,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { TrainingService } from '../../dm/training.service';
 import { RelationshipService } from '../../dm/relationship.service';
+import { ScheduleService } from '../schedule.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { CREW_LIST, CREW_COLORS, TIER_NAMES } from '../../../shared/data/training.data';
 import { TrainingWithCrew, TrainingSession, SlotWeight, SLOT_WEIGHT_UNITS, SLOT_WEIGHT_LABEL } from '../../../shared/models';
@@ -43,9 +44,12 @@ export class AddBlockDialogComponent implements OnInit {
   private dialogRef = inject(MatDialogRef<AddBlockDialogComponent>);
   private trainingService = inject(TrainingService);
   private relationshipService = inject(RelationshipService);
+  private schedule = inject(ScheduleService);
   private auth = inject(AuthService);
 
   mode = signal<'training' | 'custom'>('training');
+  /** Within training mode: pick a training, then pick a session. */
+  trainingStep = signal<'pick' | 'session'>('pick');
 
   /** Only the DM should see the roll a session calls for. */
   showRolls = (): boolean => this.auth.isDm();
@@ -88,6 +92,14 @@ export class AddBlockDialogComponent implements OnInit {
 
   setMode(mode: 'training' | 'custom') {
     this.mode.set(mode);
+    this.trainingStep.set('pick');
+  }
+
+  /** Return from the session view to the training list. */
+  backToTraining() {
+    this.trainingStep.set('pick');
+    this.selectedTraining.set(null);
+    this.selectedSession.set(null);
   }
 
   getCrewColor(name: string): string {
@@ -110,6 +122,7 @@ export class AddBlockDialogComponent implements OnInit {
   onCrewChange() {
     this.selectedTraining.set(null);
     this.selectedSession.set(null);
+    this.trainingStep.set('pick');
     const userId = this.data.forUserId ?? this.auth.userId();
     if (!userId || !this.selectedCrew) {
       this.availableTrainings.set([]);
@@ -127,9 +140,10 @@ export class AddBlockDialogComponent implements OnInit {
   selectTraining(training: TrainingWithCrew & { available: boolean; affordable: boolean }) {
     if (!training.available || !training.affordable) return;
     this.selectedTraining.set(training);
-    // Default to the first session that fits the free space, else the first.
-    const fit = training.sessions.find(s => this.sessionAffordable(s));
-    this.selectedSession.set(fit ?? training.sessions[0] ?? null);
+    // Default to the next session in sequence that can be taken.
+    const next = training.sessions.find(s => this.sessionSelectable(training.topic, s));
+    this.selectedSession.set(next ?? null);
+    this.trainingStep.set('session');
   }
 
   sessionCost(session: TrainingSession): number {
@@ -138,8 +152,39 @@ export class AddBlockDialogComponent implements OnInit {
   sessionAffordable(session: TrainingSession): boolean {
     return this.sessionCost(session) <= this.data.remainingBudget;
   }
-  selectSession(session: TrainingSession) {
-    if (!this.sessionAffordable(session)) return;
+
+  /** Sessions this player has already booked / passed for the given training. */
+  private bookedSessions(topic: string): { scheduled: Set<number>; passed: Set<number> } {
+    const scheduled = new Set<number>();
+    const passed = new Set<number>();
+    const userId = this.data.forUserId ?? this.auth.userId();
+    if (!userId) return { scheduled, passed };
+    for (const b of this.schedule.blocks()) {
+      if (b.user_id === userId && b.crew_member === this.selectedCrew &&
+          b.training_topic === topic && b.session_number != null) {
+        scheduled.add(b.session_number);
+        if (b.status === 'success') passed.add(b.session_number);
+      }
+    }
+    return { scheduled, passed };
+  }
+
+  /** A session is done once it has been passed. */
+  sessionDone(topic: string, s: TrainingSession): boolean {
+    return this.bookedSessions(topic).passed.has(s.session_number);
+  }
+  /** Sessions must be taken in order — earlier ones booked first. */
+  sessionLocked(topic: string, s: TrainingSession): boolean {
+    if (s.session_number <= 1) return false;
+    const { scheduled, passed } = this.bookedSessions(topic);
+    return !scheduled.has(s.session_number - 1) && !passed.has(s.session_number - 1);
+  }
+  sessionSelectable(topic: string, s: TrainingSession): boolean {
+    return !this.sessionDone(topic, s) && !this.sessionLocked(topic, s) && this.sessionAffordable(s);
+  }
+
+  selectSession(topic: string, session: TrainingSession) {
+    if (!this.sessionSelectable(topic, session)) return;
     this.selectedSession.set(session);
   }
 

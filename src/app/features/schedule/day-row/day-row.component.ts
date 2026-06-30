@@ -329,7 +329,7 @@ export class DayRowComponent {
         await this.withdrawSealIfNeeded(userId);
         this.toast.show(`Scheduled — ${result.trainingTopic} with ${result.crewMember}`);
       } else {
-        this.toast.show(err);
+        this.toast.warn(err);
       }
     });
   }

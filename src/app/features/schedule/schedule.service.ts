@@ -127,6 +127,16 @@ export class ScheduleService {
       if (already) return `Already training with ${crewMember} today`;
     }
 
+    // Sessions must be taken in order — the previous one must already be booked.
+    if (crewMember !== 'Independent' && sessionNumber != null && sessionNumber > 1) {
+      const priorBooked = this.blocks().some(b =>
+        b.user_id === userId &&
+        b.crew_member === crewMember &&
+        b.training_topic === trainingTopic &&
+        b.session_number === sessionNumber - 1);
+      if (!priorBooked) return `Do session ${sessionNumber - 1} with ${crewMember} first`;
+    }
+
     const remaining = this.getRemainingBudget(dayId, userId);
     const cost = SLOT_WEIGHT_UNITS[slotWeight];
     if (cost > remaining) return 'Not enough budget remaining';

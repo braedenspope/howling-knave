@@ -17,62 +17,93 @@
   }
 
   @if (mode() === 'training' && !data.correctionActive) {
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Crew member</mat-label>
-      <mat-select [(ngModel)]="selectedCrew" (ngModelChange)="onCrewChange()">
-        @for (crew of crewList; track crew) {
-          <mat-option [value]="crew" [disabled]="isCrewTaken(crew)">
-            <span class="crew-dot" [style.background]="getCrewColor(crew)" style="display: inline-block; margin-right: 6px;"></span>
-            {{ crew }}@if (isCrewTaken(crew)) { <span class="stamp-label"> · already today</span> }
-          </mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
+    <!-- ============ STEP 1 — pick the training ============ -->
+    @if (trainingStep() === 'pick') {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Crew member</mat-label>
+        <mat-select [(ngModel)]="selectedCrew" (ngModelChange)="onCrewChange()">
+          @for (crew of crewList; track crew) {
+            <mat-option [value]="crew" [disabled]="isCrewTaken(crew)">
+              <span class="crew-dot" [style.background]="getCrewColor(crew)" style="display: inline-block; margin-right: 6px;"></span>
+              {{ crew }}@if (isCrewTaken(crew)) { <span class="stamp-label"> · already today</span> }
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
 
-    @if (selectedCrew) {
-      <p class="dialog-section-label">{{ selectedCrew }} · {{ tierName(tierFor(selectedCrew)) }}</p>
-      <div class="option-list">
-        @for (training of availableTrainings(); track training.id) {
-          @let blocked = !training.available || !training.affordable;
-          <button class="training-option" [class.blocked]="blocked"
-            [style.border-left]="'3px solid ' + getCrewColor(selectedCrew)"
-            [class.chosen]="selectedTraining()?.id === training.id"
-            (click)="selectTraining(training)" [disabled]="blocked">
-            <div class="to-main">
-              <span class="to-topic">{{ training.topic }}</span>
-              <span class="stamp-label">{{ training.threshold_pp }} PP · {{ training.sessions_required }} sessions</span>
-            </div>
-            <span class="to-desc">{{ training.description }}</span>
-            <span class="to-note"><span class="ms sm">military_tech</span> {{ training.reward }}</span>
-            @if (!training.available) {
-              <span class="to-note blocked-note"><span class="ms sm">lock</span> Requires a deeper relationship</span>
-            } @else if (!training.affordable) {
-              <span class="to-note blocked-note"><span class="ms sm">schedule</span> No session fits — only {{ data.remainingBudget }} free</span>
+      @if (selectedCrew) {
+        <p class="dialog-section-label">{{ selectedCrew }} · {{ tierName(tierFor(selectedCrew)) }}</p>
+        <div class="option-list">
+          @for (training of availableTrainings(); track training.id) {
+            @let blocked = !training.available || !training.affordable;
+            <button class="training-option" [class.blocked]="blocked"
+              [style.border-left]="'3px solid ' + getCrewColor(selectedCrew)"
+              (click)="selectTraining(training)" [disabled]="blocked">
+              <div class="to-main">
+                <span class="to-topic">{{ training.topic }}</span>
+                <span class="stamp-label">{{ training.threshold_pp }} PP · {{ training.sessions_required }} sessions</span>
+              </div>
+              <span class="to-desc">{{ training.description }}</span>
+              <span class="to-note"><span class="ms sm">military_tech</span> {{ training.reward }}</span>
+              @if (!training.available) {
+                <span class="to-note blocked-note"><span class="ms sm">lock</span> Requires a deeper relationship</span>
+              } @else if (!training.affordable) {
+                <span class="to-note blocked-note"><span class="ms sm">schedule</span> No session fits — only {{ data.remainingBudget }} free</span>
+              } @else {
+                <span class="to-note go-note"><span class="ms sm">chevron_right</span> Choose a session</span>
+              }
+            </button>
+          } @empty {
+            <div class="empty-state"><span class="ms">school</span><p>Nothing available with {{ selectedCrew }} yet. Build the relationship first.</p></div>
+          }
+        </div>
+      }
+    }
+
+    <!-- ============ STEP 2 — pick the session ============ -->
+    @else if (selectedTraining(); as t) {
+      <button class="back-link" (click)="backToTraining()">
+        <span class="ms sm">arrow_back</span> All trainings
+      </button>
+
+      <div class="session-head" [style.border-left]="'3px solid ' + getCrewColor(selectedCrew)">
+        <div class="to-main">
+          <span class="to-topic">{{ t.topic }}</span>
+          <span class="stamp-label">{{ t.threshold_pp }} PP · {{ t.sessions_required }} sessions</span>
+        </div>
+        <span class="sh-crew" [style.color]="getCrewColor(selectedCrew)">{{ selectedCrew }}</span>
+        <span class="to-note"><span class="ms sm">military_tech</span> {{ t.reward }}</span>
+      </div>
+
+      <div class="session-picker">
+        <p class="dialog-section-label">Sessions — complete them in order</p>
+        @for (s of t.sessions; track s.id) {
+          @let done = sessionDone(t.topic, s);
+          @let locked = sessionLocked(t.topic, s);
+          @let unaffordable = !done && !locked && !sessionAffordable(s);
+          <button class="session-option"
+            [class.blocked]="done || locked || unaffordable"
+            [class.is-done]="done"
+            [class.chosen]="selectedSession()?.id === s.id"
+            (click)="selectSession(t.topic, s)"
+            [disabled]="done || locked || unaffordable">
+            <span class="so-num">{{ s.session_number }}</span>
+            <span class="wt-badge" [class]="lengthClass(s.length)">{{ lengthLabel(s.length) }}</span>
+            @if (showRolls()) {
+              <span class="so-roll">{{ s.roll_type }}</span>
+            } @else {
+              <span class="so-roll">Session {{ s.session_number }}</span>
+            }
+            @if (done) {
+              <span class="so-pp done">✓ done</span>
+            } @else if (locked) {
+              <span class="so-pp"><span class="ms sm">lock</span></span>
+            } @else if (unaffordable) {
+              <span class="so-pp">needs {{ sessionCost(s) }}</span>
+            } @else {
+              <span class="so-pp">+{{ s.pp_success }} / +{{ s.pp_fail }} PP</span>
             }
           </button>
-
-          @if (selectedTraining()?.id === training.id && training.sessions.length > 0) {
-            <div class="session-picker">
-              <p class="stamp-label" style="margin: 2px 0 4px;">Which session?</p>
-              @for (s of training.sessions; track s.id) {
-                @let unaffordable = !sessionAffordable(s);
-                <button class="session-option" [class.blocked]="unaffordable"
-                  [class.chosen]="selectedSession()?.id === s.id"
-                  (click)="selectSession(s)" [disabled]="unaffordable">
-                  <span class="so-num">{{ s.session_number }}</span>
-                  <span class="wt-badge" [class]="lengthClass(s.length)">{{ lengthLabel(s.length) }}</span>
-                  @if (showRolls()) {
-                    <span class="so-roll">{{ s.roll_type }}</span>
-                  } @else {
-                    <span class="so-roll">Session {{ s.session_number }}</span>
-                  }
-                  <span class="so-pp">+{{ s.pp_success }} / +{{ s.pp_fail }} PP</span>
-                </button>
-              }
-            </div>
-          }
-        } @empty {
-          <div class="empty-state"><span class="ms">school</span><p>Nothing available with {{ selectedCrew }} yet. Build the relationship first.</p></div>
         }
       </div>
     }
