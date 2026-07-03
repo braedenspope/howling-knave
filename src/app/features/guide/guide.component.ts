@@ -39,9 +39,9 @@ export class GuideComponent {
   }));
 
   readonly thresholds: ThresholdCard[] = [
-    { pp: 3, label: 'Straightforward', blurb: 'A clean skill or technique. A few good sessions and it is yours.' },
-    { pp: 4, label: 'Demanding', blurb: 'More complex, or carrying some weight. It asks for real commitment.' },
-    { pp: 5, label: 'Profound', blurb: 'A hard-won skill — or one that asks something personal of you both.' },
+    { pp: 6, label: 'Straightforward', blurb: 'A clean skill or technique. Light personal content.' },
+    { pp: 9, label: 'Weighty', blurb: 'Some complexity, or a skill that carries narrative weight.' },
+    { pp: 12, label: 'Demanding', blurb: 'A hard skill — or one that asks something personal of you both.' },
   ];
 
   readonly tiers = [1, 2, 3, 4, 5].map(n => ({

@@ -114,7 +114,7 @@ export interface TrainingProgress {
   training_topic: string;
   /** Progress Points earned toward this training's threshold. */
   pp_accumulated: number;
-  /** PP threshold required to unlock the benefit (3 / 4 / 5). */
+  /** PP threshold required to unlock the benefit (6 / 9 / 12). */
   threshold_pp: number;
   /** Failed Short sessions logged; the third short session auto-completes the training. */
   short_fails: number;

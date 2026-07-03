@@ -58,6 +58,40 @@
   gap: 6px;
 }
 
+.tier-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.tier-edit-row .tier-pips-edit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+// Tier 0 — "Wary": the crewmate refuses to train.
+.refuse-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-card-border);
+  background: rgba(15, 11, 7, 0.6);
+  color: var(--text-faint);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, box-shadow 0.15s, color 0.15s;
+
+  .ms { font-size: 14px; }
+  &.on {
+    color: #f0d8c8;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 4px rgba(138, 74, 58, 0.4);
+  }
+  &:hover { transform: scale(1.15); box-shadow: 0 0 8px rgba(138, 74, 58, 0.35); }
+}
+
 // Porthole-style pips (circles with progressive sizing)
 .tier-pip {
   width: 16px;

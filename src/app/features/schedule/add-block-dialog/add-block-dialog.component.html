@@ -31,7 +31,12 @@
         </mat-select>
       </mat-form-field>
 
-      @if (selectedCrew) {
+      @if (selectedCrew && tierFor(selectedCrew) <= 0) {
+        <div class="correction-note">
+          <span class="ms">block</span>
+          <span>{{ selectedCrew }} refuses to train with you for now. Earn their regard first.</span>
+        </div>
+      } @else if (selectedCrew) {
         <p class="dialog-section-label">{{ selectedCrew }} · {{ tierName(tierFor(selectedCrew)) }}</p>
         <div class="option-list">
           @for (training of availableTrainings(); track training.id) {

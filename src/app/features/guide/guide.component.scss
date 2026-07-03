@@ -214,7 +214,7 @@ strong { color: var(--text-primary); }
 }
 
 /* ---- thresholds ---- */
-.thr-pips { display: flex; gap: 5px; }
+.thr-pips { display: flex; flex-wrap: wrap; gap: 5px; }
 .thr-card .pip.filled,
 .thr-pips .pip.filled {
   width: 12px; height: 12px;

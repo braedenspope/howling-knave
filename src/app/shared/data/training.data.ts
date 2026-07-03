@@ -64,6 +64,7 @@ export const CREW_META: Record<string, CrewMeta> = {
 };
 
 export const TIER_NAMES: Record<number, string> = {
+  0: 'Wary',
   1: 'Stranger',
   2: 'Familiar',
   3: 'Trusted',
@@ -72,6 +73,7 @@ export const TIER_NAMES: Record<number, string> = {
 };
 
 export const TIER_COLORS: Record<number, string> = {
+  0: '#8a4a3a',
   1: '#5a5040',
   2: '#4a7a8a',
   3: '#5a8a4a',

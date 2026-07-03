@@ -1,4 +1,4 @@
-<p class="dm-hint">Adjust each player's standing with the crew. Tap a pip to set the tier; the player's Crew page and catalog update live.</p>
+<p class="dm-hint">Adjust each player's standing with the crew. Tap a pip to set the tier, or the ⃠ to make the crewmate <em>Wary</em> — refusing to train at all. The player's Crew page and catalog update live.</p>
 
 <div class="hk-tabs">
   @for (user of scheduleService.allUsers(); track user.id) {
@@ -19,13 +19,21 @@
             {{ getTierName(uid, crew) }}
           </span>
         </div>
-        <div class="tier-pips-edit">
-          @for (pip of [1, 2, 3, 4, 5]; track pip) {
-            <button class="tier-pip"
-              [style.background]="pip <= getTier(uid, crew) ? getTierColor(pip) : 'rgba(15,11,7,0.6)'"
-              [style.border-color]="pip <= getTier(uid, crew) ? getTierColor(pip) : 'var(--bg-card-border)'"
-              (click)="setTier(uid, crew, pip)" [title]="getTierNameByNum(pip)"></button>
-          }
+        <div class="tier-edit-row">
+          <button class="refuse-btn" [class.on]="getTier(uid, crew) === 0"
+            [style.background]="getTier(uid, crew) === 0 ? getTierColor(0) : 'rgba(15,11,7,0.6)'"
+            [style.border-color]="getTier(uid, crew) === 0 ? getTierColor(0) : 'var(--bg-card-border)'"
+            (click)="setTier(uid, crew, 0)" title="Wary — refuses to train">
+            <span class="ms sm">block</span>
+          </button>
+          <div class="tier-pips-edit">
+            @for (pip of [1, 2, 3, 4, 5]; track pip) {
+              <button class="tier-pip"
+                [style.background]="pip <= getTier(uid, crew) ? getTierColor(pip) : 'rgba(15,11,7,0.6)'"
+                [style.border-color]="pip <= getTier(uid, crew) ? getTierColor(pip) : 'var(--bg-card-border)'"
+                (click)="setTier(uid, crew, pip)" [title]="getTierNameByNum(pip)"></button>
+            }
+          </div>
         </div>
         <button class="btn btn-ghost" style="margin-top: 8px; padding: 4px 8px;" (click)="toggleNotes(uid, crew)">
           <span class="ms sm">{{ hasNotes(uid, crew) ? 'note' : 'note_add' }}</span> Notes
