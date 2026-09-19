@@ -229,3 +229,80 @@ Signals persisted to `localStorage`, applied via `document.documentElement.style
 | 6 | Tweaks panel | none | S–M | Mostly CSS-var plumbing |
 
 **Recommended first slice:** #1 + #6 (lock gives the system stakes; the tweaks panel is cheap polish), then #2/#3 together (they share the duty ledger), then #4, then #5 when you want the phone experience.
+
+---
+
+## 7. Play mode — the block-by-block montage runner — **built**
+
+After the schedule is filled in and every day is sealed, the DM runs the voyage
+one hour at a time. Migration `011_play_mode.sql`.
+
+### The loop
+
+Hour 1 for every player in turn order, then hour 2, and so on through each day.
+A training that spans four hours is **rolled four times** — one roll per hour.
+Hours a player has nothing booked for are skipped.
+
+| Stop kind | Shown as | Controls |
+|---|---|---|
+| `roll` | a training hour with its roll type, scene seed and hidden bonus (DM only) | Success / Failure |
+| `custom` | an Independent or home-brewed activity — anything with no `trainings` row behind it | Move on |
+| `duty` | a ship duty | Move on |
+
+### Scoring — supersedes the PP rules in 007 and the mercy rule in 009
+
+* every landed roll is worth **1 point** toward the training's `threshold_pp`
+* if **every** roll for a training on a **given day** misses, that day is worth
+  **1 point** for the attempt
+* points are capped at the threshold; reaching it completes the training
+
+`block_rolls` is the single source of truth. `TrainingProgress.pp_accumulated`
+is always **recomputed** from it (`PlayService.rescore`), never incremented —
+that is what makes Back, re-marking and mid-session corrections exact. The
+rescore query spans every voyage, so progress carried in from an earlier
+crossing survives.
+
+`schedule_blocks.status` is a derived summary: `pending` until every hour of the
+block is rolled, then `success` if any hour landed, `failure` if none did.
+
+> Net effect on the seeded curriculum: Short and Medium sessions score exactly
+> as they did before (their `pp_success` already equalled their hour count).
+> The 13 **Long** sessions now pay 4 instead of 3, so paths using them complete
+> marginally faster.
+
+### Schema
+
+| Table | Key columns |
+|---|---|
+| `block_rolls` | id, block_id, roll_index (0-based within the span), outcome |
+| `voyage_play_state` | voyage_id (pk), active, turn_order (uuid[]), cursor |
+
+RLS: everyone reads, only the DM writes. Both tables are added to the
+`supabase_realtime` publication so players' screens follow the DM's cursor.
+
+### Service — `features/play/play.service.ts`
+
+- `queue()` — computed list of every `PlayStop`, in play order
+- `current()` / `cursor()` / `finished()`
+- `start(voyageId, turnOrder)`, `advance()`, `back()`, `jumpTo(i)`, `stop()`
+- `recordRoll(block, index, outcome)`, `setAllRolls(block, outcome)`, `clearBlockRolls(block)`
+- `rescore(userId, crew, topic)` — recompute from the roll log and write
+
+### UI
+
+- **DM dashboard → "Run the Day"** (`play-setup`): the seal gate (which days are
+  still waiting, and on whom), the turn-order list, and **Begin the montage**.
+  Order is set once per voyage and editable mid-run.
+- **`/play`** (`play-runner`): one card per stop — character, crew member,
+  topic, "Roll 2 of 4" with a pip per hour, points so far. DM gets
+  Success / Failure / Back; players get the same card, read-only and live.
+- **Nav**: a gold "Montage" link appears for everyone while a run is active.
+
+### Edge cases
+
+- The board's per-block Success/Failure and the Outcomes grid both write the
+  same rolls, so all three paths agree. The Outcomes grid also exposes a
+  clickable pip per hour for fixing a single misrecorded roll.
+- Back leaves the recorded outcome in place; re-marking overwrites it.
+- The cursor is an index into the queue, which is stable because the days are
+  sealed for the duration of the run.

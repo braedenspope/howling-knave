@@ -1,0 +1,89 @@
+<p class="dm-hint">
+  Run the voyage hour by hour: hour 1 for every player in turn, then hour 2, and on through each day.
+  A training that spans four hours is rolled four times — every landed roll is a point, and a training
+  whose rolls all miss on a day still earns one for the attempt.
+</p>
+
+@if (!voyageService.activeVoyage()) {
+  <div class="empty-state">
+    <span class="ms">sailing</span>
+    <p>No active voyage. Declare a crossing before running the montage.</p>
+  </div>
+} @else {
+
+  @if (play.isActive()) {
+    <div class="run-banner">
+      <div class="run-banner-text">
+        <strong>A run is under way</strong>
+        <span>Stop {{ play.cursor() + 1 }} of {{ play.queue().length }}</span>
+      </div>
+      <div class="run-banner-actions">
+        <button class="btn" (click)="resume()"><span class="ms sm">play_arrow</span> Resume</button>
+        <button class="btn-ghost" (click)="end()">End run</button>
+      </div>
+    </div>
+  }
+
+  <!-- Seal gate -->
+  <div class="section-title">
+    <div class="section-title-row"><h2>All hands sealed</h2></div>
+    <div class="rope-divider"></div>
+  </div>
+
+  @if (allSealed()) {
+    <p class="gate-ok"><span class="ms sm">check_circle</span> Every day is sealed. The schedule is set.</p>
+  } @else if (scheduleService.allUsers().length === 0) {
+    <p class="gate-wait">No players enrolled yet.</p>
+  } @else {
+    <p class="gate-wait">
+      <span class="ms sm">hourglass_empty</span>
+      Waiting on seals before the montage can begin.
+    </p>
+    <div class="gate-list">
+      @for (day of unsealed(); track day.dayNumber) {
+        <div class="gate-row">
+          <span class="gate-day">Day {{ day.dayNumber }}</span>
+          <span class="gate-names">{{ day.waitingOn.join(', ') }}</span>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Turn order -->
+  <div class="section-title">
+    <div class="section-title-row"><h2>Turn order</h2></div>
+    <div class="rope-divider"></div>
+  </div>
+
+  <p class="dm-hint">The order the crew take each hour. Set once for the voyage.</p>
+
+  <div class="order-list">
+    @for (userId of order(); track userId; let i = $index) {
+      <div class="order-row">
+        <span class="order-num">{{ i + 1 }}</span>
+        <span class="order-name">{{ characterName(userId) }}</span>
+        <div class="order-actions">
+          <button class="btn-icon" title="Move up" [disabled]="i === 0" (click)="moveUp(i)">
+            <span class="ms sm">arrow_upward</span>
+          </button>
+          <button class="btn-icon" title="Move down" [disabled]="i === order().length - 1" (click)="moveDown(i)">
+            <span class="ms sm">arrow_downward</span>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="setup-actions">
+    @if (play.isActive()) {
+      <button class="btn" [disabled]="saving()" (click)="saveOrder()">Save turn order</button>
+    } @else {
+      <button
+        class="btn btn-brass"
+        [disabled]="!allSealed() || saving() || order().length === 0"
+        (click)="begin()">
+        <span class="ms sm">play_arrow</span> Begin the montage
+      </button>
+    }
+  </div>
+}

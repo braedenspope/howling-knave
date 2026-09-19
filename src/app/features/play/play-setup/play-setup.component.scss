@@ -1,0 +1,133 @@
+.run-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(196, 154, 60, 0.4);
+  background: rgba(196, 154, 60, 0.08);
+}
+
+.run-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    font-family: var(--font-heading);
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    color: var(--accent-gold);
+  }
+
+  span {
+    font-family: var(--font-data);
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+}
+
+.run-banner-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.gate-ok,
+.gate-wait {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  margin: 0 0 10px;
+}
+
+.gate-ok { color: var(--success-green); }
+.gate-wait { color: var(--text-secondary); }
+
+.gate-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.gate-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 6px 10px;
+  border-left: 3px solid var(--failure-red);
+  background: rgba(36, 28, 20, 0.4);
+  border-radius: 2px;
+}
+
+.gate-day {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.gate-names {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.order-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(36, 28, 20, 0.4);
+  border-left: 3px solid var(--accent-brass);
+  border-radius: 2px;
+}
+
+.order-num {
+  font-family: var(--font-data);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  width: 18px;
+  flex-shrink: 0;
+}
+
+.order-name {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.order-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+
+  button[disabled] {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+}
+
+.setup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

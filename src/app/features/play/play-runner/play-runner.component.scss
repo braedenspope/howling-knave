@@ -1,0 +1,274 @@
+.runner-page {
+  max-width: 660px;
+  margin: 0 auto;
+}
+
+// ---- where we are ----
+
+.runner-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.runner-where {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-heading);
+  letter-spacing: 1px;
+}
+
+.runner-day {
+  font-size: 18px;
+  color: var(--accent-gold);
+}
+
+.runner-dot { color: var(--text-faint); }
+
+.runner-hour {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.runner-count {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  font-family: var(--font-data);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.runner-today {
+  font-size: 10px;
+  color: var(--text-faint);
+}
+
+.runner-bar {
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.runner-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-brass), var(--accent-gold));
+  transition: width 240ms ease;
+}
+
+// ---- the stop ----
+
+.runner-card {
+  border-left: 4px solid var(--accent-brass);
+  padding: 20px 22px;
+  margin-bottom: 18px;
+}
+
+.runner-player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.runner-crew {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-style: italic;
+  margin-bottom: 8px;
+}
+
+.runner-topic {
+  margin: 0 0 10px;
+  font-family: var(--font-heading);
+  font-size: 22px;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+.runner-desc {
+  margin: 0 0 14px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+// ---- roll state ----
+
+.runner-roll {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  border-top: 1px solid rgba(196, 154, 60, 0.18);
+  border-bottom: 1px solid rgba(196, 154, 60, 0.18);
+  margin-bottom: 12px;
+}
+
+.runner-roll-label {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--accent-gold);
+}
+
+.runner-pips {
+  display: flex;
+  gap: 5px;
+  flex: 1;
+}
+
+.runner-pip {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(220, 208, 190, 0.3);
+  background: rgba(0, 0, 0, 0.3);
+
+  &.pip-success {
+    background: var(--success-green);
+    border-color: var(--success-green);
+  }
+
+  &.pip-failure {
+    background: var(--failure-red);
+    border-color: var(--failure-red);
+  }
+
+  &.pip-current {
+    box-shadow: 0 0 0 2px rgba(196, 154, 60, 0.7);
+  }
+}
+
+.runner-rolltype,
+.runner-seed,
+.runner-bonus,
+.runner-recorded {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 0 8px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.runner-rolltype {
+  font-family: var(--font-data);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--accent-copper);
+}
+
+.runner-seed {
+  font-family: var(--font-body);
+  font-style: italic;
+  color: var(--text-secondary);
+  padding-left: 10px;
+  border-left: 2px solid rgba(196, 154, 60, 0.35);
+}
+
+.runner-bonus {
+  font-family: var(--font-body);
+  color: var(--accent-gold);
+}
+
+.runner-recorded {
+  font-family: var(--font-data);
+  color: var(--failure-red);
+
+  &.rec-success { color: var(--success-green); }
+}
+
+// ---- controls ----
+
+.runner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  button { flex: 1; }
+  button:first-child { flex: 0 0 auto; }
+
+  button[disabled] {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+}
+
+.runner-succeed {
+  background: rgba(90, 138, 74, 0.22);
+  border-color: var(--success-green);
+  color: var(--success-green);
+}
+
+.runner-fail {
+  background: rgba(166, 61, 47, 0.2);
+  border-color: var(--failure-red);
+  color: var(--failure-red);
+}
+
+.runner-foot {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.runner-watching {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text-faint);
+}
+
+// ---- finished ----
+
+.runner-done {
+  text-align: center;
+  padding: 48px 16px;
+
+  .ms {
+    font-size: 48px;
+    color: var(--accent-gold);
+  }
+
+  h2 {
+    font-family: var(--font-heading);
+    letter-spacing: 1px;
+    margin: 12px 0 6px;
+  }
+
+  p {
+    font-family: var(--font-body);
+    color: var(--text-secondary);
+    margin: 0 0 20px;
+  }
+}
+
+.runner-done-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+@media (max-width: 600px) {
+  .runner-card { padding: 16px; }
+  .runner-topic { font-size: 18px; }
+  .runner-actions { flex-wrap: wrap; }
+}

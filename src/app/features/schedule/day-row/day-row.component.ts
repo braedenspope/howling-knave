@@ -12,10 +12,11 @@ import { ConfirmationService } from '../confirmation.service';
 import { CorrectionService } from '../../dm/correction.service';
 import { TrainingService } from '../../dm/training.service';
 import { TrainingTrackerService } from '../../dm/training-tracker.service';
+import { PlayService } from '../../play/play.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ToastService } from '../../../shared/toast.service';
 import { CREW_COLORS, TIER_NAMES } from '../../../shared/data/training.data';
-import { Day, ScheduleBlock, DAY_BUDGET, SLOT_WEIGHT_UNITS, SLOT_WEIGHT_LABEL, SESSION_PP, TrainingSession } from '../../../shared/models';
+import { Day, ScheduleBlock, DAY_BUDGET, SLOT_WEIGHT_UNITS, SLOT_WEIGHT_LABEL, TrainingSession } from '../../../shared/models';
 
 export interface SlotItem {
   type: 'block' | 'empty';
@@ -61,6 +62,7 @@ export class DayRowComponent {
     private corrections: CorrectionService,
     private trainingService: TrainingService,
     private tracker: TrainingTrackerService,
+    private play: PlayService,
     private auth: AuthService,
     private toast: ToastService,
     private dialog: MatDialog,
@@ -371,7 +373,7 @@ export class DayRowComponent {
     const p = this.tracker.getProgress(block.user_id, block.crew_member, block.training_topic);
     if (!p) return '';
     const shown = p.completed ? p.threshold_pp : p.pp_accumulated;
-    return `${shown}/${p.threshold_pp} PP`;
+    return `${shown}/${p.threshold_pp} pts`;
   }
 
   /**
@@ -390,47 +392,22 @@ export class DayRowComponent {
     return this.trainingService.getTraining(block.crew_member, block.training_topic)
       ?.sessions.find(s => s.session_number === block.session_number);
   }
-  /** PP this block grants on success / failure (session-specific, else by length). */
-  private sessionPp(block: ScheduleBlock): { success: number; fail: number } {
-    const session = this.sessionFor(block);
-    if (session) return { success: session.pp_success, fail: session.pp_fail };
-    const rule = SESSION_PP[block.slot_weight];
-    return { success: rule.success, fail: rule.fail };
-  }
-  private thresholdFor(block: ScheduleBlock): number {
-    return this.trainingService.getTraining(block.crew_member, block.training_topic)?.threshold_pp ?? 3;
-  }
-
+  /**
+   * Marking from the board is a shortcut for "every hour of this block went the
+   * same way" — it writes the same `block_rolls` the montage runner does, so
+   * the board, the runner and the Outcomes grid all score off one log.
+   */
   private async resolve(block: ScheduleBlock, success: boolean) {
-    const target = success ? 'success' : 'failure';
-    if (block.status === target) return;
-
-    const pp = this.sessionPp(block);
-    const isShort = block.slot_weight === 'light';
-    const threshold = this.thresholdFor(block);
-
-    // Switching outcomes (or re-marking) — undo the prior score first.
-    if (block.status === 'success' || block.status === 'failure') {
-      await this.tracker.revertSession(block.user_id, block.crew_member, block.training_topic,
-        { status: block.status, isShort, ppSuccess: pp.success, ppFail: pp.fail, threshold });
+    const err = await this.play.setAllRolls(block, success ? 'success' : 'failure');
+    if (err) {
+      this.toast.show(err);
+      return;
     }
-
-    await this.scheduleService.updateBlockStatus(block.id, target);
-    const res = await this.tracker.markSession(block.user_id, block.crew_member, block.training_topic,
-      { isShort, success, ppSuccess: pp.success, ppFail: pp.fail, threshold });
-
-    const gained = success ? pp.success : pp.fail;
-    if (res.pity) {
-      this.toast.show(`The lesson finally lands — ${block.training_topic} · UNLOCKED`);
-    } else if (success) {
-      this.toast.show(res.completed
-        ? `Success +${gained} — ${block.training_topic} · UNLOCKED`
-        : `Success +${gained} — ${block.training_topic} · ${res.pp}/${res.threshold} PP`);
-    } else {
-      this.toast.show(gained > 0
-        ? `Failure +${gained} — ${block.training_topic} · ${res.pp}/${res.threshold} PP`
-        : `Failure — ${block.training_topic} · no progress`);
-    }
+    this.toast.show(
+      this.play.isMastered(block)
+        ? `${block.training_topic} · UNLOCKED`
+        : `${success ? 'Success' : 'Failure'} — ${block.training_topic} · ${this.play.pointsLabel(block)} pts`,
+    );
   }
 
   async markSuccess(block: ScheduleBlock) {
@@ -440,18 +417,8 @@ export class DayRowComponent {
     await this.resolve(block, false);
   }
   async resetOutcome(block: ScheduleBlock) {
-    if (block.status === 'success' || block.status === 'failure') {
-      const pp = this.sessionPp(block);
-      await this.tracker.revertSession(block.user_id, block.crew_member, block.training_topic, {
-        status: block.status,
-        isShort: block.slot_weight === 'light',
-        ppSuccess: pp.success,
-        ppFail: pp.fail,
-        threshold: this.thresholdFor(block),
-      });
-    }
-    await this.scheduleService.updateBlockStatus(block.id, 'pending');
-    this.toast.show(`Reset to pending — ${block.training_topic}`);
+    const err = await this.play.clearBlockRolls(block);
+    this.toast.show(err ?? `Reset to pending — ${block.training_topic}`);
   }
 
   // ----- mobile timeline helpers -----

@@ -26,6 +26,12 @@
         <mat-icon>help_outline</mat-icon>
         <span class="nav-label">Guide</span>
       </a>
+      @if (play.isActive()) {
+        <a mat-button routerLink="/play" routerLinkActive="active-link" class="play-link">
+          <mat-icon>play_circle</mat-icon>
+          <span class="nav-label">Montage</span>
+        </a>
+      }
       @if (auth.isDm()) {
         <a mat-button routerLink="/dm" routerLinkActive="active-link">
           <mat-icon>shield</mat-icon>
@@ -65,6 +71,12 @@
         <mat-icon>help_outline</mat-icon>
         <span>Guide</span>
       </a>
+      @if (play.isActive()) {
+        <a mat-button routerLink="/play" routerLinkActive="active-link" class="play-link" (click)="closeMenu()">
+          <mat-icon>play_circle</mat-icon>
+          <span>Montage</span>
+        </a>
+      }
       @if (auth.isDm()) {
         <a mat-button routerLink="/dm" routerLinkActive="active-link" (click)="closeMenu()">
           <mat-icon>shield</mat-icon>

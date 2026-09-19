@@ -98,6 +98,29 @@ export interface ScheduleBlock {
   updated_at: string;
 }
 
+export type RollOutcome = 'success' | 'failure';
+
+/** One rolled hour inside a schedule block (play mode). */
+export interface BlockRoll {
+  id: string;
+  block_id: string;
+  /** 0-based offset within the block's span: `hour - slot_position`. */
+  roll_index: number;
+  outcome: RollOutcome;
+  created_at: string;
+}
+
+/** The shared play-mode cursor for a voyage — one row, watched by every client. */
+export interface PlayState {
+  voyage_id: string;
+  active: boolean;
+  /** Player ids in the order they take their turn each hour. */
+  turn_order: string[];
+  /** Index into the computed stop queue; equals its length when finished. */
+  cursor: number;
+  updated_at: string;
+}
+
 export interface RelationshipTier {
   id: string;
   user_id: string;
@@ -112,11 +135,15 @@ export interface TrainingProgress {
   user_id: string;
   crew_member: string;
   training_topic: string;
-  /** Progress Points earned toward this training's threshold. */
+  /**
+   * Progress Points earned toward this training's threshold — one per landed
+   * roll, plus one for any day whose rolls all missed. Always recomputed from
+   * `block_rolls`, never incremented.
+   */
   pp_accumulated: number;
   /** PP threshold required to unlock the benefit (6 / 9 / 12). */
   threshold_pp: number;
-  /** Failed Short sessions logged; the third short session auto-completes the training. */
+  /** Legacy: failed Short sessions under the pre-011 mercy rule. No longer read. */
   short_fails: number;
   /** Legacy success-count columns, kept populated for back-compat. */
   successes_accumulated: number;
@@ -177,9 +204,10 @@ export interface TrainingWithCrew extends Training {
 }
 
 /**
- * Progress Points awarded by session length, per the campaign rules:
- * Short +1/+0, Medium +2/+1, Long +3/+1. Used as a fallback when a block has
- * no specific session attached.
+ * Legacy PP-by-length table: Short +1/+0, Medium +2/+1, Long +3/+1.
+ *
+ * Superseded by per-hour rolls (migration 011) for scoring; still used by the
+ * training editor to suggest defaults when authoring a session.
  */
 export const SESSION_PP: Record<SlotWeight, { success: number; fail: number }> = {
   light: { success: 1, fail: 0 },
@@ -201,3 +229,11 @@ export const SLOT_WEIGHT_LABEL: Record<SlotWeight, string> = {
 };
 
 export const DAY_BUDGET = 8;
+
+/**
+ * Play mode scoring (migration 011): one roll per hour, each success worth one
+ * point toward `threshold_pp`. A training whose every roll on a given day fails
+ * still earns `PITY_POINT` for the attempt.
+ */
+export const POINT_PER_SUCCESS = 1;
+export const PITY_POINT = 1;

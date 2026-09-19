@@ -44,6 +44,13 @@ export const routes: Routes = [
       import('./features/guide/guide.component').then(m => m.GuideComponent),
   },
   {
+    // Players watch the montage live; only the DM gets the controls.
+    path: 'play',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/play/play-runner/play-runner.component').then(m => m.PlayRunnerComponent),
+  },
+  {
     path: 'dm',
     canActivate: [authGuard, dmGuard],
     loadComponent: () =>

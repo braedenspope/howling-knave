@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { SlotWeight, SESSION_PP, SLOT_WEIGHT_LABEL, SLOT_WEIGHT_UNITS } from '../../shared/models';
+import { SlotWeight, SLOT_WEIGHT_LABEL, SLOT_WEIGHT_UNITS } from '../../shared/models';
 import { TIER_NAMES, TIER_COLORS } from '../../shared/data/training.data';
 
 interface LengthCard {
@@ -7,8 +7,6 @@ interface LengthCard {
   label: string;
   hours: number;
   cost: number;
-  success: number;
-  fail: number;
   blurb: string;
 }
 
@@ -33,8 +31,6 @@ export class GuideComponent {
     label: SLOT_WEIGHT_LABEL[key],
     hours: SLOT_WEIGHT_UNITS[key],
     cost: SLOT_WEIGHT_UNITS[key],
-    success: SESSION_PP[key].success,
-    fail: SESSION_PP[key].fail,
     blurb: BLURBS[key],
   }));
 

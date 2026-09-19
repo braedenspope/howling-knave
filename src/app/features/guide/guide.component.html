@@ -50,59 +50,60 @@
   <div class="hk-card corners guide-block">
     <div class="gb-head"><span class="ms">trending_up</span><h3>Earn Progress Points</h3></div>
     <p>
-      Every session you sit through earns <strong>Progress Points (PP)</strong>. How many depends on the
-      length of the session — and on how it goes at the table.
+      Training is run <strong>hour by hour</strong>. Every hour of a session is its own roll, and every roll
+      that lands is worth <strong>one Progress Point (PP)</strong> — so a longer session is worth more
+      because you sit through more of it, not because it counts for extra.
     </p>
     <div class="pp-table">
       <div class="pp-row pp-head">
-        <span>Session</span><span>Success</span><span>Setback</span>
+        <span>Session</span><span>Rolls</span><span>Most it can earn</span>
       </div>
       @for (l of lengths; track l.key) {
         <div class="pp-row">
           <span><span class="wt-badge" [class]="lengthClass(l.key)">{{ l.label }}</span></span>
-          <span class="pp-val good">+{{ l.success }} PP</span>
-          <span class="pp-val" [class.muted]="l.fail === 0">{{ l.fail > 0 ? '+' + l.fail + ' PP' : 'nothing' }}</span>
+          <span class="pp-val">{{ l.hours }} {{ l.hours === 1 ? 'roll' : 'rolls' }}</span>
+          <span class="pp-val good">+{{ l.hours }} PP</span>
         </div>
       }
     </div>
     <p class="note">
       <span class="ms sm">info</span>
-      Even a setback in a Medium or Long session leaves something behind — sustained effort always counts.
-      A short lesson that doesn't land, though, gives nothing, and you'll need to come back and try again.
+      Land three of the four hours in a Long session and you bank 3 PP — a bad hour costs you that hour, not
+      the whole session.
     </p>
   </div>
 
   <!-- ============ THE MERCY RULE ============ -->
   <div class="hk-card corners guide-block mercy-block">
-    <div class="gb-head"><span class="ms">volunteer_activism</span><h3>Keep at it — the third try always lands</h3></div>
+    <div class="gb-head"><span class="ms">volunteer_activism</span><h3>A wasted day is never wasted</h3></div>
     <p>
-      A run of bad luck on <strong>Short</strong> sessions won't trap you. Fail a Short session of the same
-      training <strong>twice</strong>, and the <strong>third</strong> Short session finishes the whole
-      training automatically — whatever the dice say.
+      Miss <strong>every</strong> roll of a training on a given day and you still walk away with
+      <strong>1 PP</strong> for the attempt. A day at the mast is never worth nothing — you can have a
+      terrible day, but you can't have an empty one.
     </p>
     <div class="mercy-steps">
       <div class="mercy-step">
         <span class="mercy-mark fail"><span class="ms">close</span></span>
-        <span class="mercy-cap">1st try</span>
+        <span class="mercy-cap">1st hour</span>
         <span class="mercy-sub">Setback</span>
       </div>
       <span class="mercy-arrow ms">chevron_right</span>
       <div class="mercy-step">
         <span class="mercy-mark fail"><span class="ms">close</span></span>
-        <span class="mercy-cap">2nd try</span>
+        <span class="mercy-cap">2nd hour</span>
         <span class="mercy-sub">Setback</span>
       </div>
       <span class="mercy-arrow ms">chevron_right</span>
       <div class="mercy-step">
         <span class="mercy-mark done"><span class="ms">military_tech</span></span>
-        <span class="mercy-cap gold-text">3rd try</span>
-        <span class="mercy-sub">It lands — training complete</span>
+        <span class="mercy-cap gold-text">End of day</span>
+        <span class="mercy-sub">+1 PP for trying</span>
       </div>
     </div>
     <p class="note">
       <span class="ms sm">info</span>
-      This safety net is only for Short sessions — the ones that give nothing on a setback. Medium and Long
-      sessions already make progress whether you succeed or not.
+      It is one point for the day, not one per session — land even a single roll and you score those
+      successes instead.
     </p>
   </div>
 

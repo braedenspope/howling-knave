@@ -54,9 +54,35 @@ export class TrainingTrackerService {
   }
 
   /**
-   * Score a resolved session. PP accrues toward the threshold; failed short
+   * Write a training's progress wholesale.
+   *
+   * Play mode (migration 011) recomputes points from `block_rolls` rather than
+   * incrementing them, so it replaces the stored value outright. This is the
+   * scoring path in use; `markSession` / `revertSession` below are the older
+   * incremental ones, kept for any caller still on the PP-by-length rules.
+   */
+  async setProgress(
+    userId: string,
+    crewMember: string,
+    topic: string,
+    v: { points: number; threshold: number; completed: boolean },
+  ): Promise<string | null> {
+    const existing = this.getProgress(userId, crewMember, topic);
+    return this.write(userId, crewMember, topic, existing?.id, {
+      pp: v.points,
+      shortFails: existing?.short_fails ?? 0,
+      threshold: v.threshold,
+      completed: v.completed,
+    });
+  }
+
+  /**
+   * Legacy incremental scoring. PP accrues toward the threshold; failed short
    * sessions are tallied, and once two have failed the next short session
    * completes the training outright (the mercy rule).
+   *
+   * @deprecated Superseded by `setProgress` + `PlayService.rescore`, which
+   * recompute from the roll log. Retained for back-compat only.
    */
   async markSession(
     userId: string,
@@ -85,7 +111,11 @@ export class TrainingTrackerService {
     return { pp, threshold: o.threshold, completed, pity };
   }
 
-  /** Undo a previously-scored session (when an outcome is changed or reset). */
+  /**
+   * Undo a previously-scored session (when an outcome is changed or reset).
+   *
+   * @deprecated See `markSession`.
+   */
   async revertSession(
     userId: string,
     crewMember: string,

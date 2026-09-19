@@ -1,0 +1,129 @@
+<div class="page runner-page">
+
+  @if (!play.isActive()) {
+    <div class="empty-state">
+      <span class="ms">hourglass_empty</span>
+      <p>No montage is running.</p>
+      @if (isDm()) {
+        <button class="btn" (click)="toSetup()">Open the Captain's Charts</button>
+      }
+    </div>
+  } @else if (play.finished()) {
+    <div class="runner-done">
+      <span class="ms">done_all</span>
+      <h2>The voyage is run</h2>
+      <p>Every hour of {{ voyageService.activeVoyage()?.name }} has been resolved.</p>
+      @if (isDm()) {
+        <div class="runner-done-actions">
+          <button class="btn-ghost" (click)="back()">Step back</button>
+          <button class="btn btn-brass" (click)="end()">Close the montage</button>
+        </div>
+      }
+    </div>
+  } @else if (view(); as v) {
+
+    <!-- Where we are -->
+    <div class="runner-head">
+      <div class="runner-where">
+        <span class="runner-day">Day {{ v.stop.dayNumber }}</span>
+        <span class="runner-dot">·</span>
+        <span class="runner-hour">{{ hourLabel(v.stop) }}</span>
+      </div>
+      <span class="runner-count">
+        {{ play.cursor() + 1 }} / {{ play.queue().length }}
+        <span class="runner-today">{{ remainingToday() }} left today</span>
+      </span>
+    </div>
+    <div class="runner-bar"><div class="runner-bar-fill" [style.width.%]="progressPct()"></div></div>
+
+    <!-- The stop -->
+    <div class="hk-card corners runner-card" [style.border-left-color]="v.crewColor">
+      <div class="runner-player">
+        <span class="character-name">{{ v.characterName }}</span>
+        @if (v.kind === 'duty') {
+          <span class="duty-tag">Ship duty</span>
+        } @else if (v.kind === 'custom') {
+          <span class="chip">Independent</span>
+        } @else {
+          <span class="wt-badge" [class]="'wt-' + v.stop.block.slot_weight">{{ v.lengthLabel }}</span>
+        }
+      </div>
+
+      @if (v.kind !== 'duty') {
+        <div class="runner-crew">
+          <span class="crew-dot" [style.background]="v.crewColor"></span>
+          <span [style.color]="v.crewColor">{{ v.crewMember }}</span>
+        </div>
+      }
+
+      <h2 class="runner-topic">{{ v.topic }}</h2>
+
+      @if (v.description) { <p class="runner-desc">{{ v.description }}</p> }
+
+      @if (v.kind === 'roll') {
+        <div class="runner-roll">
+          <span class="runner-roll-label">{{ v.rollLabel }}</span>
+          <div class="runner-pips">
+            @for (h of v.history; track $index) {
+              <span
+                class="runner-pip"
+                [class.pip-success]="h === 'success'"
+                [class.pip-failure]="h === 'failure'"
+                [class.pip-current]="$index === v.stop.rollIndex"></span>
+            }
+          </div>
+          <span class="stamp-label">{{ v.points }} points{{ v.mastered ? ' · Mastered' : '' }}</span>
+        </div>
+
+        @if (isDm() && v.rollType) {
+          <p class="runner-rolltype"><span class="ms sm">casino</span> {{ v.rollType }}</p>
+        }
+        @if (isDm() && v.sceneSeed) {
+          <p class="runner-seed">{{ v.sceneSeed }}</p>
+        }
+        @if (isDm() && v.hiddenBonus) {
+          <p class="runner-bonus"><span class="ms sm">auto_awesome</span> {{ v.hiddenBonus }}</p>
+        }
+
+        @if (v.recorded) {
+          <p class="runner-recorded" [class.rec-success]="v.recorded === 'success'">
+            Already marked {{ v.recorded === 'success' ? 'a success' : 'a failure' }} — marking again overwrites it.
+          </p>
+        }
+      }
+    </div>
+
+    <!-- Controls -->
+    @if (isDm()) {
+      <div class="runner-actions">
+        <button class="btn-ghost" [disabled]="play.cursor() === 0 || busy()" (click)="back()">
+          <span class="ms sm">arrow_back</span> Back
+        </button>
+
+        @if (v.kind === 'roll') {
+          <button class="btn oc-failure runner-fail" [disabled]="busy()" (click)="mark('failure')">
+            <span class="ms sm">close</span> Failure
+          </button>
+          <button class="btn oc-success runner-succeed" [disabled]="busy()" (click)="mark('success')">
+            <span class="ms sm">check</span> Success
+          </button>
+        } @else {
+          <button class="btn btn-brass" [disabled]="busy()" (click)="next()">
+            Move on <span class="ms sm">arrow_forward</span>
+          </button>
+        }
+      </div>
+      <div class="runner-foot">
+        <button class="btn-ghost" (click)="end()">End the montage</button>
+      </div>
+    } @else {
+      <p class="runner-watching"><span class="ms sm">visibility</span> Watching the montage — the DM is calling the rolls.</p>
+    }
+
+  } @else {
+    <div class="empty-state">
+      <span class="ms">hourglass_empty</span>
+      <p>Nothing booked to run. Check the board's schedule.</p>
+    </div>
+  }
+</div>

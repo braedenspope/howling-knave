@@ -134,3 +134,10 @@ main {
     }
   }
 }
+
+/* Play-mode nav link — gold while a montage is under way. */
+.play-link {
+  color: var(--accent-gold);
+
+  mat-icon { color: var(--accent-gold); }
+}
