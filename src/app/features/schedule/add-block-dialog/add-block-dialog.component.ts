@@ -1,14 +1,12 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { TrainingService } from '../../dm/training.service';
 import { RelationshipService } from '../../dm/relationship.service';
 import { ScheduleService } from '../schedule.service';
 import { TrainingTrackerService } from '../../dm/training-tracker.service';
 import { AuthService } from '../../../core/auth/auth.service';
-import { CREW_LIST, CREW_COLORS, TIER_NAMES } from '../../../shared/data/training.data';
+import { CREW_LIST, CREW_COLORS, CREW_META, TIER_NAMES, TIER_COLORS } from '../../../shared/data/training.data';
 import { TrainingWithCrew, SlotWeight, SLOT_WEIGHTS, SLOT_WEIGHT_UNITS, SLOT_WEIGHT_LABEL } from '../../../shared/models';
 
 export interface AddBlockDialogData {
@@ -27,15 +25,23 @@ export interface AddBlockDialogResult {
   slotWeight: SlotWeight;
 }
 
-type TrainingOption = TrainingWithCrew & { available: boolean; affordable: boolean };
+type PickerFilter = 'all' | 'progress' | 'new';
+
+/** One crewmate's section of the picker — only trainings the player has unlocked. */
+interface PickerGroup {
+  crew: string;
+  role: string;
+  tier: number;
+  /** Already training with this crewmate today — one training per crewmate per day. */
+  taken: boolean;
+  trainings: TrainingWithCrew[];
+}
 
 @Component({
   selector: 'app-add-block-dialog',
   standalone: true,
   imports: [
     MatDialogModule,
-    MatFormFieldModule,
-    MatSelectModule,
     FormsModule,
   ],
   templateUrl: './add-block-dialog.component.html',
@@ -57,11 +63,48 @@ export class AddBlockDialogComponent implements OnInit {
   readonly lengths = SLOT_WEIGHTS;
 
   // Training mode
-  crewList = CREW_LIST;
-  selectedCrew = '';
-  selectedTraining = signal<TrainingOption | null>(null);
+  selectedTraining = signal<TrainingWithCrew | null>(null);
   selectedLength = signal<SlotWeight | null>(null);
-  availableTrainings = signal<TrainingOption[]>([]);
+  filter = signal<PickerFilter>('all');
+  readonly filters: { id: PickerFilter; label: string }[] = [
+    { id: 'all', label: 'All' },
+    { id: 'progress', label: 'In progress' },
+    { id: 'new', label: 'Not started' },
+  ];
+
+  /**
+   * The catalog of trainings this player can actually book, grouped by
+   * crewmate. Anything the relationship hasn't unlocked — and every training
+   * from a crewmate who is Wary of them — is left out entirely, as are
+   * trainings they've already mastered.
+   */
+  readonly groups = computed<PickerGroup[]>(() => {
+    const userId = this.userId;
+    if (!userId) return [];
+    this.relationshipService.tiers();   // re-run when a tier changes live
+    this.tracker.progress();
+    const filter = this.filter();
+
+    const groups: PickerGroup[] = [];
+    for (const crew of CREW_LIST) {
+      const tier = this.relationshipService.getTierForCrewMember(userId, crew);
+      if (tier <= 0) continue;
+      const trainings = this.trainingService.getTrainingsForCrewByName(crew)
+        .filter(t => t.tier_required <= tier && !this.isMastered(t))
+        .filter(t => filter === 'all' || (filter === 'progress') === this.pointsBanked(t) > 0)
+        .sort((a, b) => a.tier_required - b.tier_required || a.topic.localeCompare(b.topic));
+      if (trainings.length === 0) continue;
+      groups.push({
+        crew,
+        role: CREW_META[crew]?.role ?? '',
+        tier,
+        taken: this.isCrewTaken(crew),
+        trainings,
+      });
+    }
+    // Crewmates already booked today sink to the bottom.
+    return groups.sort((a, b) => Number(a.taken) - Number(b.taken));
+  });
 
   // Custom mode
   customCrew = '';
@@ -84,12 +127,21 @@ export class AddBlockDialogComponent implements OnInit {
   lengthClass(weight: string): string {
     return `wt-${weight}`;
   }
+  lengthName(weight: SlotWeight): string {
+    return SLOT_WEIGHT_LABEL[weight];
+  }
+  /** One pip per hour the block takes. */
+  hourPips(weight: SlotWeight): number[] {
+    return Array.from({ length: SLOT_WEIGHT_UNITS[weight] });
+  }
   tierName(tier: number): string {
     return TIER_NAMES[tier] ?? 'Unknown';
   }
-  tierFor(crew: string): number {
-    const userId = this.data.forUserId ?? this.auth.userId();
-    return userId ? this.relationshipService.getTierForCrewMember(userId, crew) : 1;
+  tierColor(tier: number): string {
+    return TIER_COLORS[tier] ?? '#5a5040';
+  }
+  pipArray(n: number): number[] {
+    return Array.from({ length: n }, (_, i) => i);
   }
 
   setMode(mode: 'training' | 'custom') {
@@ -121,26 +173,8 @@ export class AddBlockDialogComponent implements OnInit {
     return SLOT_WEIGHT_UNITS[this.customWeight] <= this.data.remainingBudget;
   }
 
-  onCrewChange() {
-    this.selectedTraining.set(null);
-    this.selectedLength.set(null);
-    this.trainingStep.set('pick');
-    const userId = this.data.forUserId ?? this.auth.userId();
-    if (!userId || !this.selectedCrew) {
-      this.availableTrainings.set([]);
-      return;
-    }
-    const tier = this.relationshipService.getTierForCrewMember(userId, this.selectedCrew);
-    const options = this.trainingService.getAvailableTrainings(
-      this.selectedCrew,
-      tier,
-      this.data.remainingBudget,
-    );
-    this.availableTrainings.set(options);
-  }
-
-  selectTraining(training: TrainingOption) {
-    if (!training.available || !training.affordable || this.isMastered(training)) return;
+  selectTraining(training: TrainingWithCrew) {
+    if (this.isCrewTaken(training.crew_member_name) || this.isMastered(training)) return;
     this.selectedTraining.set(training);
     // Default to the longest block that fits without planning past mastery.
     const fits = this.lengths.filter(l => this.lengthAffordable(l));
@@ -218,7 +252,7 @@ export class AddBlockDialogComponent implements OnInit {
     if (this.mode() === 'training') {
       const t = this.selectedTraining()!;
       result = {
-        crewMember: this.selectedCrew,
+        crewMember: t.crew_member_name,
         trainingTopic: t.topic,
         slotWeight: this.selectedLength()!,
       };

@@ -5,7 +5,6 @@ import {
   TrainingWithCrew,
   TrainingHiddenBonus,
   CrewMember,
-  SLOT_WEIGHT_UNITS,
   thresholdForTier,
 } from '../../shared/models';
 
@@ -82,15 +81,6 @@ export class TrainingService {
     return this.trainings().find(t => t.crew_member_name === crewName && t.topic === topic);
   }
 
-  getAvailableTrainings(crewName: string, playerTier: number, remainingBudget: number) {
-    const crewTrainings = this.getTrainingsForCrewByName(crewName);
-    return crewTrainings.map(t => ({
-      ...t,
-      available: t.tier_required <= playerTier,
-      // Affordable if at least a Short block fits the free space.
-      affordable: SLOT_WEIGHT_UNITS.light <= remainingBudget,
-    }));
-  }
 
   async createTraining(
     training: Omit<Training, 'id' | 'created_at' | 'updated_at'>,

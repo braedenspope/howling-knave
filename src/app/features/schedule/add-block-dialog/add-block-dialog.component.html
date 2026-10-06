@@ -17,55 +17,64 @@
   }
 
   @if (mode() === 'training' && !data.correctionActive) {
-    <!-- ============ STEP 1 — pick the training ============ -->
+    <!-- ============ STEP 1 — pick the training (catalog style) ============ -->
     @if (trainingStep() === 'pick') {
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Crew member</mat-label>
-        <mat-select [(ngModel)]="selectedCrew" (ngModelChange)="onCrewChange()">
-          @for (crew of crewList; track crew) {
-            <mat-option [value]="crew" [disabled]="isCrewTaken(crew)">
-              <span class="crew-dot" [style.background]="getCrewColor(crew)" style="display: inline-block; margin-right: 6px;"></span>
-              {{ crew }}@if (isCrewTaken(crew)) { <span class="stamp-label"> · already today</span> }
-            </mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+      <div class="filter-chips picker-filters">
+        @for (f of filters; track f.id) {
+          <button class="filter-chip" [class.on]="filter() === f.id" (click)="filter.set(f.id)">{{ f.label }}</button>
+        }
+      </div>
 
-      @if (selectedCrew && tierFor(selectedCrew) <= 0) {
-        <div class="correction-note">
-          <span class="ms">block</span>
-          <span>{{ selectedCrew }} refuses to train with you for now. Earn their regard first.</span>
-        </div>
-      } @else if (selectedCrew) {
-        <p class="dialog-section-label">{{ selectedCrew }} · {{ tierName(tierFor(selectedCrew)) }}</p>
-        <div class="option-list">
-          @for (training of availableTrainings(); track training.id) {
-            @let mastered = isMastered(training);
-            @let blocked = !training.available || !training.affordable || mastered;
-            <button class="training-option" [class.blocked]="blocked"
-              [style.border-left]="'3px solid ' + getCrewColor(selectedCrew)"
-              (click)="selectTraining(training)" [disabled]="blocked">
-              <div class="to-main">
-                <span class="to-topic">{{ training.topic }}</span>
-                <span class="stamp-label">{{ pointsBanked(training) }}/{{ training.threshold_pp }} pts</span>
-              </div>
-              <span class="to-desc">{{ training.description }}</span>
-              <span class="to-note"><span class="ms sm">military_tech</span> {{ training.reward }}</span>
-              @if (mastered) {
-                <span class="to-note go-note"><span class="ms sm">verified</span> Mastered — the benefit is yours</span>
-              } @else if (!training.available) {
-                <span class="to-note blocked-note"><span class="ms sm">lock</span> Requires a deeper relationship</span>
-              } @else if (!training.affordable) {
-                <span class="to-note blocked-note"><span class="ms sm">schedule</span> No open hour here</span>
+      <div class="picker-list">
+        @for (g of groups(); track g.crew) {
+          <div class="catalog-group" [class.picker-taken]="g.taken">
+            <div class="catalog-group-head">
+              <span class="crew-chip">
+                <span class="crew-dot" [style.background]="getCrewColor(g.crew)"></span>
+                <span class="crew-chip-name">{{ g.crew }}</span>
+                <span class="crew-chip-role">{{ g.role }}</span>
+              </span>
+              @if (g.taken) {
+                <span class="cr-state" style="margin-left: auto;">Already training today</span>
               } @else {
-                <span class="to-note go-note"><span class="ms sm">chevron_right</span> Choose how long</span>
+                <span class="tier-tag" style="margin-left: auto;"
+                  [style.color]="tierColor(g.tier)" [style.border-color]="tierColor(g.tier)">{{ tierName(g.tier) }}</span>
               }
-            </button>
-          } @empty {
-            <div class="empty-state"><span class="ms">school</span><p>Nothing available with {{ selectedCrew }} yet. Build the relationship first.</p></div>
-          }
-        </div>
-      }
+            </div>
+            <div class="catalog-list">
+              @for (t of g.trainings; track t.id) {
+                @let pts = pointsBanked(t);
+                <button class="training-item pickable" [disabled]="g.taken"
+                  [style.border-left-color]="getCrewColor(g.crew)"
+                  (click)="selectTraining(t)">
+                  <div class="ti-head">
+                    <span class="ti-topic">{{ t.topic }}</span>
+                    <span class="stamp-label">{{ t.threshold_pp }} pts</span>
+                    @if (pts > 0) {
+                      <span class="cr-state" style="margin-left: auto;">
+                        @for (i of pipArray(t.threshold_pp); track i) {
+                          <span class="pip" [class.filled]="i < pts"></span>
+                        }
+                        {{ pts }}/{{ t.threshold_pp }}
+                      </span>
+                    } @else {
+                      <span class="cr-state open" style="margin-left: auto;">New</span>
+                    }
+                  </div>
+                  <p class="ti-reward"><span class="ms sm">military_tech</span>{{ t.reward }}</p>
+                </button>
+              }
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <span class="ms">school</span>
+            <p>{{ filter() === 'all'
+              ? 'No crewmate has a training open to you right now. Build the relationships and check back.'
+              : 'Nothing under that filter.' }}</p>
+          </div>
+        }
+      </div>
     }
 
     <!-- ============ STEP 2 — pick how long ============ -->
@@ -74,12 +83,12 @@
         <span class="ms sm">arrow_back</span> All trainings
       </button>
 
-      <div class="length-head" [style.border-left]="'3px solid ' + getCrewColor(selectedCrew)">
+      <div class="length-head" [style.border-left]="'3px solid ' + getCrewColor(t.crew_member_name)">
         <div class="to-main">
           <span class="to-topic">{{ t.topic }}</span>
           <span class="stamp-label">{{ t.threshold_pp }} pts to master</span>
         </div>
-        <span class="sh-crew" [style.color]="getCrewColor(selectedCrew)">{{ selectedCrew }}</span>
+        <span class="sh-crew" [style.color]="getCrewColor(t.crew_member_name)">{{ t.crew_member_name }}</span>
         <span class="to-note"><span class="ms sm">military_tech</span> {{ t.reward }}</span>
         <div class="points-readout">
           <span><strong>{{ pointsBanked(t) }}</strong> banked</span>
@@ -90,22 +99,28 @@
 
       <div class="length-picker">
         <p class="dialog-section-label">How long will you spend on it? One roll per hour.</p>
-        @for (l of lengths; track l) {
-          @let fits = lengthAffordable(l);
-          <button class="length-option"
-            [class.blocked]="!fits"
-            [class.chosen]="selectedLength() === l"
-            (click)="selectLength(l)"
-            [disabled]="!fits">
-            <span class="wt-badge" [class]="lengthClass(l)">{{ lengthLabel(l) }}</span>
-            <span class="lo-blurb">up to +{{ getCost(l) }} pt{{ getCost(l) === 1 ? '' : 's' }}</span>
-            @if (!fits) {
-              <span class="lo-note">needs {{ getCost(l) }} free</span>
-            } @else if (overshoots(t, l)) {
-              <span class="lo-note warn"><span class="ms sm">warning</span> may run past mastery</span>
-            }
-          </button>
-        }
+        <div class="length-grid">
+          @for (l of lengths; track l) {
+            @let fits = lengthAffordable(l);
+            <button [class]="'length-btn ' + lengthClass(l)"
+              [class.chosen]="selectedLength() === l"
+              (click)="selectLength(l)"
+              [disabled]="!fits">
+              <span class="lb-name">{{ lengthName(l) }}</span>
+              <span class="lb-hours">{{ getCost(l) }}<small>hr{{ getCost(l) === 1 ? '' : 's' }}</small></span>
+              <span class="lb-pips">
+                @for (h of hourPips(l); track $index) { <span class="lb-pip"></span> }
+              </span>
+              @if (!fits) {
+                <span class="lb-note">needs {{ getCost(l) }} free</span>
+              } @else if (overshoots(t, l)) {
+                <span class="lb-note warn"><span class="ms sm">warning</span> past mastery</span>
+              } @else {
+                <span class="lb-note">up to +{{ getCost(l) }} pt{{ getCost(l) === 1 ? '' : 's' }}</span>
+              }
+            </button>
+          }
+        </div>
         @if (selectedLength(); as l) {
           @if (overshoots(t, l)) {
             <p class="overshoot-note">
@@ -124,11 +139,22 @@
         <input [(ngModel)]="customTopic" placeholder="Study, meditate, weapon practice…" />
       </div>
       <div class="weight-select">
-        <span class="stamp-label">Time cost</span>
-        <div class="hk-tabs" style="margin: 6px 0 0; border: none;">
-          <button class="hk-tab" [class.on]="customWeight === 'light'" [disabled]="getCost('light') > data.remainingBudget" (click)="customWeight = 'light'">Short · 1</button>
-          <button class="hk-tab" [class.on]="customWeight === 'medium'" [disabled]="getCost('medium') > data.remainingBudget" (click)="customWeight = 'medium'">Medium · 2</button>
-          <button class="hk-tab" [class.on]="customWeight === 'heavy'" [disabled]="getCost('heavy') > data.remainingBudget" (click)="customWeight = 'heavy'">Long · 4</button>
+        <span class="stamp-label">How long?</span>
+        <div class="length-grid">
+          @for (l of lengths; track l) {
+            @let fits = lengthAffordable(l);
+            <button [class]="'length-btn ' + lengthClass(l)"
+              [class.chosen]="customWeight === l"
+              (click)="customWeight = l"
+              [disabled]="!fits">
+              <span class="lb-name">{{ lengthName(l) }}</span>
+              <span class="lb-hours">{{ getCost(l) }}<small>hr{{ getCost(l) === 1 ? '' : 's' }}</small></span>
+              <span class="lb-pips">
+                @for (h of hourPips(l); track $index) { <span class="lb-pip"></span> }
+              </span>
+              @if (!fits) { <span class="lb-note">needs {{ getCost(l) }} free</span> }
+            </button>
+          }
         </div>
       </div>
     </div>
