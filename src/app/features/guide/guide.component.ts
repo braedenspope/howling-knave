@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { SlotWeight, SLOT_WEIGHT_LABEL, SLOT_WEIGHT_UNITS, thresholdForTier } from '../../shared/models';
+import { SlotWeight, SLOT_WEIGHTS, SLOT_WEIGHT_LABEL, SLOT_WEIGHT_UNITS, thresholdForTier } from '../../shared/models';
 import { TIER_NAMES, TIER_COLORS } from '../../shared/data/training.data';
 
 interface LengthCard {
@@ -28,7 +28,7 @@ export class GuideComponent {
   /** An example roll of the watch — two duties, landed at random. */
   private readonly exampleDuties = new Set([2, 5]);
 
-  readonly lengths: LengthCard[] = (['light', 'medium', 'heavy'] as SlotWeight[]).map(key => ({
+  readonly lengths: LengthCard[] = SLOT_WEIGHTS.map(key => ({
     key,
     label: SLOT_WEIGHT_LABEL[key],
     hours: SLOT_WEIGHT_UNITS[key],
@@ -62,5 +62,6 @@ export class GuideComponent {
 const BLURBS: Record<SlotWeight, string> = {
   light: 'A focused drill, a quick lesson, a single technique.',
   medium: 'A proper training block — it asks for real engagement.',
+  extended: 'Most of a watch — time to settle into the work.',
   heavy: 'A full commitment: sustained, demanding work.',
 };

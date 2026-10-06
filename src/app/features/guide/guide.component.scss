@@ -83,6 +83,7 @@ strong { color: var(--text-primary); }
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
+.length-grid { grid-template-columns: repeat(4, 1fr); }
 .length-card, .thr-card {
   padding: 16px;
   display: flex;

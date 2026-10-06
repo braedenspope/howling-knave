@@ -318,8 +318,10 @@ Migration `012_points_by_tier.sql`. Replaces the prescribed session path.
 * Every training needs **12 points per tier**: tier 1 = 12, tier 2 = 24,
   tier 3 = 36 (`thresholdForTier`). The training editor derives the goal from
   the tier — it is no longer hand-set.
-* A player books any training they've unlocked as a **Short (1h), Medium (2h)
-  or Long (4h)** block. No session order, no per-session roll table.
+* A player books any training they've unlocked as a **Short (1h), Medium (2h),
+  Extended (3h) or Long (4h)** block — Extended is `slot_weight = 'extended'`,
+  added in `014_three_hour_blocks.sql`. No session order, no per-session roll
+  table.
 * The DM calls the roll each hour at the table.
 * Scoring is as in §7, one point per landed roll, except the pity point now
   needs at least **`PITY_MIN_HOURS` (2)** rolled on that training that day.

@@ -1,5 +1,6 @@
 export type UserRole = 'player' | 'dm';
-export type SlotWeight = 'heavy' | 'medium' | 'light';
+/** Block length: Short (1h) / Medium (2h) / Extended (3h) / Long (4h). */
+export type SlotWeight = 'heavy' | 'extended' | 'medium' | 'light';
 export type BlockStatus = 'pending' | 'success' | 'failure' | 'locked';
 
 export interface AppUser {
@@ -189,6 +190,7 @@ export interface TrainingWithCrew extends Training {
 
 export const SLOT_WEIGHT_UNITS: Record<SlotWeight, number> = {
   heavy: 4,
+  extended: 3,
   medium: 2,
   light: 1,
 };
@@ -198,6 +200,7 @@ export const SLOT_WEIGHT_LABEL: Record<SlotWeight, string> = {
   light: 'Short',
   medium: 'Medium',
   heavy: 'Long',
+  extended: 'Extended',
 };
 
 export const DAY_BUDGET = 8;
@@ -221,4 +224,4 @@ export function thresholdForTier(tier: number): number {
 }
 
 /** The block lengths a player can choose for any training or activity. */
-export const SLOT_WEIGHTS: SlotWeight[] = ['light', 'medium', 'heavy'];
+export const SLOT_WEIGHTS: SlotWeight[] = ['light', 'medium', 'extended', 'heavy'];

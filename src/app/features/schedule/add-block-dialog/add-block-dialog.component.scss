@@ -33,8 +33,8 @@
 /* ---- big length buttons: Short → Long, tinted by the length's colour ---- */
 .length-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
   margin-top: 8px;
 }
 
@@ -42,6 +42,7 @@
   --wt: var(--text-secondary);
   &.wt-light  { --wt: #8aa86a; }
   &.wt-medium { --wt: var(--accent-gold); }
+  &.wt-extended { --wt: #c98a3e; }
   &.wt-heavy  { --wt: var(--accent-copper); }
 
   display: flex;
@@ -165,7 +166,7 @@
 
 @media (max-width: 600px) {
   .length-grid { gap: 6px; }
-  .length-btn { min-height: 112px; .lb-hours { font-size: 24px; } }
+  .length-btn { min-height: 112px; padding: 12px 4px 10px; .lb-name { font-size: 12px; letter-spacing: 0.5px; } .lb-hours { font-size: 24px; } }
 }
 
 /* ---- step 1: catalog-style picker (shares the Crew catalog's global styles) ---- */
