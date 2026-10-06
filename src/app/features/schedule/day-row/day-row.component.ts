@@ -333,6 +333,52 @@ export class DayRowComponent {
     });
   }
 
+  // ----- edit length (double-click a planned block) -----
+  /** A planned training or activity the viewer may re-size. */
+  canResize(block: ScheduleBlock): boolean {
+    return !block.is_mandatory && block.status === 'pending' && this.canEdit(block.user_id);
+  }
+
+  onEditLength(block: ScheduleBlock) {
+    if (block.is_mandatory) return;
+    if (this.isLocked()) {
+      this.toast.warn('The day is sealed — withdraw a seal to change the schedule.');
+      return;
+    }
+    if (!this.canEdit(block.user_id)) {
+      this.toast.warn('You can only change blocks on your own schedule.');
+      return;
+    }
+    if (block.status !== 'pending') {
+      this.toast.warn('This block has already been rolled — it can’t be re-sized.');
+      return;
+    }
+
+    const dialogRef = this.dialog.open(AddBlockDialogComponent, {
+      width: '560px',
+      maxWidth: '95vw',
+      panelClass: 'hk-dialog',
+      data: {
+        dayId: this.day().id,
+        // Room from the block's start, with the block itself counted as free.
+        remainingBudget: this.getContiguousEmpty(block.user_id, block.slot_position, block.id),
+        forUserId: block.user_id,
+        editBlock: block,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: AddBlockDialogResult | undefined) => {
+      if (!result || result.slotWeight === block.slot_weight) return;
+      const err = await this.scheduleService.updateBlockLength(block, result.slotWeight);
+      if (err) {
+        this.toast.warn(err);
+        return;
+      }
+      await this.withdrawSealIfNeeded(block.user_id);
+      this.toast.show(`${block.training_topic} — now ${this.lengthLabel(result.slotWeight)}`);
+    });
+  }
+
   // ----- duty hand-off (feature #2) -----
   /** True when the current player holds this duty and can request a hand-off. */
   canHandOff(block: ScheduleBlock): boolean {

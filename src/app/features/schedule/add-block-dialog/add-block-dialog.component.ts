@@ -7,7 +7,7 @@ import { ScheduleService } from '../schedule.service';
 import { TrainingTrackerService } from '../../dm/training-tracker.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { CREW_LIST, CREW_COLORS, CREW_META, TIER_NAMES, TIER_COLORS } from '../../../shared/data/training.data';
-import { TrainingWithCrew, SlotWeight, SLOT_WEIGHTS, SLOT_WEIGHT_UNITS, SLOT_WEIGHT_LABEL } from '../../../shared/models';
+import { ScheduleBlock, TrainingWithCrew, SlotWeight, SLOT_WEIGHTS, SLOT_WEIGHT_UNITS, SLOT_WEIGHT_LABEL } from '../../../shared/models';
 
 export interface AddBlockDialogData {
   dayId: string;
@@ -17,6 +17,12 @@ export interface AddBlockDialogData {
   correctionActive?: boolean;
   /** Crew already booked for a training this day — only one per crew per day. */
   takenCrew?: string[];
+  /**
+   * Edit mode: change the length of a block already on the board. The dialog
+   * opens straight on the length buttons; `remainingBudget` is the room from
+   * the block's start with the block itself counted as free.
+   */
+  editBlock?: ScheduleBlock;
 }
 
 export interface AddBlockDialogResult {
@@ -111,11 +117,31 @@ export class AddBlockDialogComponent implements OnInit {
   customTopic = '';
   customWeight: SlotWeight = 'light';
 
+  /** True when changing an existing block's length rather than planning a new one. */
+  readonly editing = !!this.data.editBlock;
+
   ngOnInit() {
     const userId = this.data.forUserId ?? this.auth.userId();
     if (userId) {
       this.relationshipService.loadTiers(userId);
     }
+
+    const block = this.data.editBlock;
+    if (block) {
+      const training = this.trainingService.getTraining(block.crew_member, block.training_topic);
+      if (training) {
+        this.selectedTraining.set(training);
+        this.selectedLength.set(block.slot_weight);
+        this.trainingStep.set('length');
+      } else {
+        this.mode.set('custom');
+        this.customCrew = block.crew_member;
+        this.customTopic = block.training_topic;
+        this.customWeight = block.slot_weight;
+      }
+      return;
+    }
+
     if (this.data.correctionActive) {
       this.mode.set('custom');
     }
@@ -223,8 +249,10 @@ export class AddBlockDialogComponent implements OnInit {
   plannedHours(t: TrainingWithCrew): number {
     const uid = this.userId;
     if (!uid) return 0;
+    // The block being re-sized doesn't count — its new length is what's being chosen.
     return this.schedule.blocks()
       .filter(b => b.user_id === uid && !b.is_mandatory && b.status === 'pending' &&
+        b.id !== this.data.editBlock?.id &&
         b.crew_member === t.crew_member_name && b.training_topic === t.topic)
       .reduce((sum, b) => sum + SLOT_WEIGHT_UNITS[b.slot_weight], 0);
   }
@@ -240,9 +268,11 @@ export class AddBlockDialogComponent implements OnInit {
   canConfirm(): boolean {
     if (this.mode() === 'training') {
       const l = this.selectedLength();
-      return !!this.selectedTraining() && !!l && this.lengthAffordable(l);
+      if (!this.selectedTraining() || !l || !this.lengthAffordable(l)) return false;
+      return !this.editing || l !== this.data.editBlock!.slot_weight;
     }
-    return !!this.customTopic.trim() && this.isCustomAffordable();
+    if (!this.customTopic.trim() || !this.isCustomAffordable()) return false;
+    return !this.editing || this.customWeight !== this.data.editBlock!.slot_weight;
   }
 
   confirm() {

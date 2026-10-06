@@ -162,6 +162,54 @@ export class ScheduleService {
     return error?.message ?? null;
   }
 
+  /**
+   * Change how long a planned block runs. It keeps its start hour; the new
+   * span has to fit the owner's free hours, and a crewmate still can't teach
+   * two different trainings at once. Blocks already rolled at the table can't
+   * be re-sized.
+   */
+  async updateBlockLength(block: ScheduleBlock, slotWeight: SlotWeight): Promise<string | null> {
+    if (block.is_mandatory) return 'Ship duties keep their length';
+    if (block.status !== 'pending') return 'This block has already been rolled — it can\'t be re-sized';
+
+    const start = block.slot_position;
+    const end = start + SLOT_WEIGHT_UNITS[slotWeight];
+    if (end > DAY_BUDGET) return 'Not enough hours left in the day';
+
+    const overlap = this.getBlocksForDayUser(block.day_id, block.user_id).some(b =>
+      b.id !== block.id &&
+      b.slot_position < end &&
+      b.slot_position + SLOT_WEIGHT_UNITS[b.slot_weight] > start,
+    );
+    if (overlap) return 'Not enough open hours after this block';
+
+    if (block.crew_member !== 'Independent') {
+      const clash = this.blocks().some(b =>
+        b.id !== block.id &&
+        b.day_id === block.day_id &&
+        !b.is_mandatory &&
+        b.crew_member === block.crew_member &&
+        b.training_topic !== block.training_topic &&
+        b.slot_position < end &&
+        b.slot_position + SLOT_WEIGHT_UNITS[b.slot_weight] > start,
+      );
+      if (clash) return `${block.crew_member} is already teaching another training at that hour`;
+    }
+
+    this.blocks.update(blocks =>
+      blocks.map(b => (b.id === block.id ? { ...b, slot_weight: slotWeight } : b)));
+    const { error } = await this.sb.supabase
+      .from('schedule_blocks')
+      .update({ slot_weight: slotWeight })
+      .eq('id', block.id);
+    if (error) {
+      this.blocks.update(blocks =>
+        blocks.map(b => (b.id === block.id ? { ...b, slot_weight: block.slot_weight } : b)));
+      return error.message;
+    }
+    return null;
+  }
+
   async removeBlock(blockId: string): Promise<string | null> {
     const { error } = await this.sb.supabase
       .from('schedule_blocks')

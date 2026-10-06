@@ -54,7 +54,8 @@
                 @if (item.type === 'block') {
                   @let b = item.block!;
                   <div class="tl-item" [class.tl-duty]="b.is_mandatory"
-                    [style.border-left-color]="b.is_mandatory ? 'var(--accent-copper)' : crewColor(b.crew_member)">
+                    [style.border-left-color]="b.is_mandatory ? 'var(--accent-copper)' : crewColor(b.crew_member)"
+                    (dblclick)="onEditLength(b)">
                     <span class="tl-hour">{{ roman(item.slotIndex) }}</span>
                     <div class="tl-body">
                       @if (b.is_mandatory) {
@@ -67,7 +68,7 @@
                     </div>
                     <div class="tl-end">
                       @if (canFlag(b)) {
-                        <button class="flag-btn" [class.flagged]="b.spotlight" (click)="onToggleSpotlight(b)" title="Flag for the table">
+                        <button class="flag-btn" [class.flagged]="b.spotlight" (click)="onToggleSpotlight(b)" (dblclick)="$event.stopPropagation()" title="Flag for the table">
                           <span class="ms sm">flag</span>
                         </button>
                       }
@@ -75,7 +76,7 @@
                         <button class="cover-btn-tl" (click)="requestHandOff(b)">Request</button>
                       }
                       @if ((canEdit(u.id) || isDm()) && !b.is_mandatory) {
-                        <button class="btn-icon tl-remove" (click)="onRemoveBlock(b)" title="Remove"><span class="ms sm">close</span></button>
+                        <button class="btn-icon tl-remove" (click)="onRemoveBlock(b)" (dblclick)="$event.stopPropagation()" title="Remove"><span class="ms sm">close</span></button>
                       }
                     </div>
                   </div>
@@ -154,11 +155,12 @@
                   <!-- training / independent block -->
                   <div class="slot-cell block-cell" [style.grid-column]="'span ' + item.span"
                     [style.border-left]="'3px solid ' + (isIndependent(b) ? 'var(--text-faint)' : crewColor(b.crew_member))"
-                    [attr.draggable]="canEdit(u.id)" (dragstart)="onDragStart($event, b)" (dragend)="onDragEnd()">
+                    [attr.draggable]="canEdit(u.id)" (dragstart)="onDragStart($event, b)" (dragend)="onDragEnd()"
+                    (dblclick)="onEditLength(b)" [title]="canResize(b) ? 'Double-click to change the length' : ''">
                     <div class="block-cell-top">
                       <span class="block-crew" [style.color]="isIndependent(b) ? 'var(--text-secondary)' : crewColor(b.crew_member)">{{ b.crew_member }}</span>
                       @if (canFlag(b)) {
-                        <button class="flag-btn" [class.flagged]="b.spotlight" (click)="onToggleSpotlight(b)" title="Flag for the table">
+                        <button class="flag-btn" [class.flagged]="b.spotlight" (click)="onToggleSpotlight(b)" (dblclick)="$event.stopPropagation()" title="Flag for the table">
                           <span class="ms sm">flag</span>
                         </button>
                       }
@@ -168,7 +170,7 @@
                       <span class="wt-badge" [class]="lengthClass(b.slot_weight)">{{ lengthLabel(b.slot_weight) }}</span>
                     </div>
                     @if (canEdit(u.id) || isDm()) {
-                      <button class="cell-remove" (click)="onRemoveBlock(b)" title="Remove"><span class="ms">close</span></button>
+                      <button class="cell-remove" (click)="onRemoveBlock(b)" (dblclick)="$event.stopPropagation()" title="Remove"><span class="ms">close</span></button>
                     }
                   </div>
                 }

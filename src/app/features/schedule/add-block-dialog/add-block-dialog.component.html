@@ -1,6 +1,6 @@
-<h2 mat-dialog-title class="gold-text">Plan the hour</h2>
+<h2 mat-dialog-title class="gold-text">{{ editing ? 'Change the length' : 'Plan the hour' }}</h2>
 <mat-dialog-content>
-  @if (data.correctionActive) {
+  @if (data.correctionActive && !editing) {
     <div class="correction-note">
       <span class="ms">gavel</span>
       <span>Guner has this crew member on correction detail today — training is barred. An independent activity is still open to them.</span>
@@ -9,14 +9,14 @@
 
   <p class="budget-info stamp-label">{{ data.remainingBudget }} contiguous block{{ data.remainingBudget === 1 ? '' : 's' }} free here</p>
 
-  @if (!data.correctionActive) {
+  @if (!data.correctionActive && !editing) {
     <div class="hk-tabs" style="margin-bottom: 14px;">
       <button class="hk-tab" [class.on]="mode() === 'training'" (click)="setMode('training')">Crew Training</button>
       <button class="hk-tab" [class.on]="mode() === 'custom'" (click)="setMode('custom')">Independent</button>
     </div>
   }
 
-  @if (mode() === 'training' && !data.correctionActive) {
+  @if (mode() === 'training' && (editing || !data.correctionActive)) {
     <!-- ============ STEP 1 — pick the training (catalog style) ============ -->
     @if (trainingStep() === 'pick') {
       <div class="filter-chips picker-filters">
@@ -79,9 +79,11 @@
 
     <!-- ============ STEP 2 — pick how long ============ -->
     @else if (selectedTraining(); as t) {
-      <button class="back-link" (click)="backToTraining()">
-        <span class="ms sm">arrow_back</span> All trainings
-      </button>
+      @if (!editing) {
+        <button class="back-link" (click)="backToTraining()">
+          <span class="ms sm">arrow_back</span> All trainings
+        </button>
+      }
 
       <div class="length-head" [style.border-left]="'3px solid ' + getCrewColor(t.crew_member_name)">
         <div class="to-main">
@@ -136,7 +138,7 @@
     <div class="custom-form">
       <div class="hk-field">
         <label>Activity</label>
-        <input [(ngModel)]="customTopic" placeholder="Study, meditate, weapon practice…" />
+        <input [(ngModel)]="customTopic" [disabled]="editing" placeholder="Study, meditate, weapon practice…" />
       </div>
       <div class="weight-select">
         <span class="stamp-label">How long?</span>
@@ -162,5 +164,5 @@
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button class="btn btn-ghost" mat-dialog-close>Cancel</button>
-  <button class="btn btn-brass" [disabled]="!canConfirm()" (click)="confirm()">Add to the day</button>
+  <button class="btn btn-brass" [disabled]="!canConfirm()" (click)="confirm()">{{ editing ? 'Update' : 'Add to the day' }}</button>
 </mat-dialog-actions>
