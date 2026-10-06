@@ -38,7 +38,7 @@
       </div>
       <div class="summary-item">
         <span class="summary-value">{{ dossierStats(crew).pp }}</span>
-        <span class="stamp-label">Progress Points</span>
+        <span class="stamp-label">Points</span>
       </div>
     </div>
 
@@ -66,8 +66,7 @@
             title="View training details">
             <div class="ti-head">
               <span class="ti-topic">{{ t.topic }}</span>
-              <span class="wt-badge" [class]="lengthClass(t.slot_weight)">{{ lengthLabel(t.slot_weight) }}</span>
-              <span class="stamp-label">{{ t.sessions_required }} sessions</span>
+              <span class="stamp-label">{{ t.threshold_pp }} pts</span>
               <ng-container [ngTemplateOutlet]="statusChip"
                 [ngTemplateOutletContext]="{ st: statusFor(crew, t, tierOf(crew)), t: t }"></ng-container>
             </div>
@@ -132,8 +131,7 @@
                   title="View training details">
                   <div class="ti-head">
                     <span class="ti-topic">{{ p.training.topic }}</span>
-                    <span class="wt-badge" [class]="lengthClass(p.training.slot_weight)">{{ lengthLabel(p.training.slot_weight) }}</span>
-                    <span class="stamp-label">{{ p.training.sessions_required }} sessions</span>
+                    <span class="stamp-label">{{ p.training.threshold_pp }} pts</span>
                     <ng-container [ngTemplateOutlet]="statusChip"
                       [ngTemplateOutletContext]="{ st: p.status, t: p.training }"></ng-container>
                   </div>
@@ -183,7 +181,7 @@
                           @for (i of pipArray(t.threshold_pp); track i) {
                             <span class="pip" [class.filled]="i < st.pp"></span>
                           }
-                          {{ st.pp }}/{{ t.threshold_pp }} PP
+                          {{ st.pp }}/{{ t.threshold_pp }} pts
                         </span>
                       }
                       @case ('locked') {
@@ -215,7 +213,7 @@
         @for (i of pipArray(t.threshold_pp); track i) {
           <span class="pip" [class.filled]="i < st.pp"></span>
         }
-        {{ st.pp }}/{{ t.threshold_pp }} PP
+        {{ st.pp }}/{{ t.threshold_pp }} pts
       </span>
     }
     @case ('locked') {

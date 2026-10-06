@@ -20,7 +20,11 @@ interface StopView {
   lengthLabel: string;
   /** "Roll 2 of 4" — absent for duty and custom stops. */
   rollLabel: string;
-  rollType: string | null;
+  /**
+   * A training hour left over after the training was mastered — no roll; the
+   * player describes what they do with the time, and the DM moves on.
+   */
+  spare: boolean;
   description: string | null;
   sceneSeed: string | null;
   /** One entry per hour of the block: its outcome, or null if not yet rolled. */
@@ -81,13 +85,15 @@ export class PlayRunnerComponent implements OnInit {
 
     const block = stop.block;
     const training = this.trainingService.getTraining(block.crew_member, block.training_topic);
-    const session = training?.sessions.find(s => s.session_number === block.session_number);
     const characterName = this.characterName(stop.userId);
 
     const history: (RollOutcome | null)[] = Array.from(
       { length: stop.rollCount },
       (_, i) => this.play.rollFor(block.id, i)?.outcome ?? null,
     );
+
+    const recorded = history[stop.rollIndex] ?? null;
+    const mastered = this.play.isMastered(block);
 
     const bonus = training?.hidden_bonus;
     const hiddenBonus =
@@ -104,13 +110,13 @@ export class PlayRunnerComponent implements OnInit {
       topic: block.training_topic,
       lengthLabel: SLOT_WEIGHT_LABEL[block.slot_weight],
       rollLabel: `Roll ${stop.rollIndex + 1} of ${stop.rollCount}`,
-      rollType: session?.roll_type ?? null,
+      spare: stop.kind === 'roll' && mastered && !recorded,
       description: training?.description ?? null,
       sceneSeed: training?.scene_seed ?? null,
       history,
-      recorded: history[stop.rollIndex] ?? null,
+      recorded,
       points: this.play.pointsLabel(block),
-      mastered: this.play.isMastered(block),
+      mastered,
       hiddenBonus,
     };
   });

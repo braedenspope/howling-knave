@@ -19,8 +19,8 @@ export interface TrainingDetailData {
       <h2 class="td-title gold-text">{{ t.topic }}</h2>
 
       <div class="td-badges">
-        <span class="td-badge threshold">{{ t.threshold_pp }} PP</span>
-        <span class="td-badge">{{ t.sessions_required }} session{{ t.sessions_required === 1 ? '' : 's' }}</span>
+        <span class="td-badge threshold">{{ t.threshold_pp }} points to master</span>
+        <span class="td-badge">Tier {{ t.tier_required }}</span>
       </div>
 
       <p class="td-reward"><span class="ms sm">military_tech</span> {{ t.reward }}</p>
@@ -56,7 +56,7 @@ export interface TrainingDetailData {
     }
     .td-desc {
       font-size: 18px; line-height: 1.7; color: var(--text-secondary);
-      font-style: italic; margin: 0;
+      margin: 0;
     }
   `],
 })

@@ -60,7 +60,12 @@
 
       @if (v.description) { <p class="runner-desc">{{ v.description }}</p> }
 
-      @if (v.kind === 'roll') {
+      @if (v.spare) {
+        <p class="runner-spare">
+          <span class="ms sm">verified</span>
+          Mastered — this hour is free. {{ v.characterName }} describes what they do with it.
+        </p>
+      } @else if (v.kind === 'roll') {
         <div class="runner-roll">
           <span class="runner-roll-label">{{ v.rollLabel }}</span>
           <div class="runner-pips">
@@ -75,8 +80,8 @@
           <span class="stamp-label">{{ v.points }} points{{ v.mastered ? ' · Mastered' : '' }}</span>
         </div>
 
-        @if (isDm() && v.rollType) {
-          <p class="runner-rolltype"><span class="ms sm">casino</span> {{ v.rollType }}</p>
+        @if (isDm()) {
+          <p class="runner-rolltype"><span class="ms sm">casino</span> Call a roll that fits the hour</p>
         }
         @if (isDm() && v.sceneSeed) {
           <p class="runner-seed">{{ v.sceneSeed }}</p>
@@ -100,7 +105,7 @@
           <span class="ms sm">arrow_back</span> Back
         </button>
 
-        @if (v.kind === 'roll') {
+        @if (v.kind === 'roll' && !v.spare) {
           <button class="btn oc-failure runner-fail" [disabled]="busy()" (click)="mark('failure')">
             <span class="ms sm">close</span> Failure
           </button>

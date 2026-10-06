@@ -115,7 +115,6 @@ export class ScheduleService {
     slotWeight: SlotWeight,
     forUserId?: string,
     atPosition?: number,
-    sessionNumber?: number | null,
   ): Promise<string | null> {
     const userId = forUserId ?? this.auth.userId();
     if (!userId) return 'Not authenticated';
@@ -125,16 +124,6 @@ export class ScheduleService {
       const already = this.getBlocksForDayUser(dayId, userId)
         .some(b => !b.is_mandatory && b.crew_member === crewMember);
       if (already) return `Already training with ${crewMember} today`;
-    }
-
-    // Sessions must be taken in order — the previous one must already be booked.
-    if (crewMember !== 'Independent' && sessionNumber != null && sessionNumber > 1) {
-      const priorBooked = this.blocks().some(b =>
-        b.user_id === userId &&
-        b.crew_member === crewMember &&
-        b.training_topic === trainingTopic &&
-        b.session_number === sessionNumber - 1);
-      if (!priorBooked) return `Do session ${sessionNumber - 1} with ${crewMember} first`;
     }
 
     const remaining = this.getRemainingBudget(dayId, userId);
@@ -168,7 +157,6 @@ export class ScheduleService {
       training_topic: trainingTopic,
       slot_weight: slotWeight,
       slot_position: position,
-      session_number: sessionNumber ?? null,
     });
 
     return error?.message ?? null;
@@ -301,8 +289,8 @@ export class ScheduleService {
   /**
    * Feature #3 — Guner's correction detail. Resets the corrected player's day
    * (clearing their training / independent blocks and their own duties, while
-   * leaving any watch they're covering for someone else intact) and places
-   * `count` one-block ship duties — half the day by default (4 of 8).
+   * leaving any watch they're covering for someone else intact) and tops them
+   * up to `count` duty hours in total — half the day by default (4 of 8).
    */
   async assignCorrectionDuties(
     dayId: string,
@@ -325,17 +313,20 @@ export class ScheduleService {
     );
 
     // Place duties only in slots a kept (covering) duty doesn't already hold.
+    // Those kept hours count toward the total — a player already carrying a
+    // swapped-in watch gets `count` duty hours in all, not `count` more.
     const occupied = new Set<number>();
     for (const b of this.getBlocksForDayUser(dayId, userId)) {
       const span = SLOT_WEIGHT_UNITS[b.slot_weight];
       for (let s = 0; s < span; s++) occupied.add(b.slot_position + s);
     }
+    const toPlace = Math.max(0, Math.min(count, DAY_BUDGET) - occupied.size);
     const free = Array.from({ length: DAY_BUDGET }, (_, i) => i).filter(i => !occupied.has(i));
     for (let i = free.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [free[i], free[j]] = [free[j], free[i]];
     }
-    const slots = free.slice(0, Math.max(0, Math.min(count, DAY_BUDGET))).sort((a, b) => a - b);
+    const slots = free.slice(0, toPlace).sort((a, b) => a - b);
 
     for (const slot of slots) {
       const task = DUTY_TASKS[Math.floor(Math.random() * DUTY_TASKS.length)];

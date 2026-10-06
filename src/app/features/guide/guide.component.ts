@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { SlotWeight, SLOT_WEIGHT_LABEL, SLOT_WEIGHT_UNITS } from '../../shared/models';
+import { SlotWeight, SLOT_WEIGHT_LABEL, SLOT_WEIGHT_UNITS, thresholdForTier } from '../../shared/models';
 import { TIER_NAMES, TIER_COLORS } from '../../shared/data/training.data';
 
 interface LengthCard {
@@ -25,6 +25,8 @@ interface ThresholdCard {
 })
 export class GuideComponent {
   readonly dayBlocks = Array.from({ length: 8 }, (_, i) => i);
+  /** An example roll of the watch — two duties, landed at random. */
+  private readonly exampleDuties = new Set([2, 5]);
 
   readonly lengths: LengthCard[] = (['light', 'medium', 'heavy'] as SlotWeight[]).map(key => ({
     key,
@@ -35,9 +37,9 @@ export class GuideComponent {
   }));
 
   readonly thresholds: ThresholdCard[] = [
-    { pp: 6, label: 'Straightforward', blurb: 'A clean skill or technique. Light personal content.' },
-    { pp: 9, label: 'Weighty', blurb: 'Some complexity, or a skill that carries narrative weight.' },
-    { pp: 12, label: 'Demanding', blurb: 'A hard skill — or one that asks something personal of you both.' },
+    { pp: thresholdForTier(1), label: 'First trainings', blurb: 'What a crewmate will teach a near-stranger.' },
+    { pp: thresholdForTier(2), label: 'Deeper work', blurb: 'Opens once they know you — harder skills, more at stake.' },
+    { pp: thresholdForTier(3), label: 'Hard-won', blurb: 'Taught only to someone they trust.' },
   ];
 
   readonly tiers = [1, 2, 3, 4, 5].map(n => ({
@@ -46,6 +48,9 @@ export class GuideComponent {
     color: TIER_COLORS[n],
   }));
 
+  isDutyHour(b: number): boolean {
+    return this.exampleDuties.has(b);
+  }
   lengthClass(key: SlotWeight): string {
     return `wt-${key}`;
   }

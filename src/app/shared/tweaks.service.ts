@@ -2,12 +2,14 @@ import { Injectable, signal, effect } from '@angular/core';
 
 export type Metalwork = 'gold' | 'copper' | 'silver';
 export type Density = 'comfortable' | 'compact';
+export type ReadingSize = 'small' | 'medium' | 'large';
 
 interface TweaksState {
   textureAlpha: number;
   metalwork: Metalwork;
   compass: boolean;
   density: Density;
+  readingSize: ReadingSize;
 }
 
 const METAL_PALETTES: Record<Metalwork, { gold: string; brass: string; copper: string; dim: string }> = {
@@ -16,8 +18,24 @@ const METAL_PALETTES: Record<Metalwork, { gold: string; brass: string; copper: s
   silver: { gold: '#c9c2b0', brass: '#ada594', copper: '#8a8270', dim: 'rgba(201,194,176,0.35)' },
 };
 
+/**
+ * Reading-text size for Alegreya Sans. Its small x-height reads about a pixel
+ * smaller than most sans faces, so these sit a step above the usual 15/16/17.
+ */
+export const READING_SIZES: Record<ReadingSize, { label: string; px: number }> = {
+  small:  { label: 'Small',  px: 16 },
+  medium: { label: 'Medium', px: 17 },
+  large:  { label: 'Large',  px: 18 },
+};
+
 const STORAGE_KEY = 'hk-tweaks';
-const DEFAULTS: TweaksState = { textureAlpha: 1, metalwork: 'gold', compass: false, density: 'comfortable' };
+const DEFAULTS: TweaksState = {
+  textureAlpha: 1,
+  metalwork: 'gold',
+  compass: false,
+  density: 'comfortable',
+  readingSize: 'medium',
+};
 
 /** Feature #6 — live theme tweaks, persisted to localStorage. */
 @Injectable({ providedIn: 'root' })
@@ -26,6 +44,7 @@ export class TweaksService {
   readonly metalwork = signal<Metalwork>(DEFAULTS.metalwork);
   readonly compass = signal(DEFAULTS.compass);
   readonly density = signal<Density>(DEFAULTS.density);
+  readonly readingSize = signal<ReadingSize>(DEFAULTS.readingSize);
 
   constructor() {
     this.restore();
@@ -35,6 +54,7 @@ export class TweaksService {
         metalwork: this.metalwork(),
         compass: this.compass(),
         density: this.density(),
+        readingSize: this.readingSize(),
       };
       this.apply(state);
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch { /* ignore */ }
@@ -50,6 +70,7 @@ export class TweaksService {
       this.metalwork.set(s.metalwork);
       this.compass.set(s.compass);
       this.density.set(s.density);
+      if (s.readingSize in READING_SIZES) this.readingSize.set(s.readingSize);
     } catch { /* ignore */ }
   }
 
@@ -61,6 +82,9 @@ export class TweaksService {
     root.style.setProperty('--accent-brass', p.brass);
     root.style.setProperty('--accent-copper', p.copper);
     root.style.setProperty('--accent-gold-dim', p.dim);
+
+    root.style.setProperty('--font-body-size', `${READING_SIZES[s.readingSize].px}px`);
+
     document.body.classList.toggle('density-compact', s.density === 'compact');
     document.body.classList.toggle('show-compass', s.compass);
   }
@@ -70,5 +94,6 @@ export class TweaksService {
     this.metalwork.set(DEFAULTS.metalwork);
     this.compass.set(DEFAULTS.compass);
     this.density.set(DEFAULTS.density);
+    this.readingSize.set(DEFAULTS.readingSize);
   }
 }

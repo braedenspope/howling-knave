@@ -40,22 +40,25 @@
         <p class="dialog-section-label">{{ selectedCrew }} · {{ tierName(tierFor(selectedCrew)) }}</p>
         <div class="option-list">
           @for (training of availableTrainings(); track training.id) {
-            @let blocked = !training.available || !training.affordable;
+            @let mastered = isMastered(training);
+            @let blocked = !training.available || !training.affordable || mastered;
             <button class="training-option" [class.blocked]="blocked"
               [style.border-left]="'3px solid ' + getCrewColor(selectedCrew)"
               (click)="selectTraining(training)" [disabled]="blocked">
               <div class="to-main">
                 <span class="to-topic">{{ training.topic }}</span>
-                <span class="stamp-label">{{ training.threshold_pp }} PP · {{ training.sessions_required }} sessions</span>
+                <span class="stamp-label">{{ pointsBanked(training) }}/{{ training.threshold_pp }} pts</span>
               </div>
               <span class="to-desc">{{ training.description }}</span>
               <span class="to-note"><span class="ms sm">military_tech</span> {{ training.reward }}</span>
-              @if (!training.available) {
+              @if (mastered) {
+                <span class="to-note go-note"><span class="ms sm">verified</span> Mastered — the benefit is yours</span>
+              } @else if (!training.available) {
                 <span class="to-note blocked-note"><span class="ms sm">lock</span> Requires a deeper relationship</span>
               } @else if (!training.affordable) {
-                <span class="to-note blocked-note"><span class="ms sm">schedule</span> No session fits — only {{ data.remainingBudget }} free</span>
+                <span class="to-note blocked-note"><span class="ms sm">schedule</span> No open hour here</span>
               } @else {
-                <span class="to-note go-note"><span class="ms sm">chevron_right</span> Choose a session</span>
+                <span class="to-note go-note"><span class="ms sm">chevron_right</span> Choose how long</span>
               }
             </button>
           } @empty {
@@ -65,50 +68,52 @@
       }
     }
 
-    <!-- ============ STEP 2 — pick the session ============ -->
+    <!-- ============ STEP 2 — pick how long ============ -->
     @else if (selectedTraining(); as t) {
       <button class="back-link" (click)="backToTraining()">
         <span class="ms sm">arrow_back</span> All trainings
       </button>
 
-      <div class="session-head" [style.border-left]="'3px solid ' + getCrewColor(selectedCrew)">
+      <div class="length-head" [style.border-left]="'3px solid ' + getCrewColor(selectedCrew)">
         <div class="to-main">
           <span class="to-topic">{{ t.topic }}</span>
-          <span class="stamp-label">{{ t.threshold_pp }} PP · {{ t.sessions_required }} sessions</span>
+          <span class="stamp-label">{{ t.threshold_pp }} pts to master</span>
         </div>
         <span class="sh-crew" [style.color]="getCrewColor(selectedCrew)">{{ selectedCrew }}</span>
         <span class="to-note"><span class="ms sm">military_tech</span> {{ t.reward }}</span>
+        <div class="points-readout">
+          <span><strong>{{ pointsBanked(t) }}</strong> banked</span>
+          <span><strong>{{ pointsNeeded(t) }}</strong> still needed</span>
+          <span><strong>{{ plannedHours(t) }}</strong> hour{{ plannedHours(t) === 1 ? '' : 's' }} already planned</span>
+        </div>
       </div>
 
-      <div class="session-picker">
-        <p class="dialog-section-label">Sessions — complete them in order</p>
-        @for (s of t.sessions; track s.id) {
-          @let done = sessionDone(t.topic, s);
-          @let locked = sessionLocked(t.topic, s);
-          @let unaffordable = !done && !locked && !sessionAffordable(s);
-          <button class="session-option"
-            [class.blocked]="done || locked || unaffordable"
-            [class.is-done]="done"
-            [class.chosen]="selectedSession()?.id === s.id"
-            (click)="selectSession(t.topic, s)"
-            [disabled]="done || locked || unaffordable">
-            <span class="so-num">{{ s.session_number }}</span>
-            <span class="wt-badge" [class]="lengthClass(s.length)">{{ lengthLabel(s.length) }}</span>
-            @if (showRolls()) {
-              <span class="so-roll">{{ s.roll_type }}</span>
-            } @else {
-              <span class="so-roll">Session {{ s.session_number }}</span>
-            }
-            @if (done) {
-              <span class="so-pp done">✓ done</span>
-            } @else if (locked) {
-              <span class="so-pp"><span class="ms sm">lock</span></span>
-            } @else if (unaffordable) {
-              <span class="so-pp">needs {{ sessionCost(s) }}</span>
-            } @else {
-              <span class="so-pp">+{{ s.pp_success }} / +{{ s.pp_fail }} PP</span>
+      <div class="length-picker">
+        <p class="dialog-section-label">How long will you spend on it? One roll per hour.</p>
+        @for (l of lengths; track l) {
+          @let fits = lengthAffordable(l);
+          <button class="length-option"
+            [class.blocked]="!fits"
+            [class.chosen]="selectedLength() === l"
+            (click)="selectLength(l)"
+            [disabled]="!fits">
+            <span class="wt-badge" [class]="lengthClass(l)">{{ lengthLabel(l) }}</span>
+            <span class="lo-blurb">up to +{{ getCost(l) }} pt{{ getCost(l) === 1 ? '' : 's' }}</span>
+            @if (!fits) {
+              <span class="lo-note">needs {{ getCost(l) }} free</span>
+            } @else if (overshoots(t, l)) {
+              <span class="lo-note warn"><span class="ms sm">warning</span> may run past mastery</span>
             }
           </button>
+        }
+        @if (selectedLength(); as l) {
+          @if (overshoots(t, l)) {
+            <p class="overshoot-note">
+              <span class="ms sm">info</span>
+              <span>With what's already planned, this could take you past {{ t.threshold_pp }} if every roll lands.
+                Once you master it, any hours left in the block are yours to describe at the table.</span>
+            </p>
+          }
         }
       </div>
     }

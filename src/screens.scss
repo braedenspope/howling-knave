@@ -93,7 +93,7 @@
 .progress-row-info { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .progress-topic { font-family: var(--font-heading); font-size: 16px; font-weight: 600; }
 .progress-row-pips { display: flex; align-items: center; gap: 10px; margin: 8px 0 4px; }
-.progress-reward { margin: 4px 0 6px; font-size: 14px; font-style: italic; color: var(--text-secondary); }
+.progress-reward { margin: 4px 0 6px; font-size: 14px; color: var(--text-secondary); }
 
 /* ================= EARNED ABILITIES ================= */
 .abilities-card { padding: 18px 22px; margin-bottom: 22px; }
@@ -108,7 +108,7 @@
 .ability-row:first-of-type { border-top: none; }
 .ability-row .ms { align-self: center; flex-shrink: 0; color: var(--accent-gold); }
 .ability-name { font-family: var(--font-heading); font-size: 15px; font-weight: 600; }
-.ability-benefit { font-size: 14.5px; color: var(--text-secondary); font-style: italic; }
+.ability-benefit { font-size: 14.5px; color: var(--text-secondary); }
 .ability-source {
   font-family: var(--font-data);
   font-size: 10.5px;
@@ -122,7 +122,7 @@
 /* ================= CREW CHIP ================= */
 .crew-chip { display: inline-flex; align-items: center; gap: 7px; }
 .crew-chip-name { font-family: var(--font-heading); font-size: 14px; letter-spacing: 0.3px; }
-.crew-chip-role { font-family: var(--font-body); font-style: italic; color: var(--text-secondary); font-size: 13px; }
+.crew-chip-role { font-family: var(--font-body); color: var(--text-secondary); font-size: 13px; }
 
 /* ================= CREW ROSTER ================= */
 .crew-roster {
@@ -152,7 +152,6 @@
   display: block;
 }
 .crew-card-line {
-  font-style: italic;
   color: var(--text-secondary);
   font-size: 14px;
   margin: 8px 0 10px;
@@ -224,7 +223,7 @@
 .training-item.catalog-locked .ti-reward { color: var(--text-faint); }
 .ti-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .ti-topic { font-family: var(--font-heading); font-size: 15.5px; font-weight: 600; }
-.ti-desc { margin: 6px 0 2px; font-style: italic; color: var(--text-secondary); font-size: 14px; }
+.ti-desc { margin: 6px 0 2px; color: var(--text-secondary); font-size: 14px; }
 .ti-reward { margin: 4px 0 0; font-size: 14px; color: var(--accent-gold); display: flex; align-items: center; gap: 4px; }
 .ti-reward .ms { color: var(--accent-gold); }
 
@@ -279,7 +278,7 @@
   color: var(--text-secondary);
 
   .ms { opacity: 0.5; font-size: 38px; }
-  p { font-style: italic; max-width: 380px; margin: 12px auto 0; }
+  p { max-width: 380px; margin: 12px auto 0; }
 }
 
 /* ================= UNDER SAIL PENNANT ================= */
@@ -316,7 +315,7 @@
   animation: modal-in 0.22s ease both;
 }
 .hk-modal h3 { margin: 4px 0 0; color: var(--accent-gold); font-size: 20px; letter-spacing: 1px; }
-.hk-modal-sub { color: var(--text-secondary); font-style: italic; font-size: 14.5px; margin: 10px 0 0; }
+.hk-modal-sub { color: var(--text-secondary); font-size: 14.5px; margin: 10px 0 0; }
 .hk-modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
 .request-target-list { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
 .request-target-list .training-option { cursor: pointer; }
@@ -389,7 +388,7 @@ button:focus-visible, [role="button"]:focus-visible, a:focus-visible {
 /* ================= BOARD MASTHEAD ================= */
 .board-masthead { position: relative; overflow: hidden; padding: 8px 4px 6px; }
 .board-voyage-name { font-size: 34px; letter-spacing: 2px; margin: 2px 0 4px; }
-.board-route { font-family: var(--font-body); font-style: italic; color: var(--text-secondary); margin: 0 0 16px; }
+.board-route { font-family: var(--font-body); color: var(--text-secondary); margin: 0 0 16px; }
 .board-legend { display: flex; gap: 10px; flex-wrap: wrap; }
 .board-legend .chip { padding: 4px 14px 4px 6px; }
 .board-legend .chip .ms { color: var(--accent-gold); }
@@ -450,7 +449,7 @@ button:focus-visible, [role="button"]:focus-visible, a:focus-visible {
 }
 .player-info { min-width: 168px; max-width: 168px; flex-shrink: 0; display: flex; flex-direction: column; gap: 3px; }
 .character-name { font-family: var(--font-heading); font-size: 17px; font-weight: 600; letter-spacing: 0.5px; }
-.display-name { font-style: italic; font-size: 14px; color: var(--text-secondary); }
+.display-name { font-size: 14px; color: var(--text-secondary); }
 
 .seal-action {
   margin-top: 8px; display: inline-flex; align-items: center; gap: 6px;
@@ -553,7 +552,7 @@ button:focus-visible, [role="button"]:focus-visible, a:focus-visible {
 .training-option.blocked { opacity: 0.55; cursor: not-allowed; }
 .to-main { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .to-topic { font-family: var(--font-heading); font-size: 15px; font-weight: 600; letter-spacing: 0.3px; }
-.to-desc { font-size: 14px; font-style: italic; color: var(--text-secondary); }
+.to-desc { font-size: 14px; color: var(--text-secondary); }
 .to-note { display: flex; align-items: center; gap: 6px; font-size: 13px; font-family: var(--font-data); }
 .blocked-note { color: var(--text-faint); }
 .conflict-note { color: #d08a7c; }
@@ -562,7 +561,7 @@ button:focus-visible, [role="button"]:focus-visible, a:focus-visible {
 .option-list { display: flex; flex-direction: column; gap: 8px; }
 
 /* ================= DM DASHBOARD ================= */
-.dm-hint { font-style: italic; color: var(--text-secondary); font-size: 15px; max-width: 720px; margin: 0 0 18px; }
+.dm-hint { color: var(--text-secondary); font-size: 15px; max-width: 720px; margin: 0 0 18px; }
 .rotation-grid, .ledger-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
 .rotation-card { display: flex; align-items: center; gap: 12px; padding: 14px 16px; transition: border-color 0.16s; }
 .rotation-card.overdue { border-color: rgba(166,61,47,0.55); }
@@ -604,7 +603,7 @@ button:focus-visible, [role="button"]:focus-visible, a:focus-visible {
 .ledger-card { padding: 14px 16px; transition: border-color 0.16s; }
 .ledger-card:hover { border-color: rgba(196,154,60,0.3); }
 .ledger-card.suspicious { border-color: rgba(166,61,47,0.45); }
-.ledger-note { font-style: italic; color: #d08a7c; font-size: 13.5px; margin: 8px 0 0; }
+.ledger-note { color: #d08a7c; font-size: 13.5px; margin: 8px 0 0; }
 
 .duty-day-card { padding: 14px 18px; margin-bottom: 12px; }
 .duty-chip-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
@@ -629,7 +628,7 @@ button:focus-visible, [role="button"]:focus-visible, a:focus-visible {
   border-radius: var(--radius); padding: 14px 16px;
 }
 .tf-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.ti-seed { margin: 4px 0 0; font-size: 13px; font-style: italic; color: var(--text-faint); }
+.ti-seed { margin: 4px 0 0; font-size: 13px; color: var(--text-faint); }
 
 /* ================= MOBILE SHIP'S-LOG TIMELINE ================= */
 .tl-rows { display: flex; flex-direction: column; }
@@ -668,7 +667,7 @@ button:focus-visible, [role="button"]:focus-visible, a:focus-visible {
   border-radius: var(--radius); padding: 6px 12px; flex-shrink: 0;
 }
 .tl-empty { border-style: dashed; background: rgba(36,28,20,0.2); min-height: 38px; padding: 6px 10px; }
-.tl-empty .tl-add { display: flex; align-items: center; gap: 7px; font-size: 13px; font-style: italic; color: var(--text-secondary); }
+.tl-empty .tl-add { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--text-secondary); }
 .tl-empty .tl-add.muted { opacity: 0.4; font-style: normal; font-family: var(--font-data); font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; }
 .tl-empty.interactive { cursor: pointer; }
 .tl-empty.interactive:hover, .tl-empty.interactive:active { border-color: var(--accent-gold); background: rgba(196,154,60,0.06); }

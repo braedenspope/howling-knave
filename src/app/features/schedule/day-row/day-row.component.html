@@ -135,7 +135,9 @@
                   <!-- DM: clickable to mark outcome -->
                   <div class="slot-cell block-cell dm-clickable" [style.grid-column]="'span ' + item.span"
                     [style.border-left]="'3px solid ' + crewColor(b.crew_member)"
-                    [matMenuTriggerFor]="outcomeMenu" [matMenuTriggerData]="{ block: b }">
+                    [matMenuTriggerFor]="outcomeMenu" [matMenuTriggerData]="{ block: b }"
+                    [attr.draggable]="canEdit(u.id)" (dragstart)="onDragStart($event, b)" (dragend)="onDragEnd()"
+                    [title]="canEdit(u.id) ? 'Click to mark the outcome · drag to move' : 'Click to mark the outcome'">
                     <div class="block-cell-top">
                       <span class="block-crew" [style.color]="crewColor(b.crew_member)">{{ b.crew_member }}</span>
                       @if (b.status === 'success') { <span class="ms sm status-success">check_circle</span> }
@@ -144,7 +146,6 @@
                     <span class="block-topic">{{ b.training_topic }}</span>
                     <div class="block-cell-bottom">
                       <span class="wt-badge" [class]="lengthClass(b.slot_weight)">{{ lengthLabel(b.slot_weight) }}</span>
-                      @if (sessionTag(b)) { <span class="stamp-label">{{ sessionTag(b) }}</span> }
                       @if (progressLabel(b)) { <span class="stamp-label">{{ progressLabel(b) }}</span> }
                       @if (b.spotlight) { <span class="ms sm" style="color: var(--accent-gold); font-size: 13px;">flag</span> }
                     </div>
@@ -165,7 +166,6 @@
                     <span class="block-topic">{{ b.training_topic }}</span>
                     <div class="block-cell-bottom">
                       <span class="wt-badge" [class]="lengthClass(b.slot_weight)">{{ lengthLabel(b.slot_weight) }}</span>
-                      @if (sessionTag(b)) { <span class="stamp-label">{{ sessionTag(b) }}</span> }
                     </div>
                     @if (canEdit(u.id) || isDm()) {
                       <button class="cell-remove" (click)="onRemoveBlock(b)" title="Remove"><span class="ms">close</span></button>

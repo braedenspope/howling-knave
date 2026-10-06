@@ -16,9 +16,6 @@ import {
 } from '../../shared/data/training.data';
 import {
   TrainingWithCrew,
-  SlotWeight,
-  SLOT_WEIGHT_LABEL,
-  SLOT_WEIGHT_UNITS,
 } from '../../shared/models';
 
 type StatusKind = 'mastered' | 'progress' | 'locked' | 'available';
@@ -166,13 +163,6 @@ export class CrewComponent implements OnInit {
     return { kind: 'available', pp: 0, threshold: t.threshold_pp, next: false };
   }
 
-  lengthLabel(weight: SlotWeight): string {
-    const blocks = SLOT_WEIGHT_UNITS[weight];
-    return `${SLOT_WEIGHT_LABEL[weight]} · ${blocks}`;
-  }
-  lengthClass(weight: SlotWeight): string {
-    return `wt-${weight}`;
-  }
   pipArray(n: number): number[] {
     return Array.from({ length: n }, (_, i) => i);
   }

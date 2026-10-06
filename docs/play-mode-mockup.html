@@ -1,0 +1,1037 @@
+<title>The Montage Runner</title>
+
+<style>
+  :root {
+    --bg-main: #16110b;
+    --bg-deep: #0f0b07;
+    --bg-card: #241c14;
+    --bg-card-raised: #2a2118;
+    --bg-card-border: #3d2e1f;
+    --accent-gold: #d4a843;
+    --accent-brass: #c49a3c;
+    --accent-copper: #b87333;
+    --text-primary: #dcd0be;
+    --text-secondary: #9a8b78;
+    --text-faint: #6f6353;
+    --success-green: #6f9a5c;
+    --failure-red: #a63d2f;
+    --wax-red: #8b2500;
+
+    --font-heading: 'Cinzel', 'Trajan Pro', Georgia, 'Times New Roman', serif;
+    --font-body: 'IM Fell English', 'Iowan Old Style', Palatino, Georgia, serif;
+    --font-data: 'Courier Prime', ui-monospace, 'Courier New', monospace;
+
+    --radius: 2px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 0 16px 64px;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 3px, rgba(0,0,0,0.07) 3px 4px),
+      linear-gradient(180deg, #15100a 0%, #1e1610 40%, #17110b 100%);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .wrap { max-width: 720px; margin: 0 auto; }
+
+  /* ---------- harness chrome ---------- */
+
+  .mock-head {
+    padding: 40px 0 20px;
+    border-bottom: 1px solid var(--bg-card-border);
+    margin-bottom: 20px;
+  }
+
+  .eyebrow {
+    display: block;
+    font-family: var(--font-data);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent-copper);
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    margin: 0 0 10px;
+    font-family: var(--font-heading);
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent-gold);
+    text-wrap: balance;
+  }
+
+  .lede {
+    margin: 0;
+    max-width: 60ch;
+    color: var(--text-secondary);
+    font-size: 15px;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--bg-card-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .seg button {
+    font-family: var(--font-data);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 7px 14px;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 0;
+    cursor: pointer;
+  }
+
+  .seg button + button { border-left: 1px solid var(--bg-card-border); }
+  .seg button[aria-pressed="true"] {
+    background: rgba(212,168,67,0.14);
+    color: var(--accent-gold);
+  }
+
+  .spacer { flex: 1; }
+
+  button:focus-visible,
+  .pip-btn:focus-visible {
+    outline: 2px solid var(--accent-gold);
+    outline-offset: 2px;
+  }
+
+  /* ---------- shared app kit ---------- */
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--bg-card-border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    position: relative;
+  }
+
+  .section-title {
+    font-family: var(--font-heading);
+    font-size: 15px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    margin: 28px 0 4px;
+  }
+
+  .rope {
+    height: 2px;
+    background: repeating-linear-gradient(90deg,
+      var(--accent-copper) 0 6px, transparent 6px 10px);
+    opacity: 0.45;
+    margin-bottom: 14px;
+  }
+
+  .hint {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0 0 16px;
+    max-width: 62ch;
+  }
+
+  .btn {
+    font-family: var(--font-heading);
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 18px;
+    background: var(--bg-card-raised);
+    color: var(--text-primary);
+    border: 1px solid var(--bg-card-border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+
+  .btn:hover:not(:disabled) { border-color: var(--accent-brass); }
+  .btn:disabled { opacity: 0.32; cursor: not-allowed; }
+
+  .btn-brass {
+    background: rgba(196,154,60,0.18);
+    border-color: var(--accent-brass);
+    color: var(--accent-gold);
+  }
+
+  .btn-success {
+    background: rgba(111,154,92,0.18);
+    border-color: var(--success-green);
+    color: var(--success-green);
+  }
+
+  .btn-fail {
+    background: rgba(166,61,47,0.18);
+    border-color: var(--failure-red);
+    color: #c9705f;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border-color: transparent;
+    color: var(--text-secondary);
+  }
+  .btn-ghost:hover:not(:disabled) { color: var(--text-primary); }
+
+  /* ---------- setup screen ---------- */
+
+  .gate {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    margin: 0 0 12px;
+  }
+  .gate.ok { color: var(--success-green); }
+  .gate.wait { color: var(--text-secondary); }
+
+  .gate-row {
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+    padding: 8px 12px;
+    background: rgba(36,28,20,0.5);
+    border-left: 3px solid var(--failure-red);
+    margin-bottom: 4px;
+  }
+
+  .gate-day {
+    font-family: var(--font-heading);
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .gate-names { font-size: 13px; font-style: italic; color: var(--text-secondary); }
+
+  .order-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: rgba(36,28,20,0.5);
+    border-left: 3px solid var(--accent-brass);
+    margin-bottom: 6px;
+  }
+
+  .order-num {
+    font-family: var(--font-data);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent-gold);
+    width: 18px;
+  }
+
+  .order-name {
+    flex: 1;
+    font-family: var(--font-heading);
+    font-size: 14px;
+    letter-spacing: 0.5px;
+  }
+
+  .icon-btn {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--bg-card-border);
+    border-radius: var(--radius);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+  }
+  .icon-btn:hover:not(:disabled) { color: var(--accent-gold); border-color: var(--accent-brass); }
+  .icon-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
+  .actions-right { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+
+  /* ---------- runner ---------- */
+
+  .runner-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+  .where {
+    font-family: var(--font-heading);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .where .day { font-size: 19px; color: var(--accent-gold); }
+  .where .hour { font-size: 13px; color: var(--text-secondary); margin-left: 8px; }
+
+  .count {
+    text-align: right;
+    font-family: var(--font-data);
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+  .count small { display: block; font-size: 10px; color: var(--text-faint); }
+
+  .bar {
+    height: 3px;
+    background: rgba(0,0,0,0.4);
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .bar span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-copper), var(--accent-gold));
+    transition: width 240ms ease;
+  }
+
+  .stop-card { border-left: 4px solid var(--accent-brass); }
+
+  .stop-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+
+  .char {
+    font-family: var(--font-heading);
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-primary);
+  }
+
+  .tag {
+    font-family: var(--font-data);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: var(--radius);
+    border: 1px solid var(--bg-card-border);
+    color: var(--text-secondary);
+  }
+  .tag.duty { border-color: var(--accent-copper); color: var(--accent-copper); }
+  .tag.len { border-color: var(--accent-brass); color: var(--accent-brass); }
+
+  .crewline {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    font-style: italic;
+    margin-bottom: 10px;
+  }
+
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  .topic {
+    margin: 0 0 10px;
+    font-family: var(--font-heading);
+    font-size: 23px;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+
+  .desc { margin: 0 0 14px; font-size: 14px; color: var(--text-secondary); }
+
+  .rollbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 11px 0;
+    border-top: 1px solid rgba(212,168,67,0.18);
+    border-bottom: 1px solid rgba(212,168,67,0.18);
+    margin-bottom: 14px;
+  }
+
+  .rolllabel {
+    font-family: var(--font-heading);
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent-gold);
+  }
+
+  .pips { display: flex; gap: 6px; flex: 1; }
+
+  .pip {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    border: 1px solid rgba(220,208,190,0.28);
+    background: rgba(0,0,0,0.35);
+  }
+  .pip.s { background: var(--success-green); border-color: var(--success-green); }
+  .pip.f { background: var(--failure-red); border-color: var(--failure-red); }
+  .pip.now { box-shadow: 0 0 0 2px rgba(212,168,67,0.75); }
+
+  .points {
+    font-family: var(--font-data);
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dmline {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    font-size: 13px;
+    margin: 0 0 9px;
+  }
+
+  .dmline.roll {
+    font-family: var(--font-data);
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent-copper);
+  }
+
+  .dmline.seed {
+    font-style: italic;
+    color: var(--text-secondary);
+    padding-left: 11px;
+    border-left: 2px solid rgba(212,168,67,0.35);
+  }
+
+  .dmline.bonus { color: var(--accent-gold); }
+
+  .already {
+    font-family: var(--font-data);
+    font-size: 11px;
+    margin: 0;
+  }
+  .already.s { color: var(--success-green); }
+  .already.f { color: #c9705f; }
+
+  .dm-only-note {
+    font-family: var(--font-data);
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    border: 1px dashed var(--bg-card-border);
+    padding: 1px 5px;
+    border-radius: var(--radius);
+    flex-shrink: 0;
+  }
+
+  .runner-actions { display: flex; gap: 8px; margin-top: 16px; }
+  .runner-actions .btn { flex: 1; }
+  .runner-actions .btn-ghost { flex: 0 0 auto; }
+
+  .watching {
+    text-align: center;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--text-faint);
+    margin: 16px 0 0;
+  }
+
+  .done { text-align: center; padding: 44px 16px; }
+  .done .mark { font-size: 40px; color: var(--accent-gold); }
+  .done h2 {
+    font-family: var(--font-heading);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin: 12px 0 6px;
+    font-size: 20px;
+  }
+  .done p { color: var(--text-secondary); margin: 0 0 20px; }
+
+  /* ---------- ledger ---------- */
+
+  .ledger-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 12px;
+    background: rgba(36,28,20,0.5);
+    border-left: 3px solid var(--bg-card-border);
+    margin-bottom: 5px;
+  }
+
+  .ledger-who {
+    font-family: var(--font-heading);
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    width: 116px;
+    flex-shrink: 0;
+  }
+
+  .ledger-topic { flex: 1; font-size: 14px; min-width: 0; }
+
+  .ledger-track {
+    width: 108px;
+    height: 7px;
+    background: rgba(0,0,0,0.4);
+    flex-shrink: 0;
+  }
+  .ledger-track span {
+    display: block;
+    height: 100%;
+    background: var(--accent-brass);
+    transition: width 220ms ease;
+  }
+  .ledger-track.done span { background: var(--success-green); }
+
+  .ledger-pts {
+    font-family: var(--font-data);
+    font-size: 12px;
+    width: 52px;
+    text-align: right;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+  }
+  .ledger-pts.done { color: var(--success-green); }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%) translateY(12px);
+    background: var(--bg-card-raised);
+    border: 1px solid var(--accent-brass);
+    color: var(--text-primary);
+    font-family: var(--font-data);
+    font-size: 12px;
+    padding: 9px 16px;
+    border-radius: var(--radius);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease, transform 180ms ease;
+    z-index: 20;
+    max-width: calc(100vw - 32px);
+  }
+  .toast.up { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .footnote {
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid var(--bg-card-border);
+    font-size: 13px;
+    color: var(--text-faint);
+    max-width: 62ch;
+  }
+
+  .hidden { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+
+  @media (max-width: 560px) {
+    h1 { font-size: 24px; }
+    .topic { font-size: 19px; }
+    .card { padding: 16px; }
+    .ledger-who { width: 88px; font-size: 10px; }
+    .ledger-track { width: 64px; }
+  }
+</style>
+
+<div class="wrap">
+
+  <div class="mock-head">
+    <span class="eyebrow">Echoes of the Sundering · mockup</span>
+    <h1>The Montage Runner</h1>
+    <p class="lede">
+      A clickable stand-in for play mode — not the real app, but wired to the same rules. Step through a
+      two-day voyage for three players and watch the points land. One roll per hour; every roll that lands
+      is a point; a training whose rolls all miss on a day still earns one for the attempt.
+    </p>
+  </div>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Screen">
+      <button type="button" data-screen="setup" aria-pressed="false">Run the Day</button>
+      <button type="button" data-screen="runner" aria-pressed="true">The Montage</button>
+    </div>
+    <div class="seg" role="group" aria-label="Viewer">
+      <button type="button" data-role="dm" aria-pressed="true">DM view</button>
+      <button type="button" data-role="player" aria-pressed="false">Player view</button>
+    </div>
+    <span class="spacer"></span>
+    <button type="button" class="btn btn-ghost" id="reset">Reset</button>
+  </div>
+
+  <!-- ========== SETUP ========== -->
+  <section id="screen-setup" class="hidden">
+    <p class="hint">
+      The gate into the montage. Every day must be sealed by every player before the run can start, then the
+      crew are put in the order they will take their hours.
+    </p>
+
+    <h2 class="section-title">All hands sealed</h2>
+    <div class="rope"></div>
+
+    <div id="gate"></div>
+    <button type="button" class="btn btn-ghost" id="toggle-seal">Simulate an unsealed day</button>
+
+    <h2 class="section-title">Turn order</h2>
+    <div class="rope"></div>
+    <p class="hint">Set once for the voyage. Everyone takes hour 1 in this order, then hour 2, and so on.</p>
+
+    <div id="order"></div>
+
+    <div class="actions-right">
+      <button type="button" class="btn btn-brass" id="begin">Begin the montage</button>
+    </div>
+  </section>
+
+  <!-- ========== RUNNER ========== -->
+  <section id="screen-runner">
+    <div id="runner"></div>
+
+    <h2 class="section-title">Progress so far</h2>
+    <div class="rope"></div>
+    <p class="hint">
+      Not a screen in the app — a window into the scoring so you can check the rules as you click.
+    </p>
+    <div id="ledger"></div>
+  </section>
+
+  <p class="footnote">
+    Fonts fall back to system serifs here; the real app loads Cinzel and IM Fell English. Crew colours,
+    session lengths, PP thresholds and the turn-order loop are taken from the live curriculum.
+  </p>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---- the fake voyage -------------------------------------------------
+
+  var CREW_COLOR = {
+    'Anna Rose': '#a63d2f',
+    'Guner Aldric': '#2a4a6b',
+    'Rachel Rose': '#5a8a4a',
+    'Lehiri Stars': '#6b3a8b',
+    'Toji Brassboot': '#b87333'
+  };
+
+  var PLAYERS = [
+    { id: 'p1', name: 'Kestrel Vane' },
+    { id: 'p2', name: 'Mira Solenne' },
+    { id: 'p3', name: 'Dunstan Roke' }
+  ];
+
+  var TRAININGS = {
+    'The Blade': {
+      crew: 'Anna Rose', threshold: 9, roll: 'Dexterity',
+      desc: 'Anna teaches the half-dozen things that keep you alive with a rapier in your hand, and teaches them until they stop being things you think about.',
+      seed: 'She corrects the grip once, says nothing else for an hour, then asks who taught you to stand like that.'
+    },
+    'Reading the Deep': {
+      crew: 'Lehiri Stars', threshold: 12, roll: 'Wisdom (Survival)',
+      desc: 'Lehiri reads water the way others read a page — colour, chop, the set of the birds. She plots the safest course and the fastest one, and never says which she is giving you.',
+      seed: 'Night watch, no lantern. She asks what the swell is doing before she lets you look at the chart.',
+      bonus: { character: 'Kestrel Vane', body: 'Kestrel grew up on the estuary — Lehiri notices the read is already half there, and starts teaching the harder half.' }
+    },
+    'Field Surgery': {
+      crew: 'Rachel Rose', threshold: 9, roll: 'Medicine',
+      desc: 'Stop the bleeding first. Everything else is conversation.',
+      seed: 'A rope burn on the quartermaster becomes the lesson. Rachel talks you through it and does not take the needle back.'
+    },
+    "The Engine's Temper": {
+      crew: 'Toji Brassboot', threshold: 12, roll: "Tinker's Tools",
+      desc: 'Toji argues with the engine. Usually wins. What he is really teaching is how to tell a complaint from a warning.',
+      seed: 'He hands you the wrench and goes to lunch. The knocking gets worse while he is gone.'
+    },
+    'Knots and Discipline': {
+      crew: 'Guner Aldric', threshold: 6, roll: 'Strength (Athletics)',
+      desc: 'There is a procedure. Guner will teach you the procedure. He will also notice exactly how long you take to stop resenting it.',
+      seed: 'Eight knots, timed. He does not tell you the time to beat until after the third attempt.'
+    }
+  };
+
+  // type: 'training' | 'duty' | 'custom'
+  var BLOCKS = [
+    // --- Day 1 ---
+    { id: 'k1', day: 1, player: 'p1', slot: 0, span: 2, type: 'training', crew: 'Anna Rose', topic: 'The Blade' },
+    { id: 'k2', day: 1, player: 'p1', slot: 2, span: 1, type: 'duty', crew: 'Ship Duty', topic: 'Stand watch — forecastle' },
+    { id: 'k3', day: 1, player: 'p1', slot: 3, span: 4, type: 'training', crew: 'Lehiri Stars', topic: 'Reading the Deep' },
+
+    { id: 'm1', day: 1, player: 'p2', slot: 0, span: 1, type: 'duty', crew: 'Ship Duty', topic: 'Pump the bilge' },
+    { id: 'm2', day: 1, player: 'p2', slot: 1, span: 2, type: 'training', crew: 'Rachel Rose', topic: 'Field Surgery' },
+    { id: 'm3', day: 1, player: 'p2', slot: 4, span: 1, type: 'custom', crew: 'Independent', topic: 'Write to her sister in Halloway' },
+
+    { id: 'd1', day: 1, player: 'p3', slot: 0, span: 4, type: 'training', crew: 'Toji Brassboot', topic: "The Engine's Temper" },
+    { id: 'd2', day: 1, player: 'p3', slot: 5, span: 2, type: 'training', crew: 'Guner Aldric', topic: 'Knots and Discipline' },
+
+    // --- Day 2 ---
+    { id: 'k4', day: 2, player: 'p1', slot: 0, span: 1, type: 'training', crew: 'Anna Rose', topic: 'The Blade' },
+    { id: 'm4', day: 2, player: 'p2', slot: 0, span: 2, type: 'training', crew: 'Rachel Rose', topic: 'Field Surgery' },
+    { id: 'd3', day: 2, player: 'p3', slot: 0, span: 1, type: 'duty', crew: 'Ship Duty', topic: 'Galley supply run' }
+  ];
+
+  var DAYS = [1, 2];
+  var LEN_LABEL = { 1: 'Short', 2: 'Medium', 4: 'Long' };
+
+  // ---- state -----------------------------------------------------------
+
+  var order = PLAYERS.map(function (p) { return p.id; });
+  var rolls = {};          // 'blockId:index' -> 'success' | 'failure'
+  var cursor = 0;
+  var screen = 'runner';
+  var role = 'dm';
+  var allSealed = true;
+
+  function playerName(id) {
+    for (var i = 0; i < PLAYERS.length; i++) if (PLAYERS[i].id === id) return PLAYERS[i].name;
+    return 'Unknown';
+  }
+
+  // ---- the queue: day, then hour, then turn order ----------------------
+
+  function buildQueue() {
+    var stops = [];
+    DAYS.forEach(function (day) {
+      for (var hour = 0; hour < 8; hour++) {
+        order.forEach(function (pid) {
+          var block = null;
+          for (var i = 0; i < BLOCKS.length; i++) {
+            var b = BLOCKS[i];
+            if (b.day === day && b.player === pid && b.slot <= hour && hour < b.slot + b.span) {
+              block = b;
+              break;
+            }
+          }
+          if (!block) return;
+          stops.push({
+            day: day, hour: hour, pid: pid, block: block,
+            rollIndex: hour - block.slot, rollCount: block.span
+          });
+        });
+      }
+    });
+    return stops;
+  }
+
+  var queue = buildQueue();
+
+  // ---- scoring: recomputed from the rolls, exactly as the service does --
+
+  function score(pid, topic) {
+    var t = TRAININGS[topic];
+    var byDay = {};
+    BLOCKS.forEach(function (b) {
+      if (b.player !== pid || b.topic !== topic || b.type !== 'training') return;
+      for (var i = 0; i < b.span; i++) {
+        var o = rolls[b.id + ':' + i];
+        if (!o) continue;
+        if (!byDay[b.day]) byDay[b.day] = [];
+        byDay[b.day].push(o);
+      }
+    });
+
+    var points = 0;
+    Object.keys(byDay).forEach(function (day) {
+      var outs = byDay[day];
+      var hits = outs.filter(function (o) { return o === 'success'; }).length;
+      // Every landed roll scores; a day that missed entirely still pays one.
+      points += hits > 0 ? hits : 1;
+    });
+
+    points = Math.min(points, t.threshold);
+    return { points: points, threshold: t.threshold, done: points >= t.threshold };
+  }
+
+  // ---- rendering -------------------------------------------------------
+
+  var $ = function (sel) { return document.querySelector(sel); };
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
+  function toast(msg) {
+    var el = $('#toast');
+    el.textContent = msg;
+    el.classList.add('up');
+    clearTimeout(el._t);
+    el._t = setTimeout(function () { el.classList.remove('up'); }, 2600);
+  }
+
+  function renderGate() {
+    var html = '';
+    if (allSealed) {
+      html += '<p class="gate ok">✓ Every day is sealed. The schedule is set.</p>';
+    } else {
+      html += '<p class="gate wait">⧗ Waiting on seals before the montage can begin.</p>';
+      html += '<div class="gate-row"><span class="gate-day">Day 2</span>' +
+              '<span class="gate-names">Mira Solenne, Dunstan Roke</span></div>';
+    }
+    $('#gate').innerHTML = html;
+    $('#begin').disabled = !allSealed;
+    $('#toggle-seal').textContent = allSealed ? 'Simulate an unsealed day' : 'Seal everything';
+  }
+
+  function renderOrder() {
+    $('#order').innerHTML = order.map(function (pid, i) {
+      return '<div class="order-row">' +
+        '<span class="order-num">' + (i + 1) + '</span>' +
+        '<span class="order-name">' + esc(playerName(pid)) + '</span>' +
+        '<button type="button" class="icon-btn" data-move="up" data-i="' + i + '"' +
+          (i === 0 ? ' disabled' : '') + ' aria-label="Move ' + esc(playerName(pid)) + ' up">↑</button>' +
+        '<button type="button" class="icon-btn" data-move="down" data-i="' + i + '"' +
+          (i === order.length - 1 ? ' disabled' : '') + ' aria-label="Move ' + esc(playerName(pid)) + ' down">↓</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderRunner() {
+    var host = $('#runner');
+
+    if (cursor >= queue.length) {
+      host.innerHTML =
+        '<div class="card done">' +
+          '<div class="mark">✦</div>' +
+          '<h2>The voyage is run</h2>' +
+          '<p>Every hour of the Ashfall Crossing has been resolved.</p>' +
+          (role === 'dm'
+            ? '<div class="runner-actions" style="justify-content:center">' +
+                '<button type="button" class="btn btn-ghost" data-act="back">Step back</button>' +
+                '<button type="button" class="btn btn-brass" data-act="reset">Close the montage</button>' +
+              '</div>'
+            : '') +
+        '</div>';
+      return;
+    }
+
+    var stop = queue[cursor];
+    var b = stop.block;
+    var t = b.type === 'training' ? TRAININGS[b.topic] : null;
+    var color = CREW_COLOR[b.crew] || '#6a6a5a';
+    var name = playerName(stop.pid);
+
+    var pips = '';
+    for (var i = 0; i < stop.rollCount; i++) {
+      var o = rolls[b.id + ':' + i];
+      pips += '<span class="pip' + (o === 'success' ? ' s' : o === 'failure' ? ' f' : '') +
+              (i === stop.rollIndex ? ' now' : '') + '"></span>';
+    }
+
+    var remainingToday = queue.slice(cursor).filter(function (s) { return s.day === stop.day; }).length;
+    var pct = Math.round((cursor / queue.length) * 100);
+    var recorded = rolls[b.id + ':' + stop.rollIndex];
+
+    var tagHtml = b.type === 'duty'
+      ? '<span class="tag duty">Ship duty</span>'
+      : b.type === 'custom'
+        ? '<span class="tag">Independent</span>'
+        : '<span class="tag len">' + LEN_LABEL[b.span] + '</span>';
+
+    var html = '';
+
+    html += '<div class="runner-head">' +
+      '<div class="where"><span class="day">Day ' + stop.day + '</span>' +
+      '<span class="hour">Hour ' + (stop.hour + 1) + '</span></div>' +
+      '<div class="count">' + (cursor + 1) + ' / ' + queue.length +
+      '<small>' + remainingToday + ' left today</small></div></div>';
+
+    html += '<div class="bar"><span style="width:' + pct + '%"></span></div>';
+
+    html += '<div class="card stop-card" style="border-left-color:' + color + '">';
+    html += '<div class="stop-top"><span class="char">' + esc(name) + '</span>' + tagHtml + '</div>';
+
+    if (b.type !== 'duty') {
+      html += '<div class="crewline"><span class="dot" style="background:' + color + '"></span>' +
+              '<span style="color:' + color + '">' + esc(b.crew) + '</span></div>';
+    }
+
+    html += '<h2 class="topic">' + esc(b.topic) + '</h2>';
+
+    if (t) html += '<p class="desc">' + esc(t.desc) + '</p>';
+
+    if (b.type === 'training') {
+      var sc = score(stop.pid, b.topic);
+      html += '<div class="rollbar">' +
+        '<span class="rolllabel">Roll ' + (stop.rollIndex + 1) + ' of ' + stop.rollCount + '</span>' +
+        '<span class="pips">' + pips + '</span>' +
+        '<span class="points">' + sc.points + '/' + sc.threshold + ' pts' +
+        (sc.done ? ' · Mastered' : '') + '</span></div>';
+
+      if (role === 'dm') {
+        html += '<p class="dmline roll">⚄ ' + esc(t.roll) + '<span class="dm-only-note">DM only</span></p>';
+        html += '<p class="dmline seed">' + esc(t.seed) + '</p>';
+        if (t.bonus && t.bonus.character === name) {
+          html += '<p class="dmline bonus">✦ ' + esc(t.bonus.body) + '<span class="dm-only-note">DM only</span></p>';
+        }
+      }
+
+      if (recorded) {
+        html += '<p class="already ' + (recorded === 'success' ? 's' : 'f') + '">' +
+          'Already marked ' + (recorded === 'success' ? 'a success' : 'a failure') +
+          ' — marking again overwrites it.</p>';
+      }
+    }
+
+    html += '</div>';
+
+    if (role === 'dm') {
+      html += '<div class="runner-actions">' +
+        '<button type="button" class="btn btn-ghost" data-act="back"' + (cursor === 0 ? ' disabled' : '') + '>← Back</button>';
+      if (b.type === 'training') {
+        html += '<button type="button" class="btn btn-fail" data-act="fail">✕ Failure</button>' +
+                '<button type="button" class="btn btn-success" data-act="success">✓ Success</button>';
+      } else {
+        html += '<button type="button" class="btn btn-brass" data-act="next">Move on →</button>';
+      }
+      html += '</div>';
+    } else {
+      html += '<p class="watching">👁 Watching the montage — the DM is calling the rolls.</p>';
+    }
+
+    host.innerHTML = html;
+  }
+
+  function renderLedger() {
+    var seen = {};
+    var rows = [];
+    BLOCKS.forEach(function (b) {
+      if (b.type !== 'training') return;
+      var key = b.player + '|' + b.topic;
+      if (seen[key]) return;
+      seen[key] = true;
+      var sc = score(b.player, b.topic);
+      rows.push({ pid: b.player, topic: b.topic, crew: b.crew, sc: sc });
+    });
+
+    $('#ledger').innerHTML = rows.map(function (r) {
+      var pct = Math.round((r.sc.points / r.sc.threshold) * 100);
+      return '<div class="ledger-row" style="border-left-color:' + (CREW_COLOR[r.crew] || '#3d2e1f') + '">' +
+        '<span class="ledger-who">' + esc(playerName(r.pid)) + '</span>' +
+        '<span class="ledger-topic">' + esc(r.topic) + '</span>' +
+        '<span class="ledger-track' + (r.sc.done ? ' done' : '') + '"><span style="width:' + pct + '%"></span></span>' +
+        '<span class="ledger-pts' + (r.sc.done ? ' done' : '') + '">' + r.sc.points + '/' + r.sc.threshold + '</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  function render() {
+    $('#screen-setup').classList.toggle('hidden', screen !== 'setup');
+    $('#screen-runner').classList.toggle('hidden', screen !== 'runner');
+    if (screen === 'setup') { renderGate(); renderOrder(); }
+    else { renderRunner(); renderLedger(); }
+  }
+
+  // ---- actions ---------------------------------------------------------
+
+  function mark(outcome) {
+    var stop = queue[cursor];
+    rolls[stop.block.id + ':' + stop.rollIndex] = outcome;
+    var sc = score(stop.pid, stop.block.topic);
+    toast(sc.done
+      ? stop.block.topic + ' · UNLOCKED'
+      : (outcome === 'success' ? 'Success' : 'Failure') + ' — ' + stop.block.topic + ' · ' + sc.points + '/' + sc.threshold);
+    cursor = Math.min(cursor + 1, queue.length);
+    render();
+  }
+
+  function reset() {
+    rolls = {};
+    cursor = 0;
+    allSealed = true;
+    order = PLAYERS.map(function (p) { return p.id; });
+    queue = buildQueue();
+    render();
+  }
+
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('button');
+    if (!el) return;
+
+    if (el.dataset.screen) {
+      screen = el.dataset.screen;
+      document.querySelectorAll('[data-screen]').forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.dataset.screen === screen));
+      });
+      render();
+      return;
+    }
+
+    if (el.dataset.role) {
+      role = el.dataset.role;
+      document.querySelectorAll('[data-role]').forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.dataset.role === role));
+      });
+      render();
+      return;
+    }
+
+    if (el.dataset.move) {
+      var i = Number(el.dataset.i);
+      var j = el.dataset.move === 'up' ? i - 1 : i + 1;
+      if (j < 0 || j >= order.length) return;
+      var tmp = order[i]; order[i] = order[j]; order[j] = tmp;
+      queue = buildQueue();
+      renderOrder();
+      return;
+    }
+
+    switch (el.id) {
+      case 'reset': reset(); toast('Mockup reset'); return;
+      case 'toggle-seal': allSealed = !allSealed; renderGate(); return;
+      case 'begin':
+        if (!allSealed) return;
+        cursor = 0;
+        screen = 'runner';
+        document.querySelectorAll('[data-screen]').forEach(function (b) {
+          b.setAttribute('aria-pressed', String(b.dataset.screen === 'runner'));
+        });
+        toast('The montage begins — ' + queue.length + ' hours to run');
+        render();
+        return;
+    }
+
+    switch (el.dataset.act) {
+      case 'success': mark('success'); return;
+      case 'fail': mark('failure'); return;
+      case 'next': cursor = Math.min(cursor + 1, queue.length); render(); return;
+      case 'back': cursor = Math.max(0, cursor - 1); render(); return;
+      case 'reset': reset(); return;
+    }
+  });
+
+  render();
+})();
+</script>

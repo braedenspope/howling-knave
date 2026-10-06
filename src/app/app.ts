@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from './core/auth/auth.service';
 import { VoyageService } from './features/voyage/voyage.service';
 import { PlayService } from './features/play/play.service';
+import { RelationshipService } from './features/dm/relationship.service';
 import { TweaksPanelComponent } from './shared/tweaks-panel/tweaks-panel.component';
 import { DutyRequestModalsComponent } from './features/schedule/duty-request-modals/duty-request-modals.component';
 
@@ -35,6 +36,7 @@ export class App {
     public auth: AuthService,
     public voyageService: VoyageService,
     public play: PlayService,
+    private relationships: RelationshipService,
   ) {
     // Own the play-state subscription at the shell so the nav link — and every
     // player's screen — follows the DM's cursor without visiting /play first.
@@ -46,6 +48,13 @@ export class App {
       this.watchedVoyageId = voyage.id;
       this.play.load(voyage.id);
       this.play.subscribe(voyage.id);
+    });
+
+    // Relationship tiers gate which trainings a player can book; follow them
+    // live so a DM's adjustment lands on every screen at once.
+    effect(() => {
+      if (this.auth.isAuthed()) this.relationships.subscribe();
+      else this.relationships.unsubscribe();
     });
   }
 

@@ -10,13 +10,12 @@ import { DutyRequestService } from '../duty-request.service';
 import { VoyageService } from '../../voyage/voyage.service';
 import { ConfirmationService } from '../confirmation.service';
 import { CorrectionService } from '../../dm/correction.service';
-import { TrainingService } from '../../dm/training.service';
 import { TrainingTrackerService } from '../../dm/training-tracker.service';
 import { PlayService } from '../../play/play.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ToastService } from '../../../shared/toast.service';
 import { CREW_COLORS, TIER_NAMES } from '../../../shared/data/training.data';
-import { Day, ScheduleBlock, DAY_BUDGET, SLOT_WEIGHT_UNITS, SLOT_WEIGHT_LABEL, TrainingSession } from '../../../shared/models';
+import { Day, ScheduleBlock, DAY_BUDGET, SLOT_WEIGHT_UNITS, SLOT_WEIGHT_LABEL } from '../../../shared/models';
 
 export interface SlotItem {
   type: 'block' | 'empty';
@@ -60,7 +59,6 @@ export class DayRowComponent {
     private voyageService: VoyageService,
     private confirmations: ConfirmationService,
     private corrections: CorrectionService,
-    private trainingService: TrainingService,
     private tracker: TrainingTrackerService,
     private play: PlayService,
     private auth: AuthService,
@@ -325,7 +323,6 @@ export class DayRowComponent {
       if (!result) return;
       const err = await this.scheduleService.addBlock(
         this.day().id, result.crewMember, result.trainingTopic, result.slotWeight, userId, atSlot,
-        result.sessionNumber ?? null,
       );
       if (!err) {
         await this.withdrawSealIfNeeded(userId);
@@ -376,22 +373,6 @@ export class DayRowComponent {
     return `${shown}/${p.threshold_pp} pts`;
   }
 
-  /**
-   * Short label for a training block's session. The DM sees the roll
-   * ("S2 · Insight"); players only see which session it is.
-   */
-  sessionTag(block: ScheduleBlock): string {
-    const s = this.sessionFor(block);
-    if (!s) return '';
-    return this.isDm() ? `S${s.session_number} · ${s.roll_type}` : `Session ${s.session_number}`;
-  }
-
-  /** The prescribed session this block represents, if known. */
-  private sessionFor(block: ScheduleBlock): TrainingSession | undefined {
-    if (!block.session_number) return undefined;
-    return this.trainingService.getTraining(block.crew_member, block.training_topic)
-      ?.sessions.find(s => s.session_number === block.session_number);
-  }
   /**
    * Marking from the board is a shortcut for "every hour of this block went the
    * same way" — it writes the same `block_rolls` the montage runner does, so

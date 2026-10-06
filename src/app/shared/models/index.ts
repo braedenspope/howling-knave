@@ -84,7 +84,7 @@ export interface ScheduleBlock {
   user_id: string;
   crew_member: string;
   training_topic: string;
-  /** Which session of the training path this block represents (1-based). */
+  /** Legacy: which prescribed session this block was (pre-012). No longer written. */
   session_number?: number | null;
   slot_weight: SlotWeight;
   slot_position: number;
@@ -141,7 +141,7 @@ export interface TrainingProgress {
    * `block_rolls`, never incremented.
    */
   pp_accumulated: number;
-  /** PP threshold required to unlock the benefit (6 / 9 / 12). */
+  /** Points required to unlock the benefit — 12 per tier (see `thresholdForTier`). */
   threshold_pp: number;
   /** Legacy: failed Short sessions under the pre-011 mercy rule. No longer read. */
   short_fails: number;
@@ -150,22 +150,6 @@ export interface TrainingProgress {
   successes_required: number;
   last_trained_at: string | null;
   completed: boolean;
-}
-
-/**
- * One prescribed session within a training path: a length (which sets the
- * block cost), the roll the DM calls for, and the Progress Points it grants
- * on success vs. failure.
- */
-export interface TrainingSession {
-  id: string;
-  training_id: string;
-  session_number: number;
-  /** Stored as a slot weight; renders as Short / Medium / Long. */
-  length: SlotWeight;
-  roll_type: string;
-  pp_success: number;
-  pp_fail: number;
 }
 
 /** A bonus that unlocks only for one specific player character. */
@@ -184,13 +168,14 @@ export interface Training {
   reward: string;
   /** DM-facing scene prompt read at the table during the montage. */
   scene_seed: string | null;
-  /** DM-facing narrative arc that plays out across the sessions. */
+  /** DM-facing narrative arc that plays out as the player trains. */
   narrative_thread: string | null;
-  /** Representative length (first session); per-session lengths live on `sessions`. */
+  /** Legacy (pre-012): players now choose the length of every block. */
   slot_weight: SlotWeight;
+  /** Legacy (pre-012): the old prescribed session count. */
   sessions_required: number;
   tier_required: number;
-  /** Progress Points needed to unlock the benefit. */
+  /** Points needed to unlock the benefit — always `thresholdForTier(tier_required)`. */
   threshold_pp: number;
   created_at: string;
   updated_at: string;
@@ -199,21 +184,8 @@ export interface Training {
 export interface TrainingWithCrew extends Training {
   crew_member_name: string;
   crew_member_role: string;
-  sessions: TrainingSession[];
   hidden_bonus: TrainingHiddenBonus | null;
 }
-
-/**
- * Legacy PP-by-length table: Short +1/+0, Medium +2/+1, Long +3/+1.
- *
- * Superseded by per-hour rolls (migration 011) for scoring; still used by the
- * training editor to suggest defaults when authoring a session.
- */
-export const SESSION_PP: Record<SlotWeight, { success: number; fail: number }> = {
-  light: { success: 1, fail: 0 },
-  medium: { success: 2, fail: 1 },
-  heavy: { success: 3, fail: 1 },
-};
 
 export const SLOT_WEIGHT_UNITS: Record<SlotWeight, number> = {
   heavy: 4,
@@ -231,9 +203,22 @@ export const SLOT_WEIGHT_LABEL: Record<SlotWeight, string> = {
 export const DAY_BUDGET = 8;
 
 /**
- * Play mode scoring (migration 011): one roll per hour, each success worth one
- * point toward `threshold_pp`. A training whose every roll on a given day fails
- * still earns `PITY_POINT` for the attempt.
+ * Play mode scoring (migrations 011 + 012): one roll per hour, each success
+ * worth one point toward `threshold_pp`. A training whose every roll on a given
+ * day fails still earns `PITY_POINT` for the attempt — but only once at least
+ * `PITY_MIN_HOURS` were rolled that day, so a lone Short block can't bank a
+ * guaranteed point.
  */
 export const POINT_PER_SUCCESS = 1;
 export const PITY_POINT = 1;
+export const PITY_MIN_HOURS = 2;
+
+/** Points each tier of training asks for: tier 1 = 12, tier 2 = 24, tier 3 = 36… */
+export const POINTS_PER_TIER = 12;
+
+export function thresholdForTier(tier: number): number {
+  return POINTS_PER_TIER * Math.max(1, tier);
+}
+
+/** The block lengths a player can choose for any training or activity. */
+export const SLOT_WEIGHTS: SlotWeight[] = ['light', 'medium', 'heavy'];

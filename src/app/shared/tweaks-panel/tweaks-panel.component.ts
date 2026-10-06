@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { TweaksService, Metalwork, Density } from '../tweaks.service';
+import { TweaksService, Metalwork, Density, READING_SIZES, ReadingSize } from '../tweaks.service';
 
 @Component({
   selector: 'app-tweaks-panel',
@@ -30,6 +30,15 @@ import { TweaksService, Metalwork, Density } from '../tweaks.service';
     @if (open()) {
       <div class="hk-card corners tweaks-panel fade-up">
         <p class="stamp-label" style="margin: 0 0 12px;">Tweaks</p>
+
+        <div class="tweak-row">
+          <label class="stamp-label">Reading size</label>
+          <div class="hk-tabs" style="border: none; margin: 0;">
+            @for (sz of sizes; track sz) {
+              <button class="hk-tab" [class.on]="tweaks.readingSize() === sz" (click)="tweaks.readingSize.set(sz)">{{ sizeLabel(sz) }}</button>
+            }
+          </div>
+        </div>
 
         <div class="tweak-row">
           <label class="stamp-label">Texture intensity</label>
@@ -70,6 +79,11 @@ import { TweaksService, Metalwork, Density } from '../tweaks.service';
 export class TweaksPanelComponent {
   open = signal(false);
   metals: Metalwork[] = ['gold', 'copper', 'silver'];
+  sizes = Object.keys(READING_SIZES) as ReadingSize[];
+
+  sizeLabel(sz: ReadingSize): string {
+    return READING_SIZES[sz].label;
+  }
 
   constructor(public tweaks: TweaksService) {}
 

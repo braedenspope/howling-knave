@@ -19,7 +19,7 @@ Ordered by dependency and value. Items 5–6 need no backend.
 | `training_hidden_bonuses` | id, training_id, character_name, body |
 | `crew_members` | id, name, role |
 
-> **Progress Points (PP):** trainings unlock at a `threshold_pp` (3/4/5). Each scheduled block is one session; on resolution the DM marks Success/Failure and PP are awarded by session length — Short +1/+0, Medium +2/+1, Long +3/+1 — accumulating toward the threshold. See migrations `007_training_pp_system.sql` and `008_seed_initial_trainings.sql`.
+> **Points:** each training needs 12 points per tier (12 / 24 / 36). Players book Short / Medium / Long blocks; every hour is one roll and each landed roll is worth 1 point. See §7 and §8 (migrations `011_play_mode.sql`, `012_points_by_tier.sql`).
 
 > Ship duties already exist as `schedule_blocks` rows with `is_mandatory = true` (inserted by the duty-injector), owned by a `user_id`. The features below build on that.
 
@@ -306,3 +306,37 @@ RLS: everyone reads, only the DM writes. Both tables are added to the
 - Back leaves the recorded outcome in place; re-marking overwrites it.
 - The cursor is an index into the queue, which is stable because the days are
   sealed for the duration of the run.
+
+---
+
+## 8. Points by tier — players choose how long to train — **built**
+
+Migration `012_points_by_tier.sql`. Replaces the prescribed session path.
+
+### Rules
+
+* Every training needs **12 points per tier**: tier 1 = 12, tier 2 = 24,
+  tier 3 = 36 (`thresholdForTier`). The training editor derives the goal from
+  the tier — it is no longer hand-set.
+* A player books any training they've unlocked as a **Short (1h), Medium (2h)
+  or Long (4h)** block. No session order, no per-session roll table.
+* The DM calls the roll each hour at the table.
+* Scoring is as in §7, one point per landed roll, except the pity point now
+  needs at least **`PITY_MIN_HOURS` (2)** rolled on that training that day.
+  Without that, one Short block that misses still banks 1 point, so sprinkling
+  Short blocks across many crewmates would guarantee points without a roll.
+* Ship duties are unchanged: two random one-hour duties per player per day,
+  which players plan around or trade.
+
+### Over-completion
+
+The add dialog shows points banked, points still needed and hours already
+planned, and warns when a block could run past the goal. If a training is
+mastered mid-block, the runner shows the remaining hours as free time
+("describe what you do with it") with **Move on** instead of Success/Failure.
+Mastered trainings can't be booked again.
+
+### Left in place
+
+`training_sessions` and `schedule_blocks.session_number` remain in the schema
+but are no longer read or written.

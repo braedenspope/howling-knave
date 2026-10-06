@@ -50,7 +50,10 @@ html {
   --texture-alpha: 1; // tweak: texture intensity
 
   --font-heading: 'Cinzel', serif;
-  --font-body: 'IM Fell English', serif;
+  // Reading text — paragraphs, descriptions, notes. Sans, upright.
+  // Tweaks → Reading size overrides the size.
+  --font-body: 'Alegreya Sans', sans-serif;
+  --font-body-size: 17px;
   --font-data: 'Courier Prime', monospace;
 
   // Wood grain gradient
@@ -85,7 +88,8 @@ html, body {
   background-attachment: fixed;
   color: var(--text-primary);
   font-family: var(--font-body);
-  font-size: 17px;
+  font-size: var(--font-body-size);
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }

@@ -123,7 +123,7 @@
 }
 
 .error-text { color: var(--failure-red); margin-top: 8px; font-size: 14px; }
-.empty-state, .loading-text { color: var(--text-secondary); text-align: center; padding: 24px 0; font-style: italic; }
+.empty-state, .loading-text { color: var(--text-secondary); text-align: center; padding: 24px 0; }
 
 @media (max-width: 600px) {
   .voyage-list-container { padding: 0 12px; margin: 16px auto; }

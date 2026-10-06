@@ -12,8 +12,10 @@ import {
   RollOutcome,
   ScheduleBlock,
   SLOT_WEIGHT_UNITS,
+  PITY_MIN_HOURS,
   PITY_POINT,
   POINT_PER_SUCCESS,
+  thresholdForTier,
 } from '../../shared/models';
 
 /**
@@ -338,12 +340,12 @@ export class PlayService {
   }
 
   /**
-   * Each successful roll is worth a point. If a training was rolled on a given
-   * day and every one of those rolls failed, that day is worth a single point
-   * for the attempt instead.
+   * Each successful roll is worth a point. If a training was rolled for at
+   * least `PITY_MIN_HOURS` on a given day and every one of those rolls failed,
+   * that day is worth a single point for the attempt instead.
    */
   private async score(userId: string, crewMember: string, topic: string): Promise<ScoredProgress> {
-    const threshold = this.trainings.getTraining(crewMember, topic)?.threshold_pp ?? 3;
+    const threshold = this.thresholdOf(crewMember, topic);
 
     const { data: blockRows } = await this.sb.supabase
       .from('schedule_blocks')
@@ -377,18 +379,22 @@ export class PlayService {
     let points = 0;
     for (const outcomes of byDay.values()) {
       const successes = outcomes.filter(o => o === 'success').length;
-      points += successes > 0 ? successes * POINT_PER_SUCCESS : PITY_POINT;
+      if (successes > 0) points += successes * POINT_PER_SUCCESS;
+      else if (outcomes.length >= PITY_MIN_HOURS) points += PITY_POINT;
     }
 
     points = Math.min(points, threshold);
     return { points, threshold, completed: points >= threshold };
   }
 
+  private thresholdOf(crewMember: string, topic: string): number {
+    return this.trainings.getTraining(crewMember, topic)?.threshold_pp ?? thresholdForTier(1);
+  }
+
   /** Points banked so far, for the runner's progress readout. */
   pointsLabel(block: ScheduleBlock): string {
-    const threshold = this.trainings.getTraining(block.crew_member, block.training_topic)?.threshold_pp ?? 3;
     const p = this.tracker.getProgress(block.user_id, block.crew_member, block.training_topic);
-    return `${p?.pp_accumulated ?? 0}/${p?.threshold_pp ?? threshold}`;
+    return `${p?.pp_accumulated ?? 0}/${p?.threshold_pp ?? this.thresholdOf(block.crew_member, block.training_topic)}`;
   }
 
   isMastered(block: ScheduleBlock): boolean {

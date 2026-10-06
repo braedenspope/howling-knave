@@ -13,24 +13,29 @@
   <div class="hk-card corners guide-block">
     <div class="gb-head"><span class="ms">schedule</span><h3>Your day is eight hours</h3></div>
     <p>
-      Each day on the board is <strong>eight one-hour blocks</strong> (sleep is assumed). Some hours get
-      claimed by <em>ship duties</em> — the work that keeps you afloat. Whatever is left is yours to spend
-      training with the crew.
+      Each day on the board is <strong>eight one-hour blocks</strong> (sleep is assumed). Every day, two of
+      those hours are <em>ship duties</em> — the work that keeps you afloat — and they land at
+      <strong>random</strong>. Whatever is left is yours to spend training with the crew.
     </p>
     <div class="day-strip">
       @for (b of dayBlocks; track b) {
-        <span class="day-cell" [class.duty]="b < 2">
-          @if (b < 2) { <span class="ms sm">anchor</span> }
+        <span class="day-cell" [class.duty]="isDutyHour(b)">
+          @if (isDutyHour(b)) { <span class="ms sm">anchor</span> }
         </span>
       }
     </div>
     <p class="caption"><span class="swatch duty"></span> Ship duty &nbsp;·&nbsp; <span class="swatch free"></span> Free to train</p>
+    <p class="note">
+      <span class="ms sm">swap_horiz</span>
+      A duty splitting your day in two? Plan around it, or ask a crewmate to take it off your hands and
+      clear a longer stretch.
+    </p>
   </div>
 
   <!-- ============ SESSION LENGTHS ============ -->
   <div class="guide-block">
-    <div class="gb-head"><span class="ms">timer</span><h3>Pick a session length</h3></div>
-    <p class="gb-sub">A longer session costs more of your day, but moves you further. The crewmate decides what you'll work on — you decide how long.</p>
+    <div class="gb-head"><span class="ms">timer</span><h3>You choose how long to train</h3></div>
+    <p class="gb-sub">Pick a training, then pick how much of your day to give it. A longer block costs more hours, but moves you further. Go all in on one crewmate, or split the day between several — it's your call.</p>
     <div class="length-grid">
       @for (l of lengths; track l.key) {
         <div class="hk-card corners length-card">
@@ -48,28 +53,29 @@
 
   <!-- ============ PROGRESS POINTS ============ -->
   <div class="hk-card corners guide-block">
-    <div class="gb-head"><span class="ms">trending_up</span><h3>Earn Progress Points</h3></div>
+    <div class="gb-head"><span class="ms">trending_up</span><h3>Earn points, one hour at a time</h3></div>
     <p>
-      Training is run <strong>hour by hour</strong>. Every hour of a session is its own roll, and every roll
-      that lands is worth <strong>one Progress Point (PP)</strong> — so a longer session is worth more
-      because you sit through more of it, not because it counts for extra.
+      Training is run <strong>hour by hour</strong>. Every hour of a block is its own roll — the DM calls
+      for whichever roll fits what you're doing — and every roll that lands is worth
+      <strong>one point</strong>. A longer block is worth more because you sit through more of it, not
+      because it counts for extra.
     </p>
     <div class="pp-table">
       <div class="pp-row pp-head">
-        <span>Session</span><span>Rolls</span><span>Most it can earn</span>
+        <span>Block</span><span>Rolls</span><span>Most it can earn</span>
       </div>
       @for (l of lengths; track l.key) {
         <div class="pp-row">
           <span><span class="wt-badge" [class]="lengthClass(l.key)">{{ l.label }}</span></span>
           <span class="pp-val">{{ l.hours }} {{ l.hours === 1 ? 'roll' : 'rolls' }}</span>
-          <span class="pp-val good">+{{ l.hours }} PP</span>
+          <span class="pp-val good">+{{ l.hours }} pt{{ l.hours === 1 ? '' : 's' }}</span>
         </div>
       }
     </div>
     <p class="note">
       <span class="ms sm">info</span>
-      Land three of the four hours in a Long session and you bank 3 PP — a bad hour costs you that hour, not
-      the whole session.
+      Land three of the four hours in a Long block and you bank 3 points — a bad hour costs you that hour,
+      not the whole block.
     </p>
   </div>
 
@@ -77,9 +83,9 @@
   <div class="hk-card corners guide-block mercy-block">
     <div class="gb-head"><span class="ms">volunteer_activism</span><h3>A wasted day is never wasted</h3></div>
     <p>
-      Miss <strong>every</strong> roll of a training on a given day and you still walk away with
-      <strong>1 PP</strong> for the attempt. A day at the mast is never worth nothing — you can have a
-      terrible day, but you can't have an empty one.
+      Put <strong>two hours or more</strong> into a training on a given day and miss <strong>every</strong>
+      roll, and you still walk away with <strong>1 point</strong> for the attempt. You can have a terrible
+      day at the mast, but you can't have an empty one.
     </p>
     <div class="mercy-steps">
       <div class="mercy-step">
@@ -97,32 +103,47 @@
       <div class="mercy-step">
         <span class="mercy-mark done"><span class="ms">military_tech</span></span>
         <span class="mercy-cap gold-text">End of day</span>
-        <span class="mercy-sub">+1 PP for trying</span>
+        <span class="mercy-sub">+1 point for trying</span>
       </div>
     </div>
     <p class="note">
       <span class="ms sm">info</span>
-      It is one point for the day, not one per session — land even a single roll and you score those
-      successes instead.
+      It is one point per training per day, not one per block — land even a single roll and you score
+      those successes instead. A lone Short hour that misses earns nothing; the effort has to be real.
     </p>
   </div>
 
   <!-- ============ THRESHOLDS ============ -->
   <div class="guide-block">
     <div class="gb-head"><span class="ms">military_tech</span><h3>Fill the bar, earn the benefit</h3></div>
-    <p class="gb-sub">Each training has a goal — a number of Progress Points that unlocks its reward for good. Keep training until the bar is full.</p>
+    <p class="gb-sub">Every training has a point goal, set by how deep the relationship has to run before a crewmate will teach it. Reach the goal and the reward is yours for good.</p>
     <div class="thr-grid">
       @for (t of thresholds; track t.pp) {
         <div class="hk-card corners thr-card">
           <div class="thr-pips">
             @for (i of range(t.pp); track i) { <span class="pip filled"></span> }
           </div>
-          <span class="thr-pp gold-text">{{ t.pp }} PP</span>
+          <span class="thr-pp gold-text">{{ t.pp }} points</span>
           <span class="thr-label">{{ t.label }}</span>
           <p class="len-blurb">{{ t.blurb }}</p>
         </div>
       }
     </div>
+  </div>
+
+  <!-- ============ PLANNING ============ -->
+  <div class="hk-card corners guide-block">
+    <div class="gb-head"><span class="ms">edit_calendar</span><h3>Plan your crossing</h3></div>
+    <p>
+      Not every roll lands, so a 12-point training usually takes <strong>more than twelve hours</strong> —
+      most of a short crossing if you give it your full attention. When you add a block, the board shows
+      how many points you've banked, how many you still need, and how many hours you've already planned.
+    </p>
+    <p class="note">
+      <span class="ms sm">info</span>
+      Try not to plan past the goal. If you master a training partway through a block, the rest of that
+      block is free time — you'll describe at the table what you do with it.
+    </p>
   </div>
 
   <!-- ============ RELATIONSHIPS ============ -->
@@ -147,7 +168,7 @@
     <div class="hk-card corners tip-card">
       <span class="ms">flag</span>
       <h4>Flag it for the table</h4>
-      <p>Hit the flag on a planned session to tell the DM you'd love to actually play it out, not just montage past it.</p>
+      <p>Hit the flag on a planned block to tell the DM you'd love to actually play it out, not just montage past it.</p>
     </div>
     <div class="hk-card corners tip-card">
       <span class="ms">approval</span>
@@ -157,7 +178,7 @@
     <div class="hk-card corners tip-card">
       <span class="ms">groups</span>
       <h4>Train together</h4>
-      <p>Several of you can join the same session — each of you rolls and progresses on your own.</p>
+      <p>Several of you can join the same training at the same hour — each of you rolls and progresses on your own.</p>
     </div>
   </div>
 </div>
