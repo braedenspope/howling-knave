@@ -19,6 +19,18 @@
   @if (mode() === 'training' && (editing || !data.correctionActive)) {
     <!-- ============ STEP 1 — pick the training (catalog style) ============ -->
     @if (trainingStep() === 'pick') {
+      <div class="hk-field training-search">
+        <span class="ms sm">search</span>
+        <input type="search" [ngModel]="search()" (ngModelChange)="search.set($event)"
+          placeholder="Search by training, reward, or crewmate…" aria-label="Search trainings" />
+      </div>
+      <div class="filter-chips tag-chips">
+        @for (tag of tagOptions; track tag.id) {
+          <button class="filter-chip" [class.on]="tagFilter() === tag.id" (click)="toggleTagFilter(tag.id)">
+            <span class="ms sm">{{ tag.icon }}</span> {{ tag.label }}
+          </button>
+        }
+      </div>
       <div class="filter-chips picker-filters">
         @for (f of filters; track f.id) {
           <button class="filter-chip" [class.on]="filter() === f.id" (click)="filter.set(f.id)">{{ f.label }}</button>
@@ -62,6 +74,11 @@
                     }
                   </div>
                   <p class="ti-reward"><span class="ms sm">military_tech</span>{{ t.reward }}</p>
+                  @if (t.tags.length) {
+                    <div class="ti-tags">
+                      @for (tag of t.tags; track tag) { <span class="ti-tag">{{ tagLabel(tag) }}</span> }
+                    </div>
+                  }
                 </button>
               }
             </div>
@@ -69,9 +86,9 @@
         } @empty {
           <div class="empty-state">
             <span class="ms">school</span>
-            <p>{{ filter() === 'all'
+            <p>{{ !narrowed()
               ? 'No crewmate has a training open to you right now. Build the relationships and check back.'
-              : 'Nothing under that filter.' }}</p>
+              : 'Nothing matches that search.' }}</p>
           </div>
         }
       </div>

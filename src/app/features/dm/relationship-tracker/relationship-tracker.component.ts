@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { RelationshipService } from '../relationship.service';
 import { ScheduleService } from '../../schedule/schedule.service';
 import { CREW_LIST, CREW_COLORS, TIER_NAMES, TIER_COLORS } from '../../../shared/data/training.data';
-import { RelationshipTier } from '../../../shared/models';
+import { ToastService } from '../../../shared/toast.service';
 
 @Component({
   selector: 'app-relationship-tracker',
@@ -20,6 +20,7 @@ export class RelationshipTrackerComponent implements OnInit {
   constructor(
     private relationshipService: RelationshipService,
     public scheduleService: ScheduleService,
+    private toast: ToastService,
   ) {}
 
   selectedPlayerId = signal<string | null>(null);
@@ -58,7 +59,8 @@ export class RelationshipTrackerComponent implements OnInit {
   }
 
   async setTier(userId: string, crewMember: string, tier: number) {
-    await this.relationshipService.setTier(userId, crewMember, tier);
+    const err = await this.relationshipService.setTier(userId, crewMember, tier);
+    if (err) this.toast.warn(err);
   }
 
   hasNotes(userId: string, crewMember: string): boolean {
@@ -95,7 +97,8 @@ export class RelationshipTrackerComponent implements OnInit {
     // Debounce notes save
     clearTimeout(this.noteTimers[key]);
     this.noteTimers[key] = setTimeout(() => {
-      this.relationshipService.setNotes(userId, crewMember, value);
+      this.relationshipService.setNotes(userId, crewMember, value)
+        .then(err => err && this.toast.warn(err));
     }, 800);
   }
 }

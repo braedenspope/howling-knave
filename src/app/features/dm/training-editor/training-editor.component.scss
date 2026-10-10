@@ -192,3 +192,18 @@
     grid-template-columns: 1fr;
   }
 }
+
+.tag-badge {
+  background: rgba(74,122,138,0.18);
+  color: var(--text-secondary);
+}
+
+.tag-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+
+  .form-section-label { margin: 0 6px 0 0; }
+}

@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { PlayService } from '../play.service';
 import { VoyageService } from '../../voyage/voyage.service';
@@ -24,6 +24,14 @@ interface UnsealedDay {
   styleUrl: './play-setup.component.scss',
 })
 export class PlaySetupComponent implements OnInit {
+  /**
+   * When opened from the board, the board already loads (and live-subscribes
+   * to) the voyage, days, blocks, and seals, and the app shell follows the play
+   * state. Re-bootstrapping would toggle the board's shared `loading` signal,
+   * so we skip it.
+   */
+  embedded = input(false);
+
   play = inject(PlayService);
   voyageService = inject(VoyageService);
   scheduleService = inject(ScheduleService);
@@ -36,6 +44,11 @@ export class PlaySetupComponent implements OnInit {
   readonly saving = signal(false);
 
   async ngOnInit() {
+    if (this.embedded()) {
+      this.order.set(this.reconcile(this.play.state()?.turn_order ?? []));
+      return;
+    }
+
     await this.play.bootstrap();
 
     const voyage = this.voyageService.activeVoyage();
@@ -118,7 +131,7 @@ export class PlaySetupComponent implements OnInit {
       this.toast.show(err);
       return;
     }
-    this.toast.show(`The montage begins — ${this.play.queue().length} hours to run`);
+    this.toast.show(`The voyage begins — ${this.play.queue().length} hours to run`);
     this.router.navigate(['/play']);
   }
 
@@ -135,6 +148,6 @@ export class PlaySetupComponent implements OnInit {
 
   async end() {
     const err = await this.play.stop();
-    this.toast.show(err ?? 'The montage is called to a close');
+    this.toast.show(err ?? 'The voyage is called to a close');
   }
 }

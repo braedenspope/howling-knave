@@ -84,27 +84,50 @@ export class RelationshipService {
           }],
     );
 
-    const { error } = await this.sb.supabase
-      .from('relationship_tiers')
-      .upsert(
-        { user_id: userId, crew_member: crewMember, tier },
-        { onConflict: 'user_id,crew_member' }
-      );
+    const error = await this.write(userId, crewMember, { tier });
     if (error) {
       this.tiers.set(previous);
-      return error.message;
+      return error;
     }
     await this.loadAllTiers();
     return null;
   }
 
   async setNotes(userId: string, crewMember: string, notes: string): Promise<string | null> {
-    const { error } = await this.sb.supabase
-      .from('relationship_tiers')
-      .update({ notes })
-      .eq('user_id', userId)
-      .eq('crew_member', crewMember);
+    const error = await this.write(userId, crewMember, { notes });
     if (!error) await this.loadAllTiers();
-    return error?.message ?? null;
+    return error;
+  }
+
+  /**
+   * Update the player's row for this crewmate, or create it if they've never
+   * had one (everyone starts as a Stranger with no row at all). Done as an
+   * explicit update-then-insert rather than an upsert so it doesn't lean on a
+   * (user_id, crew_member) unique constraint, and with `.select()` so a write
+   * that row-level security silently filters out comes back as an error
+   * instead of a no-op the next reload quietly reverts.
+   */
+  private async write(
+    userId: string,
+    crewMember: string,
+    patch: { tier?: number; notes?: string },
+  ): Promise<string | null> {
+    const changes = { ...patch, updated_at: new Date().toISOString() };
+    const { data: updated, error: updateError } = await this.sb.supabase
+      .from('relationship_tiers')
+      .update(changes)
+      .eq('user_id', userId)
+      .eq('crew_member', crewMember)
+      .select('id');
+    if (updateError) return updateError.message;
+    if (updated?.length) return null;
+
+    const { data: inserted, error: insertError } = await this.sb.supabase
+      .from('relationship_tiers')
+      .insert({ user_id: userId, crew_member: crewMember, tier: 1, ...changes })
+      .select('id');
+    if (insertError) return insertError.message;
+    if (!inserted?.length) return 'Not permitted to change crew standing';
+    return null;
   }
 }

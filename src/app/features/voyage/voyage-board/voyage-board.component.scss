@@ -45,6 +45,14 @@
   color: var(--text-secondary);
   margin: 0 0 16px;
 }
+.start-voyage-btn {
+  position: absolute;
+  top: 12px;
+  right: 4px;
+}
+@media (max-width: 600px) {
+  .start-voyage-btn { position: static; margin-top: 14px; }
+}
 .board-legend {
   display: flex;
   gap: 10px;

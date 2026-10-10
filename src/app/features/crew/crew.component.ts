@@ -16,6 +16,9 @@ import {
 } from '../../shared/data/training.data';
 import {
   TrainingWithCrew,
+  TrainingTag,
+  TRAINING_TAGS,
+  matchesTrainingSearch,
 } from '../../shared/models';
 
 type StatusKind = 'mastered' | 'progress' | 'locked' | 'available';
@@ -61,6 +64,10 @@ export class CrewComponent implements OnInit {
   readonly view = signal<'roster' | 'catalog'>('roster');
   readonly detail = signal<string | null>(null);
   readonly filter = signal<'all' | StatusKind>('all');
+  /** Catalog search — free text over training, reward, and crewmate — and tag. */
+  readonly search = signal('');
+  readonly tagFilter = signal<TrainingTag | null>(null);
+  readonly tagOptions = TRAINING_TAGS;
   readonly viewAs = signal<string | null>(null); // DM: selected player id
 
   constructor(
@@ -106,17 +113,27 @@ export class CrewComponent implements OnInit {
     this.relationships.tiers();
     this.tracker.progress();
     const f = this.filter();
+    const search = this.search();
+    const tag = this.tagFilter();
     return CREW_LIST.map(crew => {
       const tier = this.tierOf(crew);
       const paths = this.training
         .getTrainingsForCrewByName(crew)
         .map(t => ({ training: t, status: this.statusFor(crew, t, tier) }))
-        .filter(p => f === 'all' || p.status.kind === f);
+        .filter(p => f === 'all' || p.status.kind === f)
+        .filter(p => !tag || p.training.tags.includes(tag))
+        .filter(p => matchesTrainingSearch(p.training, search));
       return { crew, role: this.crewRole(crew), tier, paths };
     }).filter(g => g.paths.length > 0);
   });
 
   // ----- helpers -----
+  tagLabel(tag: TrainingTag): string {
+    return TRAINING_TAGS.find(t => t.id === tag)?.label ?? tag;
+  }
+  toggleTagFilter(tag: TrainingTag) {
+    this.tagFilter.update(current => (current === tag ? null : tag));
+  }
   crewColor(name: string): string {
     return CREW_COLORS[name] ?? '#666';
   }

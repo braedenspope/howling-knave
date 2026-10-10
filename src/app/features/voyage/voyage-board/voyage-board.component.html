@@ -22,6 +22,12 @@
           <span class="chip"><span class="crew-dot" style="background: var(--accent-gold);"></span> Training</span>
           <span class="chip"><span class="ms sm" style="font-size: 13px;">flag</span> Spotlight flag</span>
         </div>
+        @if (auth.isDm()) {
+          <button class="btn btn-brass start-voyage-btn" (click)="startVoyage()">
+            <span class="ms sm">{{ play.isActive() ? 'play_circle' : 'play_arrow' }}</span>
+            {{ play.isActive() ? 'Resume voyage' : 'Start voyage' }}
+          </button>
+        }
         <div class="rope-divider" style="margin-top: 16px;"></div>
       </div>
     }

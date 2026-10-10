@@ -3,9 +3,9 @@
   @if (!play.isActive()) {
     <div class="empty-state">
       <span class="ms">hourglass_empty</span>
-      <p>No montage is running.</p>
+      <p>No voyage is under way.</p>
       @if (isDm()) {
-        <button class="btn" (click)="toSetup()">Open the Captain's Charts</button>
+        <button class="btn" (click)="toSetup()">Back to the board</button>
       }
     </div>
   } @else if (play.finished()) {
@@ -16,7 +16,7 @@
       @if (isDm()) {
         <div class="runner-done-actions">
           <button class="btn-ghost" (click)="back()">Step back</button>
-          <button class="btn btn-brass" (click)="end()">Close the montage</button>
+          <button class="btn btn-brass" (click)="end()">Close the voyage</button>
         </div>
       }
     </div>
@@ -119,10 +119,10 @@
         }
       </div>
       <div class="runner-foot">
-        <button class="btn-ghost" (click)="end()">End the montage</button>
+        <button class="btn-ghost" (click)="end()">End the voyage</button>
       </div>
     } @else {
-      <p class="runner-watching"><span class="ms sm">visibility</span> Watching the montage — the DM is calling the rolls.</p>
+      <p class="runner-watching"><span class="ms sm">visibility</span> Watching the voyage — the DM is calling the rolls.</p>
     }
 
   } @else {

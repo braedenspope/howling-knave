@@ -6,7 +6,6 @@ import { DutyInjectorComponent } from '../duty-injector/duty-injector.component'
 import { TrainingEditorComponent } from '../training-editor/training-editor.component';
 import { SpotlightTrackerComponent } from '../spotlight-tracker/spotlight-tracker.component';
 import { DutyLedgerComponent } from '../duty-ledger/duty-ledger.component';
-import { PlaySetupComponent } from '../../play/play-setup/play-setup.component';
 
 @Component({
   selector: 'app-dm-dashboard',
@@ -19,7 +18,6 @@ import { PlaySetupComponent } from '../../play/play-setup/play-setup.component';
     TrainingEditorComponent,
     SpotlightTrackerComponent,
     DutyLedgerComponent,
-    PlaySetupComponent,
   ],
   templateUrl: './dm-dashboard.component.html',
   styleUrl: './dm-dashboard.component.scss',

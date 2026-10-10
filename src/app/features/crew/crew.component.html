@@ -100,6 +100,18 @@
     </div>
 
     @if (view() === 'catalog') {
+      <div class="hk-field training-search">
+        <span class="ms sm">search</span>
+        <input type="search" [value]="search()" (input)="search.set($any($event.target).value)"
+          placeholder="Search by training, reward, or crewmate…" aria-label="Search trainings" />
+      </div>
+      <div class="filter-chips tag-chips">
+        @for (tag of tagOptions; track tag.id) {
+          <button class="filter-chip" [class.on]="tagFilter() === tag.id" (click)="toggleTagFilter(tag.id)">
+            <span class="ms sm">{{ tag.icon }}</span> {{ tag.label }}
+          </button>
+        }
+      </div>
       <div class="filter-chips">
         @for (f of catalogFilters; track f.id) {
           <button class="filter-chip" [class.on]="filter() === f.id" (click)="filter.set(f.id)">{{ f.label }}</button>
@@ -109,7 +121,7 @@
       @if (catalogGroups().length === 0) {
         <div class="empty-state">
           <span class="ms">school</span>
-          <p>Nothing here under that filter. Train, bond, and check back.</p>
+          <p>Nothing matches that search. Train, bond, and check back.</p>
         </div>
       } @else {
         @for (g of catalogGroups(); track g.crew) {
@@ -136,6 +148,11 @@
                       [ngTemplateOutletContext]="{ st: p.status, t: p.training }"></ng-container>
                   </div>
                   <p class="ti-reward"><span class="ms sm">military_tech</span>{{ p.training.reward }}</p>
+                  @if (p.training.tags.length) {
+                    <div class="ti-tags">
+                      @for (tag of p.training.tags; track tag) { <span class="ti-tag">{{ tagLabel(tag) }}</span> }
+                    </div>
+                  }
                 </div>
               }
             </div>

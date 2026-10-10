@@ -29,7 +29,7 @@
       @if (play.isActive()) {
         <a mat-button routerLink="/play" routerLinkActive="active-link" class="play-link">
           <mat-icon>play_circle</mat-icon>
-          <span class="nav-label">Montage</span>
+          <span class="nav-label">Underway</span>
         </a>
       }
       @if (auth.isDm()) {
@@ -74,7 +74,7 @@
       @if (play.isActive()) {
         <a mat-button routerLink="/play" routerLinkActive="active-link" class="play-link" (click)="closeMenu()">
           <mat-icon>play_circle</mat-icon>
-          <span>Montage</span>
+          <span>Underway</span>
         </a>
       }
       @if (auth.isDm()) {

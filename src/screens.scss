@@ -200,6 +200,32 @@
   color: var(--accent-gold);
   border-color: var(--accent-gold-dim);
 }
+.filter-chip .ms { font-size: 14px; vertical-align: -2px; }
+
+/* ---- Training search: free text + tag chips ---- */
+.training-search {
+  position: relative;
+  margin-bottom: 10px;
+
+  > .ms {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--text-faint); pointer-events: none;
+  }
+  input { width: 100%; padding-left: 36px; box-sizing: border-box; }
+}
+.tag-chips { margin-bottom: 14px; }
+.ti-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.ti-tag {
+  font-family: var(--font-data);
+  font-size: 10.5px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius);
+  padding: 1px 7px;
+}
+
 .catalog-group { margin-bottom: 22px; }
 .catalog-group-head {
   display: flex;

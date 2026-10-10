@@ -178,14 +178,37 @@ export interface Training {
   tier_required: number;
   /** Points needed to unlock the benefit — always `thresholdForTier(tier_required)`. */
   threshold_pp: number;
+  /** What kind of training this is — players search and filter by these. */
+  tags: TrainingTag[];
   created_at: string;
   updated_at: string;
 }
+
+export type TrainingTag = 'combat' | 'magic' | 'skills' | 'social' | 'tools';
+
+export const TRAINING_TAGS: { id: TrainingTag; label: string; icon: string }[] = [
+  { id: 'combat', label: 'Combat', icon: 'swords' },
+  { id: 'magic', label: 'Magic', icon: 'auto_awesome' },
+  { id: 'skills', label: 'Skills', icon: 'psychology' },
+  { id: 'social', label: 'Social', icon: 'forum' },
+  { id: 'tools', label: 'Tools', icon: 'construction' },
+];
 
 export interface TrainingWithCrew extends Training {
   crew_member_name: string;
   crew_member_role: string;
   hidden_bonus: TrainingHiddenBonus | null;
+}
+
+/**
+ * Free-text training search: matches the training's name, its reward, or the
+ * crewmate who teaches it, so "rapier", "Shanoa" or "Perception" all land.
+ */
+export function matchesTrainingSearch(t: TrainingWithCrew, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  return [t.topic, t.reward, t.crew_member_name, t.crew_member_role]
+    .some(field => field?.toLowerCase().includes(q));
 }
 
 export const SLOT_WEIGHT_UNITS: Record<SlotWeight, number> = {

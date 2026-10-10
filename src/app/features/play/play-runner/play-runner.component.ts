@@ -175,11 +175,11 @@ export class PlayRunnerComponent implements OnInit {
   async end() {
     if (!this.isDm()) return;
     await this.play.stop();
-    this.toast.show('The montage is called to a close');
-    this.router.navigate(['/dm']);
+    this.toast.show('The voyage is called to a close');
+    this.router.navigate(['/board']);
   }
 
   toSetup() {
-    this.router.navigate(['/dm']);
+    this.router.navigate(['/board']);
   }
 }

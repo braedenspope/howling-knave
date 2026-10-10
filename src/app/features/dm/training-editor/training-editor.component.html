@@ -31,6 +31,15 @@
                   <textarea matInput rows="2" [(ngModel)]="editForm.reward"></textarea>
                 </mat-form-field>
 
+                <div class="tag-toggles full-span">
+                  <span class="form-section-label">Tags</span>
+                  @for (tag of tagOptions; track tag.id) {
+                    <button type="button" class="filter-chip" [class.on]="editForm.tags.includes(tag.id)" (click)="toggleTag(editForm, tag.id)">
+                      <span class="ms sm">{{ tag.icon }}</span> {{ tag.label }}
+                    </button>
+                  }
+                </div>
+
                 <mat-form-field appearance="outline" class="full-span">
                   <mat-label>Description</mat-label>
                   <textarea matInput rows="2" [(ngModel)]="editForm.description"></textarea>
@@ -42,7 +51,7 @@
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="full-span">
-                  <mat-label>Scene seed (montage prompt)</mat-label>
+                  <mat-label>Scene seed (table prompt)</mat-label>
                   <textarea matInput rows="2" [(ngModel)]="editForm.scene_seed"></textarea>
                 </mat-form-field>
               </div>
@@ -73,6 +82,9 @@
                 <span class="training-topic">{{ training.topic }}</span>
                 <span class="badge tier-badge">Tier {{ training.tier_required }}</span>
                 <span class="badge threshold-badge">{{ training.threshold_pp }} pts</span>
+                @for (tag of training.tags; track tag) {
+                  <span class="badge tag-badge">{{ tagLabel(tag) }}</span>
+                }
                 @if (training.hidden_bonus) {
                   <span class="badge hidden-badge" [title]="'Hidden bonus for ' + training.hidden_bonus.character_name">★ {{ training.hidden_bonus.character_name }}</span>
                 }
@@ -113,6 +125,15 @@
                 <textarea matInput rows="2" [(ngModel)]="addForm.reward"></textarea>
               </mat-form-field>
 
+              <div class="tag-toggles full-span">
+                <span class="form-section-label">Tags</span>
+                @for (tag of tagOptions; track tag.id) {
+                  <button type="button" class="filter-chip" [class.on]="addForm.tags.includes(tag.id)" (click)="toggleTag(addForm, tag.id)">
+                    <span class="ms sm">{{ tag.icon }}</span> {{ tag.label }}
+                  </button>
+                }
+              </div>
+
               <mat-form-field appearance="outline" class="full-span">
                 <mat-label>Description</mat-label>
                 <textarea matInput rows="2" [(ngModel)]="addForm.description"></textarea>
@@ -124,7 +145,7 @@
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="full-span">
-                <mat-label>Scene seed (montage prompt)</mat-label>
+                <mat-label>Scene seed (table prompt)</mat-label>
                 <textarea matInput rows="2" [(ngModel)]="addForm.scene_seed"></textarea>
               </mat-form-field>
             </div>

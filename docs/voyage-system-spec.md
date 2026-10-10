@@ -14,7 +14,7 @@ Ordered by dependency and value. Items 5–6 need no backend.
 | `schedule_blocks` | id, day_id, user_id, crew_member, training_topic, session_number, slot_weight, slot_position, status, is_mandatory, created_at, updated_at |
 | `relationship_tiers` | id, user_id, crew_member, tier, notes, updated_at |
 | `training_progress` | id, user_id, crew_member, training_topic, pp_accumulated, threshold_pp, successes_accumulated (legacy), successes_required (legacy), last_trained_at, completed |
-| `trainings` | id, crew_member_id, topic, description, reward, scene_seed, narrative_thread, slot_weight, sessions_required, tier_required, threshold_pp |
+| `trainings` | id, crew_member_id, topic, description, reward, scene_seed, narrative_thread, slot_weight, sessions_required, tier_required, threshold_pp, tags (text[]) |
 | `training_sessions` | id, training_id, session_number, length (`light`\|`medium`\|`heavy`), roll_type, pp_success, pp_fail |
 | `training_hidden_bonuses` | id, training_id, character_name, body |
 | `crew_members` | id, name, role |

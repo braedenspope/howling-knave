@@ -7,7 +7,7 @@
 @if (!voyageService.activeVoyage()) {
   <div class="empty-state">
     <span class="ms">sailing</span>
-    <p>No active voyage. Declare a crossing before running the montage.</p>
+    <p>No active voyage. Declare a crossing before starting the voyage.</p>
   </div>
 } @else {
 
@@ -37,7 +37,7 @@
   } @else {
     <p class="gate-wait">
       <span class="ms sm">hourglass_empty</span>
-      Waiting on seals before the montage can begin.
+      Waiting on seals before the voyage can begin.
     </p>
     <div class="gate-list">
       @for (day of unsealed(); track day.dayNumber) {
@@ -82,7 +82,7 @@
         class="btn btn-brass"
         [disabled]="!allSealed() || saving() || order().length === 0"
         (click)="begin()">
-        <span class="ms sm">play_arrow</span> Begin the montage
+        <span class="ms sm">play_arrow</span> Start voyage
       </button>
     }
   </div>

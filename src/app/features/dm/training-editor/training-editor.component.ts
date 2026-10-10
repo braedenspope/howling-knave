@@ -9,7 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { TrainingService, HiddenBonusInput } from '../training.service';
 import { CREW_COLORS } from '../../../shared/data/training.data';
-import { TrainingWithCrew, thresholdForTier } from '../../../shared/models';
+import { TrainingWithCrew, TrainingTag, TRAINING_TAGS, thresholdForTier } from '../../../shared/models';
 
 interface TrainingForm {
   topic: string;
@@ -18,6 +18,7 @@ interface TrainingForm {
   scene_seed: string;
   narrative_thread: string;
   tier_required: number;
+  tags: TrainingTag[];
   hidden_character: string;
   hidden_body: string;
 }
@@ -41,6 +42,8 @@ interface TrainingForm {
 export class TrainingEditorComponent implements OnInit {
   editingId = signal<string | null>(null);
   addingForCrew = signal<number | null>(null);
+
+  readonly tagOptions = TRAINING_TAGS;
 
   editForm: TrainingForm = this.emptyForm();
   addForm: TrainingForm = this.emptyForm();
@@ -69,6 +72,7 @@ export class TrainingEditorComponent implements OnInit {
       scene_seed: '',
       narrative_thread: '',
       tier_required: 1,
+      tags: [],
       hidden_character: '',
       hidden_body: '',
     };
@@ -83,6 +87,7 @@ export class TrainingEditorComponent implements OnInit {
       scene_seed: training.scene_seed ?? '',
       narrative_thread: training.narrative_thread ?? '',
       tier_required: training.tier_required,
+      tags: [...training.tags],
       hidden_character: training.hidden_bonus?.character_name ?? '',
       hidden_body: training.hidden_bonus?.body ?? '',
     };
@@ -107,7 +112,18 @@ export class TrainingEditorComponent implements OnInit {
       narrative_thread: form.narrative_thread.trim() || null,
       tier_required: tier,
       threshold_pp: thresholdForTier(tier),
+      tags: form.tags,
     };
+  }
+
+  tagLabel(tag: TrainingTag): string {
+    return TRAINING_TAGS.find(t => t.id === tag)?.label ?? tag;
+  }
+
+  toggleTag(form: TrainingForm, tag: TrainingTag) {
+    form.tags = form.tags.includes(tag)
+      ? form.tags.filter(t => t !== tag)
+      : TRAINING_TAGS.map(t => t.id).filter(t => t === tag || form.tags.includes(t));
   }
 
   async saveEdit(id: string) {

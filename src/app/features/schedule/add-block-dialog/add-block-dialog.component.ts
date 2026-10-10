@@ -7,7 +7,10 @@ import { ScheduleService } from '../schedule.service';
 import { TrainingTrackerService } from '../../dm/training-tracker.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { CREW_LIST, CREW_COLORS, CREW_META, TIER_NAMES, TIER_COLORS } from '../../../shared/data/training.data';
-import { ScheduleBlock, TrainingWithCrew, SlotWeight, SLOT_WEIGHTS, SLOT_WEIGHT_UNITS, SLOT_WEIGHT_LABEL } from '../../../shared/models';
+import {
+  ScheduleBlock, TrainingWithCrew, TrainingTag, TRAINING_TAGS, SlotWeight, SLOT_WEIGHTS, SLOT_WEIGHT_UNITS,
+  SLOT_WEIGHT_LABEL, matchesTrainingSearch,
+} from '../../../shared/models';
 
 export interface AddBlockDialogData {
   dayId: string;
@@ -77,6 +80,22 @@ export class AddBlockDialogComponent implements OnInit {
     { id: 'progress', label: 'In progress' },
     { id: 'new', label: 'Not started' },
   ];
+  /** Free text over training name, reward, and crewmate. */
+  search = signal('');
+  tagFilter = signal<TrainingTag | null>(null);
+  readonly tagOptions = TRAINING_TAGS;
+
+  tagLabel(tag: TrainingTag): string {
+    return TRAINING_TAGS.find(t => t.id === tag)?.label ?? tag;
+  }
+
+  toggleTagFilter(tag: TrainingTag) {
+    this.tagFilter.update(current => (current === tag ? null : tag));
+  }
+
+  /** True when the player has narrowed the picker beyond what's unlocked. */
+  readonly narrowed = computed(() =>
+    this.filter() !== 'all' || !!this.search().trim() || !!this.tagFilter());
 
   /**
    * The catalog of trainings this player can actually book, grouped by
@@ -90,6 +109,8 @@ export class AddBlockDialogComponent implements OnInit {
     this.relationshipService.tiers();   // re-run when a tier changes live
     this.tracker.progress();
     const filter = this.filter();
+    const search = this.search();
+    const tag = this.tagFilter();
 
     const groups: PickerGroup[] = [];
     for (const crew of CREW_LIST) {
@@ -98,6 +119,8 @@ export class AddBlockDialogComponent implements OnInit {
       const trainings = this.trainingService.getTrainingsForCrewByName(crew)
         .filter(t => t.tier_required <= tier && !this.isMastered(t))
         .filter(t => filter === 'all' || (filter === 'progress') === this.pointsBanked(t) > 0)
+        .filter(t => !tag || t.tags.includes(tag))
+        .filter(t => matchesTrainingSearch(t, search))
         .sort((a, b) => a.tier_required - b.tier_required || a.topic.localeCompare(b.topic));
       if (trainings.length === 0) continue;
       groups.push({
