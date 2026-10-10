@@ -44,6 +44,13 @@ export const routes: Routes = [
       import('./features/guide/guide.component').then(m => m.GuideComponent),
   },
   {
+    // Everyone reads the in-game date; the DM's controls render in place.
+    path: 'almanac',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/chronometer/almanac/almanac.component').then(m => m.AlmanacComponent),
+  },
+  {
     // Players watch the montage live; only the DM gets the controls.
     path: 'play',
     canActivate: [authGuard],

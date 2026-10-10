@@ -1,0 +1,105 @@
+<div class="page">
+  <div class="section-title">
+    <div class="section-title-row"><h2>The Almanac</h2></div>
+    <div class="rope-divider"></div>
+  </div>
+
+  @let todayAbs = today();
+  @if (todayAbs !== null) {
+    <div class="alm-layout" [class.with-dm]="auth.isDm()">
+      <div class="alm-main">
+        <!-- ---- today ---- -->
+        <div class="hk-card corners alm-hero">
+          <p class="stamp-label">Today</p>
+          <h1 class="alm-date gold-text">{{ todayAbs | argousDate }}</h1>
+          <p class="alm-folk">{{ folkName() }}</p>
+          @for (f of todaysFestivals(); track f.id) {
+            <p class="alm-today-fest"><span class="fest-badge">{{ f.name }}</span> {{ f.blurb }}</p>
+          }
+        </div>
+
+        <div class="alm-pair">
+          <!-- ---- the sky ---- -->
+          @if (selein(); as moon) {
+            <div class="hk-card alm-sky">
+              <app-selein-glyph [cycleDay]="moon.cycleDay" [size]="52" />
+              <div>
+                <p class="stamp-label">Selein</p>
+                <p class="alm-moon">{{ moon.name }}</p>
+                <p class="alm-still">{{ stillstar }}</p>
+              </div>
+            </div>
+          }
+
+          <!-- ---- next festival ---- -->
+          @if (next(); as nf) {
+            <div class="hk-card alm-next">
+              <p class="stamp-label">Next festival · {{ daysLabel(nf.daysUntil) }}</p>
+              <p class="alm-next-name">{{ nf.festival.name }}</p>
+              <p class="alm-next-date">{{ nf.absDay | argousDate }}</p>
+              <p class="alm-blurb">{{ nf.festival.blurb }}</p>
+            </div>
+          }
+        </div>
+
+        <!-- ---- upcoming ---- -->
+        <div class="hk-card alm-list">
+          <p class="stamp-label">Upcoming</p>
+          @for (row of upcoming(); track row.abs) {
+            <div class="alm-row" [class.today]="row.abs === todayAbs"
+              [class.picked]="auth.isDm() && row.abs === viewedDay()"
+              [class.clickable]="auth.isDm()" (click)="pickDay(row.abs)">
+              <span class="alm-row-date">{{ row.abs | argousDate: 'short' }}</span>
+              <span class="alm-row-body">
+                @for (f of row.festivals; track f) {
+                  <span class="fest-badge">{{ f }}</span>
+                }
+                @for (e of row.events; track e.id) {
+                  <span class="alm-event" [class.editable]="auth.isDm()" (click)="editEvent(e, $event)">
+                    @if (e.visibility === 'dm') { <span class="ms sm" title="DM only">lock</span> }
+                    {{ e.title }}
+                  </span>
+                }
+              </span>
+              @if (auth.isDm() && row.abs === viewedDay()) {
+                <span class="ms sm alm-note-mark" title="Viewing this day's note">edit_note</span>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- ---- log ---- -->
+        <div class="hk-card alm-list">
+          <p class="stamp-label">Almanac log</p>
+          @for (day of log(); track day.abs) {
+            <div class="alm-log-day">
+              <p class="alm-log-date">{{ day.abs | argousDate }}</p>
+              @for (e of day.events; track e.id) {
+                <div class="alm-log-event" [class.editable]="auth.isDm()" (click)="editEvent(e, $event)">
+                  <span class="alm-log-title">
+                    @if (e.visibility === 'dm') { <span class="ms sm" title="DM only">lock</span> }
+                    {{ e.title }}
+                  </span>
+                  @if (e.body) { <span class="alm-log-body">{{ e.body }}</span> }
+                </div>
+              }
+            </div>
+          } @empty {
+            <p class="alm-empty">Nothing yet recorded.</p>
+          }
+        </div>
+      </div>
+
+      @if (auth.isDm()) {
+        <app-almanac-dm class="alm-dm" [viewedDay]="viewedDay()!" (backToToday)="pickDay(todayAbs)" />
+      }
+    </div>
+  } @else if (chrono.clockLoaded()) {
+    <div class="empty-state">
+      <span class="ms">calendar_month</span>
+      <p>The clock hasn't been set. Run migration 017_chronometer.sql in Supabase.</p>
+    </div>
+  } @else {
+    <div class="empty-state"><p>Consulting the almanac…</p></div>
+  }
+</div>

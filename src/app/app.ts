@@ -9,6 +9,8 @@ import { PlayService } from './features/play/play.service';
 import { RelationshipService } from './features/dm/relationship.service';
 import { TweaksPanelComponent } from './shared/tweaks-panel/tweaks-panel.component';
 import { DutyRequestModalsComponent } from './features/schedule/duty-request-modals/duty-request-modals.component';
+import { ChronometerService } from './features/chronometer/chronometer.service';
+import { DateBannerComponent } from './features/chronometer/date-banner/date-banner.component';
 
 @Component({
   selector: 'app-root',
@@ -22,6 +24,7 @@ import { DutyRequestModalsComponent } from './features/schedule/duty-request-mod
     MatIconModule,
     TweaksPanelComponent,
     DutyRequestModalsComponent,
+    DateBannerComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -37,6 +40,7 @@ export class App {
     public voyageService: VoyageService,
     public play: PlayService,
     private relationships: RelationshipService,
+    private chronometer: ChronometerService,
   ) {
     // Own the play-state subscription at the shell so the nav link — and every
     // player's screen — follows the DM's cursor without visiting /play first.
@@ -55,6 +59,16 @@ export class App {
     effect(() => {
       if (this.auth.isAuthed()) this.relationships.subscribe();
       else this.relationships.unsubscribe();
+    });
+
+    // The in-game date sits in the header, so follow the DM's clock from here.
+    effect(() => {
+      if (this.auth.isAuthed()) {
+        this.chronometer.load();
+        this.chronometer.subscribe();
+      } else {
+        this.chronometer.unsubscribe();
+      }
     });
   }
 

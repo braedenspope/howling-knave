@@ -1,52 +1,59 @@
 @if (auth.isAuthed()) {
-  <mat-toolbar class="app-nav">
-    <span class="app-title gold-text" routerLink="/board">Echoes of the Sundering</span>
-    @if (voyageService.activeVoyage(); as voyage) {
-      <span class="voyage-name">{{ voyage.name }}</span>
-    }
-    <span class="spacer"></span>
-    <nav class="nav-links">
-      <a mat-button routerLink="/board" routerLinkActive="active-link">
-        <mat-icon>dashboard</mat-icon>
-        <span class="nav-label">Board</span>
-      </a>
-      <a mat-button routerLink="/crew" routerLinkActive="active-link">
-        <mat-icon>groups</mat-icon>
-        <span class="nav-label">Crew</span>
-      </a>
-      <a mat-button routerLink="/voyages" routerLinkActive="active-link">
-        <mat-icon>sailing</mat-icon>
-        <span class="nav-label">Voyages</span>
-      </a>
-      <a mat-button routerLink="/progress" routerLinkActive="active-link">
-        <mat-icon>trending_up</mat-icon>
-        <span class="nav-label">Progress</span>
-      </a>
-      <a mat-button routerLink="/guide" routerLinkActive="active-link">
-        <mat-icon>help_outline</mat-icon>
-        <span class="nav-label">Guide</span>
-      </a>
-      @if (play.isActive()) {
-        <a mat-button routerLink="/play" routerLinkActive="active-link" class="play-link">
-          <mat-icon>play_circle</mat-icon>
-          <span class="nav-label">Underway</span>
-        </a>
+  <header class="app-header">
+    <mat-toolbar class="app-nav">
+      <span class="app-title gold-text" routerLink="/board">Echoes of the Sundering</span>
+      @if (voyageService.activeVoyage(); as voyage) {
+        <span class="voyage-name">{{ voyage.name }}</span>
       }
-      @if (auth.isDm()) {
-        <a mat-button routerLink="/dm" routerLinkActive="active-link">
-          <mat-icon>shield</mat-icon>
-          <span class="nav-label">DM</span>
+      <span class="spacer"></span>
+      <nav class="nav-links">
+        <a mat-button routerLink="/board" routerLinkActive="active-link">
+          <mat-icon>dashboard</mat-icon>
+          <span class="nav-label">Board</span>
         </a>
-      }
-    </nav>
-    <span class="character-chip">{{ auth.profile()?.character_name }}</span>
-    <button mat-icon-button (click)="auth.logout()" aria-label="Logout">
-      <mat-icon>logout</mat-icon>
-    </button>
-    <button mat-icon-button class="menu-toggle" (click)="toggleMenu()" aria-label="Menu">
-      <mat-icon>{{ menuOpen() ? 'close' : 'menu' }}</mat-icon>
-    </button>
-  </mat-toolbar>
+        <a mat-button routerLink="/crew" routerLinkActive="active-link">
+          <mat-icon>groups</mat-icon>
+          <span class="nav-label">Crew</span>
+        </a>
+        <a mat-button routerLink="/voyages" routerLinkActive="active-link">
+          <mat-icon>sailing</mat-icon>
+          <span class="nav-label">Voyages</span>
+        </a>
+        <a mat-button routerLink="/progress" routerLinkActive="active-link">
+          <mat-icon>trending_up</mat-icon>
+          <span class="nav-label">Progress</span>
+        </a>
+        <a mat-button routerLink="/almanac" routerLinkActive="active-link">
+          <mat-icon>calendar_month</mat-icon>
+          <span class="nav-label">Almanac</span>
+        </a>
+        <a mat-button routerLink="/guide" routerLinkActive="active-link">
+          <mat-icon>help_outline</mat-icon>
+          <span class="nav-label">Guide</span>
+        </a>
+        @if (play.isActive()) {
+          <a mat-button routerLink="/play" routerLinkActive="active-link" class="play-link">
+            <mat-icon>play_circle</mat-icon>
+            <span class="nav-label">Underway</span>
+          </a>
+        }
+        @if (auth.isDm()) {
+          <a mat-button routerLink="/dm" routerLinkActive="active-link">
+            <mat-icon>shield</mat-icon>
+            <span class="nav-label">DM</span>
+          </a>
+        }
+      </nav>
+      <span class="character-chip">{{ auth.profile()?.character_name }}</span>
+      <button mat-icon-button (click)="auth.logout()" aria-label="Logout">
+        <mat-icon>logout</mat-icon>
+      </button>
+      <button mat-icon-button class="menu-toggle" (click)="toggleMenu()" aria-label="Menu">
+        <mat-icon>{{ menuOpen() ? 'close' : 'menu' }}</mat-icon>
+      </button>
+    </mat-toolbar>
+    <div class="date-strip"><app-date-banner /></div>
+  </header>
 
   @if (menuOpen()) {
     <div class="mobile-menu-backdrop" (click)="closeMenu()"></div>
@@ -66,6 +73,10 @@
       <a mat-button routerLink="/progress" routerLinkActive="active-link" (click)="closeMenu()">
         <mat-icon>trending_up</mat-icon>
         <span>Progress</span>
+      </a>
+      <a mat-button routerLink="/almanac" routerLinkActive="active-link" (click)="closeMenu()">
+        <mat-icon>calendar_month</mat-icon>
+        <span>Almanac</span>
       </a>
       <a mat-button routerLink="/guide" routerLinkActive="active-link" (click)="closeMenu()">
         <mat-icon>help_outline</mat-icon>

@@ -1,0 +1,59 @@
+<div class="hk-card corners dm-card">
+  <p class="stamp-label"><span class="ms sm">shield</span> The clock</p>
+  <div class="dm-clock-row">
+    <button class="btn btn-brass" [disabled]="busy()" (click)="advance(1)">+1 day</button>
+    <button class="btn btn-copper" [disabled]="busy()" (click)="advance(6)">+6 days</button>
+    <div class="dm-adv-n">
+      <input type="number" min="1" step="1" [(ngModel)]="advanceBy" aria-label="Days to advance" />
+      <button class="btn btn-ghost" [disabled]="busy()" (click)="advance(advanceBy)">+{{ advanceBy }}</button>
+    </div>
+  </div>
+
+  @if (settingDate()) {
+    <div class="dm-set-date">
+      <app-argous-date-picker [(value)]="pickedDate" />
+      <div class="dm-actions">
+        <button class="btn btn-ghost" (click)="settingDate.set(false)">Cancel</button>
+        <button class="btn btn-brass" [disabled]="busy()" (click)="setDate()">Set date</button>
+      </div>
+    </div>
+  } @else {
+    <button class="btn btn-ghost dm-set-toggle" (click)="openSetDate()">
+      <span class="ms sm">edit_calendar</span> Set date…
+    </button>
+  }
+</div>
+
+<div class="hk-card dm-card">
+  <div class="dm-head">
+    <p class="stamp-label">Pending</p>
+    <button class="btn btn-ghost" (click)="newEvent()"><span class="ms sm">add</span> New event</button>
+  </div>
+  @for (e of pending(); track e.id) {
+    <div class="dm-pending" [class.today]="e.abs_day === today()" (click)="editEvent(e)">
+      <span class="dm-pending-date">{{ e.abs_day | argousDate: 'short' }}</span>
+      <span class="dm-pending-title">
+        @if (e.visibility === 'dm') { <span class="ms sm">lock</span> }
+        {{ e.title }}
+      </span>
+      <span class="vis-badge" [class.dm]="e.visibility === 'dm'">
+        {{ e.visibility === 'dm' ? 'DM' : 'Players' }}
+      </span>
+    </div>
+  } @empty {
+    <p class="dm-empty">Nothing pending.</p>
+  }
+</div>
+
+<div class="hk-card dm-card">
+  <div class="dm-head">
+    <p class="stamp-label">Day note · {{ viewedDay() | argousDate: 'short' }}</p>
+    @if (viewedDay() !== today()) {
+      <button class="btn btn-ghost" (click)="backToToday.emit()">Back to today</button>
+    }
+  </div>
+  <div class="hk-field">
+    <textarea rows="6" [(ngModel)]="note" (blur)="saveNote()" [disabled]="noteLoading()"
+      placeholder="Private to you. Click any upcoming day to open its note."></textarea>
+  </div>
+</div>

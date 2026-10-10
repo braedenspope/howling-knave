@@ -248,3 +248,17 @@ export function thresholdForTier(tier: number): number {
 
 /** The block lengths a player can choose for any training or activity. */
 export const SLOT_WEIGHTS: SlotWeight[] = ['light', 'medium', 'extended', 'heavy'];
+
+export type CalendarEventVisibility = 'dm' | 'player';
+
+/** A dated event on the Chronometer. Players are only ever sent `player` ones (RLS). */
+export interface CalendarEvent {
+  id: string;
+  /** Days since 1 Primis, Year 0 A.S. — see the chronometer engine. */
+  abs_day: number;
+  title: string;
+  body: string | null;
+  visibility: CalendarEventVisibility;
+  created_by: string | null;
+  created_at: string;
+}

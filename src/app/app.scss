@@ -1,11 +1,24 @@
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
 .app-nav {
   background: var(--bg-nav);
   background-image: var(--wood-grain);
   border-bottom: 3px solid var(--accent-brass);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 -1px 0 rgba(196,154,60,0.2);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  box-shadow: inset 0 -1px 0 rgba(196,154,60,0.2);
+}
+
+/* The in-game date, always in view under the nav. */
+.date-strip {
+  display: flex;
+  justify-content: center;
+  padding: 3px 12px;
+  background: var(--bg-deep);
+  border-bottom: 1px solid var(--bg-card-border);
 }
 
 .app-title {

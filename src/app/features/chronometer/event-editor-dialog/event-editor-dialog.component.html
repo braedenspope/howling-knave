@@ -1,0 +1,41 @@
+<div class="ee-modal">
+  <h2 class="ee-title gold-text">{{ isEdit ? 'Edit event' : 'New event' }}</h2>
+
+  <div class="hk-field">
+    <label>Title</label>
+    <input [(ngModel)]="title" placeholder="What happens?" cdkFocusInitial />
+  </div>
+
+  <div class="hk-field">
+    <label>Details</label>
+    <textarea rows="3" [(ngModel)]="body" placeholder="Optional"></textarea>
+  </div>
+
+  <app-argous-date-picker [(value)]="date" />
+
+  <div class="hk-field">
+    <label>Visible to</label>
+    <div class="ee-vis">
+      <button type="button" class="btn btn-ghost" [class.on]="visibility() === 'dm'"
+        (click)="visibility.set('dm')">
+        <span class="ms sm">lock</span> DM only
+      </button>
+      <button type="button" class="btn btn-ghost" [class.on]="visibility() === 'player'"
+        (click)="visibility.set('player')">
+        <span class="ms sm">visibility</span> Players
+      </button>
+    </div>
+  </div>
+
+  <div class="ee-actions">
+    @if (isEdit) {
+      <button type="button" class="btn btn-danger" [disabled]="saving()" (click)="remove()">
+        <span class="ms sm">delete</span> Delete
+      </button>
+    }
+    <button type="button" class="btn btn-ghost" mat-dialog-close>Cancel</button>
+    <button type="button" class="btn btn-brass" [disabled]="saving() || !title.trim()" (click)="save()">
+      {{ isEdit ? 'Save' : 'Add event' }}
+    </button>
+  </div>
+</div>

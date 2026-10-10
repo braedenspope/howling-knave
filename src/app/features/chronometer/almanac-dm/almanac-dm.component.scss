@@ -1,0 +1,37 @@
+:host { display: flex; flex-direction: column; gap: 14px; }
+.dm-card { padding: 16px 18px; }
+p { margin: 0; }
+.stamp-label { margin-bottom: 8px; }
+.stamp-label .ms { vertical-align: -3px; color: var(--accent-gold); }
+
+.dm-clock-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.dm-adv-n { display: flex; gap: 4px; }
+.dm-adv-n input {
+  width: 64px; padding: 6px 8px; font-family: var(--font-data); font-size: 14px;
+  background: rgba(15,11,7,0.6); color: var(--text-primary);
+  border: 1px solid var(--bg-card-border); border-radius: var(--radius);
+}
+.dm-set-toggle { margin-top: 10px; }
+.dm-set-date { margin-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+.dm-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+.dm-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+.dm-head .stamp-label { margin: 0; }
+
+.dm-pending {
+  display: flex; gap: 10px; align-items: baseline; padding: 7px 8px; cursor: pointer;
+  border-top: 1px solid rgba(61,46,31,0.35); border-left: 2px solid transparent;
+}
+.dm-pending:hover { background: rgba(196,154,60,0.08); }
+.dm-pending.today { border-left-color: var(--accent-gold); background: rgba(196,154,60,0.1); }
+.dm-pending-date { font-family: var(--font-heading); font-size: 12.5px; flex: 0 0 118px; }
+.dm-pending-title { flex: 1; font-size: 15px; min-width: 0; }
+.dm-pending-title .ms { color: var(--text-faint); vertical-align: -2px; }
+
+.vis-badge {
+  font-family: var(--font-data); font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+  padding: 1px 6px; border-radius: var(--radius);
+  border: 1px solid var(--success-green); color: var(--success-green);
+}
+.vis-badge.dm { border-color: var(--wax-red-hi); color: var(--wax-red-hi); }
+.dm-empty { color: var(--text-faint); font-style: italic; }

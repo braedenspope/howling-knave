@@ -1,0 +1,54 @@
+.alm-layout { display: grid; gap: 18px; max-width: 760px; }
+.alm-layout.with-dm { grid-template-columns: minmax(0, 1fr) 380px; max-width: none; align-items: start; }
+.alm-main { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.hk-card { padding: 16px 20px; }
+p { margin: 0; }
+.stamp-label { margin-bottom: 6px; }
+
+.alm-hero { padding: 22px 26px; }
+.alm-date { margin: 0; font-size: 30px; letter-spacing: 1px; line-height: 1.2; }
+.alm-folk { color: var(--text-secondary); font-style: italic; margin-top: 4px; }
+.alm-today-fest { margin-top: 12px; font-size: 15px; color: var(--text-secondary); }
+
+.fest-badge {
+  display: inline-block; font-family: var(--font-heading); font-size: 11px; letter-spacing: 0.5px;
+  padding: 1px 8px; margin-right: 6px; border-radius: var(--radius);
+  border: 1px solid var(--accent-gold-dim); color: var(--accent-gold); background: rgba(196,154,60,0.07);
+}
+
+.alm-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.alm-sky { display: flex; gap: 16px; align-items: center; }
+.alm-moon, .alm-next-name { font-family: var(--font-heading); font-size: 17px; }
+.alm-still { margin-top: 6px; font-size: 14px; font-style: italic; color: var(--text-secondary); }
+.alm-next-date { font-size: 14px; color: var(--accent-gold); }
+.alm-blurb { margin-top: 6px; font-size: 14.5px; color: var(--text-secondary); }
+
+.alm-row {
+  display: flex; gap: 12px; align-items: baseline; padding: 7px 8px;
+  border-top: 1px solid rgba(61,46,31,0.35); border-left: 2px solid transparent;
+}
+.alm-row.today { border-left-color: var(--accent-gold); background: rgba(196,154,60,0.05); }
+.alm-row.clickable { cursor: pointer; }
+.alm-row.clickable:hover, .alm-row.picked { background: rgba(196,154,60,0.09); }
+.alm-row-date { font-family: var(--font-heading); font-size: 14px; flex: 0 0 170px; }
+.alm-row-body { flex: 1; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; font-size: 15px; }
+.alm-note-mark { color: var(--accent-gold); }
+.alm-event .ms, .alm-log-title .ms { color: var(--text-faint); vertical-align: -2px; }
+.editable { cursor: pointer; }
+.editable:hover { color: var(--accent-gold); }
+
+.alm-log-day { padding: 8px 0; border-top: 1px solid rgba(61,46,31,0.35); }
+.alm-log-date { font-family: var(--font-heading); font-size: 13px; color: var(--accent-gold); margin-bottom: 4px; }
+.alm-log-event { display: flex; flex-direction: column; padding: 2px 0 4px 10px; }
+.alm-log-body { font-size: 14.5px; color: var(--text-secondary); white-space: pre-line; }
+.alm-empty { color: var(--text-faint); font-style: italic; }
+
+@media (max-width: 1000px) {
+  .alm-layout.with-dm { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .alm-pair { grid-template-columns: 1fr; }
+  .alm-date { font-size: 23px; }
+  .alm-row { flex-direction: column; gap: 2px; }
+  .alm-row-date { flex-basis: auto; }
+}
