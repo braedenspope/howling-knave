@@ -89,8 +89,6 @@ export interface CrewMember {
 export interface CrewUnavailability {
   crew_member_id: number;
   day_id: string;
-  /** Shown to players in the training picker. */
-  reason: string | null;
   created_at: string;
 }
 
@@ -242,6 +240,9 @@ export const SLOT_WEIGHT_LABEL: Record<SlotWeight, string> = {
 };
 
 export const DAY_BUDGET = 8;
+
+/** Every ship duty reads the same on the board — the watch is the watch. */
+export const SHIP_DUTY_LABEL = 'Ship Duty';
 
 /**
  * Play mode scoring (migrations 011 + 012): one roll per hour, each success

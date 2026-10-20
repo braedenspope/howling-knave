@@ -46,7 +46,7 @@
                 <span class="crew-chip-name">{{ g.crew }}</span>
                 <span class="crew-chip-role">{{ g.role }}</span>
               </span>
-              @if (g.unavailable !== null) {
+              @if (g.unavailable) {
                 <span class="cr-state" style="margin-left: auto;">Unavailable today</span>
               } @else if (g.taken) {
                 <span class="cr-state" style="margin-left: auto;">Already training today</span>
@@ -55,9 +55,6 @@
                   [style.color]="tierColor(g.tier)" [style.border-color]="tierColor(g.tier)">{{ tierName(g.tier) }}</span>
               }
             </div>
-            @if (g.unavailable) {
-              <p class="unavailable-note"><span class="ms sm">block</span>{{ g.unavailable }}</p>
-            }
             <div class="catalog-list">
               @for (t of g.trainings; track t.id) {
                 @let pts = pointsBanked(t);

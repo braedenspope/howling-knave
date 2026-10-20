@@ -77,8 +77,6 @@
   border-left: 3px solid var(--bg-card-border);
 }
 
-:host-context(.ledger-drawer-body) .form-grid { grid-template-columns: 1fr; }
-
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -254,11 +252,6 @@
     border-color: var(--crew);
   }
 
-  &.sel {
-    outline: 2px solid var(--accent-gold);
-    outline-offset: 1px;
-  }
-
   .ms { font-size: 15px; }
 }
 
@@ -275,31 +268,4 @@
   font-family: var(--font-data);
   font-size: 10px;
   line-height: 14px;
-}
-
-.cell-panel {
-  margin-top: 12px;
-  padding: 14px 16px;
-  border-left: 3px solid var(--bg-card-border);
-  max-width: 560px;
-}
-
-.cell-title {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin-bottom: 10px;
-  font-family: var(--font-heading);
-  font-size: 15px;
-}
-
-.clash-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  margin: 0 0 10px;
-  font-size: 14px;
-  color: var(--text-secondary);
-
-  .ms { color: var(--accent-copper); }
 }

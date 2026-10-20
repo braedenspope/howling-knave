@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, effect, inject, input, signal } from '@angular/core';
+import { Component, OnInit, effect, inject, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CrewService, CrewMemberInput } from '../../crew/crew.service';
@@ -17,12 +17,6 @@ const PALETTE = [
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
 
-/** The crewmate/day cell the DM has selected in the availability grid. */
-interface CellRef {
-  crewId: number;
-  dayId: string;
-}
-
 @Component({
   selector: 'app-crew-manager',
   standalone: true,
@@ -39,9 +33,6 @@ export class CrewManagerComponent implements OnInit {
 
   readonly palette = PALETTE;
 
-  /** Docked in the board's side drawer: roster only — the day rows handle days off. */
-  readonly embedded = input(false);
-
   // ----- roster editing -----
   /** The crewmate being edited, `'new'` while adding one, or null. */
   readonly editing = signal<number | 'new' | null>(null);
@@ -54,14 +45,12 @@ export class CrewManagerComponent implements OnInit {
   readonly days = signal<Day[]>([]);
   /** Training blocks already on the board for the shown voyage — to flag clashes. */
   private readonly blocks = signal<ScheduleBlock[]>([]);
-  readonly selected = signal<CellRef | null>(null);
-  reason = '';
 
   constructor() {
     // Follow the active voyage until the DM picks another one.
     effect(() => {
       const active = this.voyages.activeVoyage();
-      if (active && !this.voyageId() && !this.embedded()) this.showVoyage(active.id);
+      if (active && !this.voyageId()) this.showVoyage(active.id);
     });
   }
 
@@ -150,7 +139,6 @@ export class CrewManagerComponent implements OnInit {
 
   async showVoyage(voyageId: string) {
     this.voyageId.set(voyageId);
-    this.selected.set(null);
     const days = await this.voyages.loadDaysForVoyage(voyageId);
     this.days.set(days);
     this.blocks.set(await this.schedule.loadBlocksByDayIds(days.map(d => d.id)));
@@ -160,55 +148,16 @@ export class CrewManagerComponent implements OnInit {
     return this.crew.unavailableOn(m.name, day.id) !== undefined;
   }
 
-  reasonFor(m: CrewMember, day: Day): string {
-    return this.crew.unavailableOn(m.name, day.id)?.reason ?? '';
-  }
-
   /** Trainings with this crewmate already on the board for the day. */
   bookedCount(m: CrewMember, day: Day): number {
     return this.blocks().filter(b => b.day_id === day.id && !b.is_mandatory && b.crew_member === m.name).length;
   }
 
-  isSelected(m: CrewMember, day: Day): boolean {
-    const s = this.selected();
-    return !!s && s.crewId === m.id && s.dayId === day.id;
-  }
-
-  readonly selectedCrew = computed(() => {
-    const s = this.selected();
-    return s ? this.crew.members().find(m => m.id === s.crewId) ?? null : null;
-  });
-
-  readonly selectedDay = computed(() => {
-    const s = this.selected();
-    return s ? this.days().find(d => d.id === s.dayId) ?? null : null;
-  });
-
-  select(m: CrewMember, day: Day) {
-    if (this.isSelected(m, day)) {
-      this.selected.set(null);
-      return;
-    }
-    this.selected.set({ crewId: m.id, dayId: day.id });
-    this.reason = this.reasonFor(m, day);
-  }
-
-  /** Block the selected cell, or update its reason if it's already blocked. */
-  async blockSelected() {
-    const m = this.selectedCrew();
-    const day = this.selectedDay();
-    if (!m || !day) return;
-    const err = await this.crew.block(m.id, day.id, this.reason);
+  async toggle(m: CrewMember, day: Day) {
+    const err = this.isBlocked(m, day)
+      ? await this.crew.unblock(m.id, day.id)
+      : await this.crew.block(m.id, day.id);
     if (err) this.toast.warn(err);
-  }
-
-  async unblockSelected() {
-    const m = this.selectedCrew();
-    const day = this.selectedDay();
-    if (!m || !day) return;
-    const err = await this.crew.unblock(m.id, day.id);
-    if (err) this.toast.warn(err);
-    this.reason = '';
   }
 
   private emptyForm(): CrewMemberInput {

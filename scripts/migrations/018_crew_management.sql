@@ -90,10 +90,12 @@ create trigger crew_member_renamed
 create table if not exists public.crew_unavailability (
   crew_member_id integer not null references public.crew_members(id) on delete cascade,
   day_id uuid not null references public.days(id) on delete cascade,
-  reason text,
   created_at timestamptz not null default now(),
   primary key (crew_member_id, day_id)
 );
+
+-- An earlier draft carried a reason per block; days off are a plain toggle now.
+alter table public.crew_unavailability drop column if exists reason;
 
 create index if not exists crew_unavailability_day_idx
   on public.crew_unavailability (day_id);
@@ -195,3 +197,13 @@ begin
     alter publication supabase_realtime add table public.crew_unavailability;
   end if;
 end $$;
+
+-- ---- ship duties read generically ----
+-- The app used to draw each watch a specific task ("Pump the bilge"); every
+-- ship duty is just "Ship Duty" now. Rename the ones already on the board.
+-- DM-written duties tied to a crewmate (crew_member <> 'Ship Duty') are kept.
+update public.schedule_blocks
+set training_topic = 'Ship Duty'
+where is_mandatory
+  and crew_member = 'Ship Duty'
+  and training_topic <> 'Ship Duty';

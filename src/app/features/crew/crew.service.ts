@@ -147,8 +147,8 @@ export class CrewService {
 
   // ----- day blocks (DM) -----
 
-  async block(crewMemberId: number, dayId: string, reason: string | null): Promise<string | null> {
-    const row = { crew_member_id: crewMemberId, day_id: dayId, reason: reason?.trim() || null };
+  async block(crewMemberId: number, dayId: string): Promise<string | null> {
+    const row = { crew_member_id: crewMemberId, day_id: dayId };
     const previous = this.unavailability();
     this.unavailability.set([
       ...previous.filter(u => !(u.crew_member_id === crewMemberId && u.day_id === dayId)),

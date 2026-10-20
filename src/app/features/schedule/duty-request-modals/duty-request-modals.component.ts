@@ -25,7 +25,7 @@ type ModalState =
             @case ('compose') {
               <p class="stamp-label">Ship duty · hour {{ composeHour() }}</p>
               <h3>Ask a crewmate to take your watch</h3>
-              <p class="hk-modal-sub">{{ composeTask() }} — it keeps its hour, so only crew with hour {{ composeHour() }} free can take it.</p>
+              <p class="hk-modal-sub">Ship Duty — it keeps its hour, so only crew with hour {{ composeHour() }} free can take it.</p>
               <div class="request-target-list">
                 @for (row of targetRows(); track row.user.id) {
                   @if (row.eligible) {
@@ -51,7 +51,7 @@ type ModalState =
             @case ('incoming') {
               <p class="stamp-label">A request from the crew</p>
               <h3>{{ name(m.req.from_user) }} asks you to stand their watch</h3>
-              <p class="hk-modal-sub">{{ task(m.req) }}</p>
+              <p class="hk-modal-sub">Ship Duty</p>
               <div class="hk-modal-actions">
                 <button class="btn btn-danger" (click)="requests.deny(m.req)">Decline</button>
                 <button class="btn btn-brass" (click)="requests.accept(m.req)">
@@ -64,7 +64,7 @@ type ModalState =
               <p class="stamp-label">Awaiting word</p>
               <h3>Waiting for {{ name(m.req.to_user) }}…</h3>
               <div class="hk-modal-spinner"><span class="compass-spin">＊</span></div>
-              <p class="hk-modal-sub">Your request to hand off {{ task(m.req) }} is with them.</p>
+              <p class="hk-modal-sub">Your request to hand off your ship duty is with them.</p>
               <div class="hk-modal-actions">
                 <button class="btn btn-ghost" (click)="requests.cancel(m.req)">Cancel request</button>
               </div>
@@ -133,10 +133,6 @@ export class DutyRequestModalsComponent implements OnInit {
       }));
   });
 
-  composeTask(): string {
-    return this.requests.composeBlock()?.training_topic ?? 'a ship duty';
-  }
-
   composeHour(): string {
     const slot = this.requests.composeBlock()?.slot_position ?? 0;
     return ROMAN[slot] ?? `${slot + 1}`;
@@ -144,9 +140,5 @@ export class DutyRequestModalsComponent implements OnInit {
 
   name(userId: string): string {
     return this.schedule.allUsers().find(u => u.id === userId)?.character_name ?? 'A crewmate';
-  }
-
-  task(req: DutyRequest): string {
-    return this.schedule.blocks().find(b => b.id === req.block_id)?.training_topic ?? 'a ship duty';
   }
 }

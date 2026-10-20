@@ -20,46 +20,34 @@
     }
   </div>
 
-  <!-- Crewmates the DM has off-limits for training today. Everyone sees them; the DM edits in place. -->
+  <!-- Crewmates the DM has taken off training today. Everyone sees them; the DM toggles them here. -->
   @if (offToday().length || isDm()) {
     <div class="off-strip">
       @if (offToday().length) {
         <span class="stamp-label">Off today</span>
       }
       @for (o of offToday(); track o.member.id) {
-        <span class="off-chip" [style.border-color]="o.member.color" [title]="o.reason || 'Not teaching today'">
+        <span class="off-chip" [style.border-color]="o.member.color">
           <span class="crew-dot" [style.background]="o.member.color"></span>
           <span [style.color]="o.member.color">{{ o.member.name }}</span>
-          @if (o.reason) { <span class="off-reason">{{ o.reason }}</span> }
           @if (o.booked) {
-            <span class="off-booked" [title]="o.booked + ' training' + (o.booked === 1 ? ' was' : 's were') + ' booked before the block'">
+            <span class="off-booked" [title]="o.booked + ' training' + (o.booked === 1 ? ' was' : 's were') + ' booked before they were taken off'">
               <span class="ms sm">warning</span>{{ o.booked }}
             </span>
           }
           @if (isDm()) {
-            <button class="off-btn" (click)="editOffReason(o.member.id, o.reason)" title="Edit reason" aria-label="Edit reason">
-              <span class="ms sm">edit_note</span>
-            </button>
-            <button class="off-btn" (click)="liftOff(o.member.id)" [title]="'Let ' + o.member.name + ' teach today'" aria-label="Lift the block">
+            <button class="off-btn" (click)="toggleOff(o.member.id)" [title]="'Put ' + o.member.name + ' back on today'" aria-label="Put back on">
               <span class="ms sm">close</span>
             </button>
           }
         </span>
       }
-      @if (isDm() && onDutyCrew().length) {
-        <button class="off-add" [matMenuTriggerFor]="offMenu" title="Block a crewmate from teaching today">
-          <span class="ms sm">person_off</span> Crewmate off
+      @if (isDm()) {
+        <button class="off-add" [matMenuTriggerFor]="offMenu" title="Take crewmates off training today">
+          <span class="ms sm">person_off</span> Crew off
         </button>
       }
     </div>
-    @if (editingOff() !== null) {
-      <div class="off-reason-row">
-        <input [(ngModel)]="offReason" placeholder="Reason players see — fever, ashore, sulking…"
-          (keydown.enter)="saveOffReason()" (keydown.escape)="editingOff.set(null)" aria-label="Reason" />
-        <button class="btn btn-ghost" (click)="editingOff.set(null)">Skip</button>
-        <button class="btn btn-brass" (click)="saveOffReason()">Save</button>
-      </div>
-    }
   }
 
   @if (isMobile()) {
@@ -101,8 +89,8 @@
                     <span class="tl-hour">{{ roman(item.slotIndex) }}</span>
                     <div class="tl-body">
                       @if (b.is_mandatory) {
-                        <span class="tl-topic">{{ b.training_topic }}</span>
-                        <span class="duty-tag">{{ isCovered(b) ? 'Covered · ' + coveredByName(b) : 'Ship duty' }}</span>
+                        <span class="tl-topic">Ship Duty</span>
+                        @if (isCovered(b)) { <span class="duty-tag">Covered · {{ coveredByName(b) }}</span> }
                       } @else {
                         <span class="tl-crew" [style.color]="crewColor(b.crew_member)">{{ b.crew_member }}</span>
                         <span class="tl-topic">{{ b.training_topic }}</span>
@@ -168,8 +156,8 @@
                   <div class="slot-cell duty-cell" [class.covering]="isCovered(b)" [style.grid-column]="'span ' + item.span"
                     [attr.draggable]="isDm() && !isLocked()" (dragstart)="onDragStart($event, b)" (dragend)="onDragEnd()"
                     [title]="isDm() ? 'Drag to reposition this watch' : ''">
-                    <div class="duty-task">{{ b.training_topic }}</div>
-                    <span class="duty-tag">{{ isCovered(b) ? 'Covering ' + coveredByName(b) + '\'s watch' : 'Ship duty' }}</span>
+                    <div class="duty-task">Ship Duty</div>
+                    @if (isCovered(b)) { <span class="duty-tag">Covering {{ coveredByName(b) }}'s watch</span> }
                     @if (canHandOff(b)) {
                       <button class="cover-btn" (click)="requestHandOff(b)">Request hand-off</button>
                     }
@@ -240,8 +228,10 @@
 
 <!-- DM outcome menu -->
 <mat-menu #offMenu="matMenu" class="hk-outcome-menu">
-  @for (m of onDutyCrew(); track m.id) {
-    <button mat-menu-item (click)="takeOff(m.id)">
+  @for (m of crew.members(); track m.id) {
+    @let off = isOff(m.id);
+    <button mat-menu-item (click)="$event.stopPropagation(); toggleOff(m.id)">
+      <span class="ms sm">{{ off ? 'check_box' : 'check_box_outline_blank' }}</span>&nbsp;
       <span class="crew-dot" [style.background]="m.color"></span>&nbsp; {{ m.name }}
       @if (bookedWith(m.name); as n) { <span class="stamp-label">&nbsp;· {{ n }} booked</span> }
     </button>

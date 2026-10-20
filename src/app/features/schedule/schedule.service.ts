@@ -1,8 +1,8 @@
 import { Injectable, NgZone, signal } from '@angular/core';
 import { SupabaseService } from '../../core/supabase/supabase.service';
 import { AuthService } from '../../core/auth/auth.service';
-import { ScheduleBlock, SlotWeight, SLOT_WEIGHT_UNITS, DAY_BUDGET } from '../../shared/models';
-import { DUTY_TASKS, DEFAULT_DUTY_HOURS } from '../../shared/data/training.data';
+import { ScheduleBlock, SlotWeight, SLOT_WEIGHT_UNITS, DAY_BUDGET, SHIP_DUTY_LABEL } from '../../shared/models';
+import { DEFAULT_DUTY_HOURS } from '../../shared/data/training.data';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { CrewService } from '../crew/crew.service';
 
@@ -316,8 +316,7 @@ export class ScheduleService {
     for (const user of players) {
       const slots = this.pickRandomSlots(DAY_BUDGET, count);
       for (const slot of slots) {
-        const task = DUTY_TASKS[Math.floor(Math.random() * DUTY_TASKS.length)];
-        const err = await this.insertMandatoryBlock(dayId, user.id, 'Ship Duty', task, 'light', slot);
+        const err = await this.insertMandatoryBlock(dayId, user.id, SHIP_DUTY_LABEL, SHIP_DUTY_LABEL, 'light', slot);
         if (err) return err;
       }
     }
@@ -380,8 +379,7 @@ export class ScheduleService {
     const slots = free.slice(0, toPlace).sort((a, b) => a - b);
 
     for (const slot of slots) {
-      const task = DUTY_TASKS[Math.floor(Math.random() * DUTY_TASKS.length)];
-      const err = await this.insertMandatoryBlock(dayId, userId, 'Ship Duty', task, 'light', slot);
+      const err = await this.insertMandatoryBlock(dayId, userId, SHIP_DUTY_LABEL, SHIP_DUTY_LABEL, 'light', slot);
       if (err) return err;
     }
     return null;

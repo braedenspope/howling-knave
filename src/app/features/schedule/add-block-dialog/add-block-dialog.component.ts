@@ -44,8 +44,8 @@ interface PickerGroup {
   tier: number;
   /** Already training with this crewmate today — one training per crewmate per day. */
   taken: boolean;
-  /** The DM has this crewmate off-limits today; holds their reason, if any ('' when none). */
-  unavailable: string | null;
+  /** The DM has this crewmate off today. */
+  unavailable: boolean;
   trainings: TrainingWithCrew[];
 }
 
@@ -132,7 +132,7 @@ export class AddBlockDialogComponent implements OnInit {
         role: this.crew.roleOf(crew),
         tier,
         taken: this.isCrewTaken(crew),
-        unavailable: this.unavailableReason(crew),
+        unavailable: this.isCrewOff(crew),
         trainings,
       });
     }
@@ -214,15 +214,14 @@ export class AddBlockDialogComponent implements OnInit {
     return this.crew.colorOf(name);
   }
 
-  /** Why the DM has this crewmate off-limits today ('' with no reason), or null if they're free. */
-  unavailableReason(crew: string): string | null {
-    const block = this.crew.unavailableOn(crew, this.data.dayId);
-    return block ? (block.reason ?? '') : null;
+  /** True when the DM has this crewmate off today. */
+  isCrewOff(crew: string): boolean {
+    return !!this.crew.unavailableOn(crew, this.data.dayId);
   }
 
   /** True when this crewmate's trainings can't be picked today. */
   isClosed(g: PickerGroup): boolean {
-    return g.taken || g.unavailable !== null;
+    return g.taken || g.unavailable;
   }
 
   /** True when this crew member already has a training booked for the day. */
@@ -240,7 +239,7 @@ export class AddBlockDialogComponent implements OnInit {
 
   selectTraining(training: TrainingWithCrew) {
     if (this.isCrewTaken(training.crew_member_name) || this.isMastered(training)) return;
-    if (this.unavailableReason(training.crew_member_name) !== null) return;
+    if (this.isCrewOff(training.crew_member_name)) return;
     this.selectedTraining.set(training);
     // Default to the longest block that fits without planning past mastery.
     const fits = this.lengths.filter(l => this.lengthAffordable(l));

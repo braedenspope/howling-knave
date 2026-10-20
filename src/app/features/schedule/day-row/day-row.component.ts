@@ -14,7 +14,6 @@ import { TrainingTrackerService } from '../../dm/training-tracker.service';
 import { PlayService } from '../../play/play.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ToastService } from '../../../shared/toast.service';
-import { FormsModule } from '@angular/forms';
 import { TIER_NAMES } from '../../../shared/data/training.data';
 import { Day, ScheduleBlock, DAY_BUDGET, SLOT_WEIGHT_UNITS, SLOT_WEIGHT_LABEL } from '../../../shared/models';
 import { CrewService } from '../../crew/crew.service';
@@ -32,7 +31,7 @@ const SEAL_HUES = [0, 320, 22, 268, 180, 96, 210, 45];
 @Component({
   selector: 'app-day-row',
   standalone: true,
-  imports: [MatMenuModule, FormsModule],
+  imports: [MatMenuModule],
   templateUrl: './day-row.component.html',
   styleUrl: './day-row.component.scss',
 })
@@ -50,26 +49,19 @@ export class DayRowComponent {
     { initialValue: false },
   );
 
-  // ----- crewmates off today (DM blocks them from teaching on this day) -----
+  // ----- crewmates off today (the DM takes them off training for this day) -----
 
-  /** Crew the DM has off today, with any trainings booked with them before the block. */
+  /** Crew the DM has off today, with any trainings booked with them before that. */
   readonly offToday = computed(() => {
     const dayId = this.day().id;
     return this.crew.members()
-      .map(member => ({ member, block: this.crew.unavailableOn(member.name, dayId) }))
-      .filter(o => o.block)
-      .map(o => ({ member: o.member, reason: o.block!.reason ?? '', booked: this.bookedWith(o.member.name) }));
+      .filter(member => this.crew.unavailableOn(member.name, dayId))
+      .map(member => ({ member, booked: this.bookedWith(member.name) }));
   });
 
-  /** Crew still free to teach today — what the DM can take off. */
-  readonly onDutyCrew = computed(() => {
-    const dayId = this.day().id;
-    return this.crew.members().filter(m => !this.crew.unavailableOn(m.name, dayId));
-  });
-
-  /** Crewmate whose reason is being typed, or null. */
-  readonly editingOff = signal<number | null>(null);
-  offReason = '';
+  isOff(crewId: number): boolean {
+    return this.offToday().some(o => o.member.id === crewId);
+  }
 
   bookedWith(crewName: string): number {
     const dayId = this.day().id;
@@ -77,31 +69,11 @@ export class DayRowComponent {
       .filter(b => b.day_id === dayId && !b.is_mandatory && b.crew_member === crewName).length;
   }
 
-  async takeOff(crewId: number) {
-    const err = await this.crew.block(crewId, this.day().id, null);
-    if (err) {
-      this.toast.warn(err);
-      return;
-    }
-    this.editOffReason(crewId, '');
-  }
-
-  editOffReason(crewId: number, reason: string) {
-    this.offReason = reason;
-    this.editingOff.set(crewId);
-  }
-
-  async saveOffReason() {
-    const crewId = this.editingOff();
-    if (crewId === null) return;
-    const err = await this.crew.block(crewId, this.day().id, this.offReason);
-    if (err) this.toast.warn(err);
-    this.editingOff.set(null);
-  }
-
-  async liftOff(crewId: number) {
-    if (this.editingOff() === crewId) this.editingOff.set(null);
-    const err = await this.crew.unblock(crewId, this.day().id);
+  async toggleOff(crewId: number) {
+    const dayId = this.day().id;
+    const err = this.isOff(crewId)
+      ? await this.crew.unblock(crewId, dayId)
+      : await this.crew.block(crewId, dayId);
     if (err) this.toast.warn(err);
   }
 

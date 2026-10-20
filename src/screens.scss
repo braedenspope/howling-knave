@@ -446,8 +446,6 @@ button:focus-visible, [role="button"]:focus-visible, a:focus-visible {
   border: 1px solid var(--bg-card-border); border-left-width: 3px;
   border-radius: var(--radius); background: rgba(15,11,7,0.4);
 }
-.off-reason { color: var(--text-secondary); font-style: italic; }
-.off-reason::before { content: '— '; }
 .off-booked {
   display: inline-flex; align-items: center; gap: 2px;
   font-family: var(--font-data); font-size: 11px; color: var(--accent-copper);
@@ -466,15 +464,6 @@ button:focus-visible, [role="button"]:focus-visible, a:focus-visible {
   background: transparent; color: var(--text-secondary);
 }
 .off-add:hover { color: var(--text-primary); border-color: var(--accent-copper); }
-.off-reason-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 10px; }
-.off-reason-row input {
-  flex: 1 1 220px; min-width: 0;
-  font-family: var(--font-body); font-size: 15px; color: var(--text-primary);
-  background: rgba(15,11,7,0.55); border: 1px solid var(--accent-copper);
-  border-radius: var(--radius); padding: 6px 10px; outline: none;
-}
-.off-reason-row input:focus { border-color: var(--accent-gold); }
-.off-reason-row .btn { padding: 6px 12px; }
 .locked-stamp {
   font-family: var(--font-heading); font-size: 12px; font-weight: 700;
   letter-spacing: 2px; text-transform: uppercase;

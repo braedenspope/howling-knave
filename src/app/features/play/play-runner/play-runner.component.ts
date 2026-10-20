@@ -6,7 +6,7 @@ import { ScheduleService } from '../../schedule/schedule.service';
 import { TrainingService } from '../../dm/training.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ToastService } from '../../../shared/toast.service';
-import { RollOutcome, SLOT_WEIGHT_LABEL } from '../../../shared/models';
+import { RollOutcome, SLOT_WEIGHT_LABEL, SHIP_DUTY_LABEL } from '../../../shared/models';
 import { CrewService } from '../../crew/crew.service';
 
 /** Everything the runner card shows for the stop it is sitting on. */
@@ -108,7 +108,7 @@ export class PlayRunnerComponent implements OnInit {
       characterName,
       crewMember: block.crew_member,
       crewColor: this.crew.colorOf(block.crew_member, '#6a6a5a'),
-      topic: block.training_topic,
+      topic: stop.kind === 'duty' ? SHIP_DUTY_LABEL : block.training_topic,
       lengthLabel: SLOT_WEIGHT_LABEL[block.slot_weight],
       rollLabel: `Roll ${stop.rollIndex + 1} of ${stop.rollCount}`,
       spare: stop.kind === 'roll' && mastered && !recorded,

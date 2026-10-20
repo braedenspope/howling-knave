@@ -1,8 +1,4 @@
-@if (!embedded()) {
 <p class="dm-hint">The ship's roster. Names, roles and colors here are what every screen shows — a rename carries through to every block, standing and point of progress already logged.</p>
-} @else {
-<p class="dm-hint">Renames carry through to every block and standing. Take a crewmate off for a day from that day's row.</p>
-}
 
 <!-- ============ ROSTER ============ -->
 <div class="roster">
@@ -99,7 +95,6 @@
 </ng-template>
 
 <!-- ============ AVAILABILITY ============ -->
-@if (!embedded()) {
 <div class="section-head">
   <h3>Days off from training</h3>
   @if (voyageList().length > 1) {
@@ -112,7 +107,7 @@
     </div>
   }
 </div>
-<p class="dm-hint">Block a crewmate from teaching on a given day. Players can't book trainings with them that day; standings are left exactly as they are. Tap a cell to block or lift it.</p>
+<p class="dm-hint">Tap a cell to take a crewmate off that day — players can't book trainings with them, and standings are left as they are. A number on a cell counts trainings booked before the block; those stay on the board. You can also toggle days off from each day on the board.</p>
 
 @if (days().length === 0) {
   <p class="empty">No voyage days to show yet.</p>
@@ -137,13 +132,13 @@
               @let blocked = isBlocked(m, d);
               @let booked = bookedCount(m, d);
               <td>
-                <button class="cell" [class.blocked]="blocked" [class.sel]="isSelected(m, d)"
-                  [style.--crew]="m.color"
-                  (click)="select(m, d)"
-                  [title]="blocked ? (m.name + ' off on Day ' + d.day_number + (reasonFor(m, d) ? ' — ' + reasonFor(m, d) : '')) : (m.name + ', Day ' + d.day_number)"
-                  [attr.aria-label]="m.name + ', Day ' + d.day_number + (blocked ? ', blocked' : '')">
+                <button class="cell" [class.blocked]="blocked" [style.--crew]="m.color"
+                  (click)="toggle(m, d)"
+                  [title]="m.name + ', Day ' + d.day_number + (blocked ? ' — off' : '')"
+                  [attr.aria-pressed]="blocked"
+                  [attr.aria-label]="m.name + ' off on Day ' + d.day_number">
                   @if (blocked) { <span class="ms sm">block</span> }
-                  @if (blocked && booked) { <span class="clash" [title]="booked + ' already booked'">{{ booked }}</span> }
+                  @if (blocked && booked) { <span class="clash" [title]="booked + ' booked before the block'">{{ booked }}</span> }
                 </button>
               </td>
             }
@@ -152,39 +147,4 @@
       </tbody>
     </table>
   </div>
-
-  @if (selectedCrew(); as m) {
-    @if (selectedDay(); as d) {
-      @let blocked = isBlocked(m, d);
-      @let booked = bookedCount(m, d);
-      <div class="hk-card cell-panel" [style.border-left-color]="m.color">
-        <div class="cell-title">
-          <span [style.color]="m.color">{{ m.name }}</span> · Day {{ d.day_number }}
-          <span class="stamp-label">{{ blocked ? 'Not teaching' : 'Available' }}</span>
-        </div>
-        @if (booked) {
-          <p class="clash-note">
-            <span class="ms sm">warning</span>
-            {{ booked }} training{{ booked === 1 ? ' is' : 's are' }} already booked with {{ m.name }} this day.
-            Blocking won't remove {{ booked === 1 ? 'it' : 'them' }} — clear {{ booked === 1 ? 'it' : 'them' }} from the board if needed.
-          </p>
-        }
-        <div class="hk-field">
-          <label for="block-reason">Reason (players see this)</label>
-          <input id="block-reason" [(ngModel)]="reason" placeholder="Below decks with fever, ashore in port…"
-            (keydown.enter)="blockSelected()" />
-        </div>
-        <div class="form-actions">
-          <button class="btn btn-ghost" (click)="selected.set(null)">Close</button>
-          @if (blocked) {
-            <button class="btn btn-copper" (click)="unblockSelected()">Lift the block</button>
-            <button class="btn btn-brass" (click)="blockSelected()">Save reason</button>
-          } @else {
-            <button class="btn btn-brass" (click)="blockSelected()">Block this day</button>
-          }
-        </div>
-      </div>
-    }
-  }
-}
 }

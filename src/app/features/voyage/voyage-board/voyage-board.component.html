@@ -9,7 +9,7 @@
     <p>Ask your DM to declare a crossing from the Voyages page.</p>
   </div>
 } @else {
-  <div class="page board-container" [class.ledger-shift]="auth.isDm() && drawer() !== null">
+  <div class="page board-container" [class.ledger-shift]="auth.isDm() && ledgerOpen()">
     @if (voyageService.activeVoyage(); as voyage) {
       <div class="board-masthead">
         <p class="stamp-label">
@@ -45,36 +45,21 @@
     </div>
   </div>
 
-  <!-- ===================== DM: side drawers (Guner's Ledger, the crew roster) ===================== -->
+  <!-- ===================== DM: Guner's Ledger side panel ===================== -->
   @if (auth.isDm()) {
-    @if (drawer() === null) {
-      <button class="ledger-tab" (click)="openDrawer('ledger')" title="Open Guner's Ledger">
+    @if (!ledgerOpen()) {
+      <button class="ledger-tab" (click)="toggleLedger()" title="Open Guner's Ledger">
         <span class="ms">gavel</span>
         <span class="ledger-tab-label">Guner's Ledger</span>
-      </button>
-      <button class="ledger-tab crew-tab" (click)="openDrawer('crew')" title="Edit the crew">
-        <span class="ms">groups</span>
-        <span class="ledger-tab-label">Crew</span>
       </button>
     } @else {
       <aside class="ledger-panel">
         <div class="ledger-drawer-head">
-          <div class="drawer-switch">
-            <button class="drawer-switch-btn" [class.on]="drawer() === 'ledger'" (click)="openDrawer('ledger')">
-              <span class="ms sm">gavel</span> Guner's Ledger
-            </button>
-            <button class="drawer-switch-btn" [class.on]="drawer() === 'crew'" (click)="openDrawer('crew')">
-              <span class="ms sm">groups</span> Crew
-            </button>
-          </div>
-          <button class="btn-icon" (click)="closeDrawer()" aria-label="Collapse" title="Collapse"><span class="ms">chevron_left</span></button>
+          <h2 class="gold-text"><span class="ms sm">gavel</span> Guner's Ledger</h2>
+          <button class="btn-icon" (click)="closeLedger()" aria-label="Collapse" title="Collapse"><span class="ms">chevron_left</span></button>
         </div>
         <div class="ledger-drawer-body">
-          @if (drawer() === 'ledger') {
-            <app-duty-ledger [embedded]="true" />
-          } @else {
-            <app-crew-manager [embedded]="true" />
-          }
+          <app-duty-ledger [embedded]="true" />
         </div>
       </aside>
     }
