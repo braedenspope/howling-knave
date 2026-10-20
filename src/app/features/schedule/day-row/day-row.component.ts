@@ -4,6 +4,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { map } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
+import { Router } from '@angular/router';
 import { AddBlockDialogComponent, AddBlockDialogResult } from '../add-block-dialog/add-block-dialog.component';
 import { ScheduleService } from '../schedule.service';
 import { DutyRequestService } from '../duty-request.service';
@@ -12,6 +13,7 @@ import { ConfirmationService } from '../confirmation.service';
 import { CorrectionService } from '../../dm/correction.service';
 import { TrainingTrackerService } from '../../dm/training-tracker.service';
 import { PlayService } from '../../play/play.service';
+import { StartVoyageDialogComponent } from '../../play/start-voyage-dialog/start-voyage-dialog.component';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ToastService } from '../../../shared/toast.service';
 import { TIER_NAMES } from '../../../shared/data/training.data';
@@ -44,6 +46,7 @@ export class DayRowComponent {
   isDm = computed(() => this.auth.isDm());
 
   private breakpoints = inject(BreakpointObserver);
+  private router = inject(Router);
   isMobile = toSignal(
     this.breakpoints.observe('(max-width: 860px)').pipe(map(r => r.matches)),
     { initialValue: false },
@@ -90,7 +93,7 @@ export class DayRowComponent {
     private confirmations: ConfirmationService,
     private corrections: CorrectionService,
     private tracker: TrainingTrackerService,
-    private play: PlayService,
+    public play: PlayService,
     private auth: AuthService,
     private toast: ToastService,
     private dialog: MatDialog,
@@ -129,6 +132,19 @@ export class DayRowComponent {
       width: '20px', height: '20px',
       border: `1px solid hsla(${h},50%,55%,0.5)`,
     };
+  }
+
+  /** DM: open the seal check and turn order, or rejoin a run already under way. */
+  startVoyage() {
+    if (this.play.isActive()) {
+      this.router.navigate(['/play']);
+      return;
+    }
+    this.dialog.open(StartVoyageDialogComponent, {
+      width: '560px',
+      maxWidth: '94vw',
+      panelClass: 'hk-dialog',
+    });
   }
 
   async toggleSeal(userId: string) {

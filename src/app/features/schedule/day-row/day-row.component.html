@@ -18,6 +18,12 @@
     @if (isLocked()) {
       <span class="locked-stamp">Schedule Locked</span>
     }
+    @if (isDm()) {
+      <button class="btn btn-brass day-start-btn" (click)="startVoyage()">
+        <span class="ms sm">{{ play.isActive() ? 'play_circle' : 'play_arrow' }}</span>
+        {{ play.isActive() ? 'Resume voyage' : 'Start voyage' }}
+      </button>
+    }
   </div>
 
   <!-- Crewmates the DM has taken off training today. Everyone sees them; the DM toggles them here. -->
@@ -70,7 +76,7 @@
             }
           </div>
 
-          @if (mine || isDm()) {
+          @if (mine) {
             <button class="seal-action" [class.confirm]="!isSealed(u.id)" [class.withdraw]="isSealed(u.id)"
               (click)="toggleSeal(u.id)">
               <span class="ms sm">{{ isSealed(u.id) ? 'lock_open' : 'approval' }}</span>
@@ -138,7 +144,7 @@
             @if (isCorrected(u.id)) {
               <span class="correction-chip"><span class="ms sm">gavel</span> Correction detail</span>
             }
-            @if (isMe(u.id) || isDm()) {
+            @if (isMe(u.id)) {
               <button class="seal-action" [class.confirm]="!isSealed(u.id)" [class.withdraw]="isSealed(u.id)"
                 (click)="toggleSeal(u.id)">
                 <span class="ms sm">{{ isSealed(u.id) ? 'lock_open' : 'approval' }}</span>

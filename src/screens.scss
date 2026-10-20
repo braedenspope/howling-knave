@@ -464,6 +464,7 @@ button:focus-visible, [role="button"]:focus-visible, a:focus-visible {
   background: transparent; color: var(--text-secondary);
 }
 .off-add:hover { color: var(--text-primary); border-color: var(--accent-copper); }
+.day-start-btn { padding: 6px 12px; font-size: 11px; }
 .locked-stamp {
   font-family: var(--font-heading); font-size: 12px; font-weight: 700;
   letter-spacing: 2px; text-transform: uppercase;
