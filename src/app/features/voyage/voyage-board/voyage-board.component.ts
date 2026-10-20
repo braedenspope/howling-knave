@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { DayRowComponent } from '../../schedule/day-row/day-row.component';
 import { DutyLedgerComponent } from '../../dm/duty-ledger/duty-ledger.component';
+import { CrewManagerComponent } from '../../dm/crew-manager/crew-manager.component';
 import { VoyageService } from '../voyage.service';
 import { ScheduleService } from '../../schedule/schedule.service';
 import { ConfirmationService } from '../../schedule/confirmation.service';
@@ -23,17 +24,18 @@ import { StartVoyageDialogComponent } from '../../play/start-voyage-dialog/start
     MatProgressSpinnerModule,
     DayRowComponent,
     DutyLedgerComponent,
+    CrewManagerComponent,
   ],
   templateUrl: './voyage-board.component.html',
   styleUrl: './voyage-board.component.scss',
 })
 export class VoyageBoardComponent implements OnInit, OnDestroy {
-  /** DM-only Guner's Ledger side panel. */
-  readonly ledgerOpen = signal(false);
+  /** DM-only side drawer — Guner's Ledger or the crew roster, one at a time. */
+  readonly drawer = signal<'ledger' | 'crew' | null>(null);
   readonly isDm = computed(() => this.auth.isDm());
 
-  toggleLedger() { this.ledgerOpen.update(v => !v); }
-  closeLedger() { this.ledgerOpen.set(false); }
+  openDrawer(which: 'ledger' | 'crew') { this.drawer.set(which); }
+  closeDrawer() { this.drawer.set(null); }
 
   /** DM: open the seal check and turn order, or rejoin a run already under way. */
   startVoyage() {
@@ -87,7 +89,6 @@ export class VoyageBoardComponent implements OnInit, OnDestroy {
     await Promise.all([
       this.voyageService.loadVoyages(),
       this.scheduleService.loadAllUsers(),
-      this.trainingService.loadCrewMembers(),
       this.trainingService.loadTrainings(),
       this.tracker.loadAllProgress(),
       this.corrections.loadAll(),

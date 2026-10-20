@@ -77,6 +77,21 @@ export interface CrewMember {
   id: number;
   name: string;
   role: string;
+  /** Hex color (#rrggbb) the crewmate draws in across the app. */
+  color: string;
+  /** One-line character read shown on the Crew roster. */
+  line: string;
+  /** Roster order — lower first. */
+  sort_order: number;
+}
+
+/** The DM has blocked this crewmate from teaching on this voyage day (migration 018). */
+export interface CrewUnavailability {
+  crew_member_id: number;
+  day_id: string;
+  /** Shown to players in the training picker. */
+  reason: string | null;
+  created_at: string;
 }
 
 export interface ScheduleBlock {

@@ -1,10 +1,10 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, signal, inject } from '@angular/core';
 import { VoyageService } from '../../voyage/voyage.service';
 import { ScheduleService } from '../../schedule/schedule.service';
 import { SpotlightService } from '../spotlight.service';
-import { CREW_COLORS } from '../../../shared/data/training.data';
 import { ScheduleBlock } from '../../../shared/models';
 import { ToastService } from '../../../shared/toast.service';
+import { CrewService } from '../../crew/crew.service';
 
 interface FlaggedSession {
   block: ScheduleBlock;
@@ -71,6 +71,7 @@ interface FlaggedSession {
   styles: [':host { display: block; }'],
 })
 export class SpotlightTrackerComponent implements OnInit {
+  readonly crew = inject(CrewService);
   private chosenIds = signal<Set<string>>(new Set());
 
   constructor(
@@ -93,7 +94,7 @@ export class SpotlightTrackerComponent implements OnInit {
     }
   }
 
-  crewColor(name: string): string { return CREW_COLORS[name] ?? '#666'; }
+  crewColor(name: string): string { return this.crew.colorOf(name); }
 
   rotation = computed(() => {
     this.spotlight.log();

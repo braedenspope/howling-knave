@@ -20,6 +20,48 @@
     }
   </div>
 
+  <!-- Crewmates the DM has off-limits for training today. Everyone sees them; the DM edits in place. -->
+  @if (offToday().length || isDm()) {
+    <div class="off-strip">
+      @if (offToday().length) {
+        <span class="stamp-label">Off today</span>
+      }
+      @for (o of offToday(); track o.member.id) {
+        <span class="off-chip" [style.border-color]="o.member.color" [title]="o.reason || 'Not teaching today'">
+          <span class="crew-dot" [style.background]="o.member.color"></span>
+          <span [style.color]="o.member.color">{{ o.member.name }}</span>
+          @if (o.reason) { <span class="off-reason">{{ o.reason }}</span> }
+          @if (o.booked) {
+            <span class="off-booked" [title]="o.booked + ' training' + (o.booked === 1 ? ' was' : 's were') + ' booked before the block'">
+              <span class="ms sm">warning</span>{{ o.booked }}
+            </span>
+          }
+          @if (isDm()) {
+            <button class="off-btn" (click)="editOffReason(o.member.id, o.reason)" title="Edit reason" aria-label="Edit reason">
+              <span class="ms sm">edit_note</span>
+            </button>
+            <button class="off-btn" (click)="liftOff(o.member.id)" [title]="'Let ' + o.member.name + ' teach today'" aria-label="Lift the block">
+              <span class="ms sm">close</span>
+            </button>
+          }
+        </span>
+      }
+      @if (isDm() && onDutyCrew().length) {
+        <button class="off-add" [matMenuTriggerFor]="offMenu" title="Block a crewmate from teaching today">
+          <span class="ms sm">person_off</span> Crewmate off
+        </button>
+      }
+    </div>
+    @if (editingOff() !== null) {
+      <div class="off-reason-row">
+        <input [(ngModel)]="offReason" placeholder="Reason players see — fever, ashore, sulking…"
+          (keydown.enter)="saveOffReason()" (keydown.escape)="editingOff.set(null)" aria-label="Reason" />
+        <button class="btn btn-ghost" (click)="editingOff.set(null)">Skip</button>
+        <button class="btn btn-brass" (click)="saveOffReason()">Save</button>
+      </div>
+    }
+  }
+
   @if (isMobile()) {
     <!-- ===================== MOBILE: ship's-log timeline ===================== -->
     <div class="tl-rows">
@@ -197,6 +239,15 @@
 </div>
 
 <!-- DM outcome menu -->
+<mat-menu #offMenu="matMenu" class="hk-outcome-menu">
+  @for (m of onDutyCrew(); track m.id) {
+    <button mat-menu-item (click)="takeOff(m.id)">
+      <span class="crew-dot" [style.background]="m.color"></span>&nbsp; {{ m.name }}
+      @if (bookedWith(m.name); as n) { <span class="stamp-label">&nbsp;· {{ n }} booked</span> }
+    </button>
+  }
+</mat-menu>
+
 <mat-menu #outcomeMenu="matMenu" class="hk-outcome-menu">
   <ng-template matMenuContent let-block="block">
     <button mat-menu-item (click)="markSuccess(block)"><span class="ms sm status-success">check</span>&nbsp; Success</button>

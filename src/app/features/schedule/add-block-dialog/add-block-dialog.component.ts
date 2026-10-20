@@ -6,11 +6,12 @@ import { RelationshipService } from '../../dm/relationship.service';
 import { ScheduleService } from '../schedule.service';
 import { TrainingTrackerService } from '../../dm/training-tracker.service';
 import { AuthService } from '../../../core/auth/auth.service';
-import { CREW_LIST, CREW_COLORS, CREW_META, TIER_NAMES, TIER_COLORS } from '../../../shared/data/training.data';
+import { TIER_NAMES, TIER_COLORS } from '../../../shared/data/training.data';
 import {
   ScheduleBlock, TrainingWithCrew, TrainingTag, TRAINING_TAGS, SlotWeight, SLOT_WEIGHTS, SLOT_WEIGHT_UNITS,
   SLOT_WEIGHT_LABEL, matchesTrainingSearch,
 } from '../../../shared/models';
+import { CrewService } from '../../crew/crew.service';
 
 export interface AddBlockDialogData {
   dayId: string;
@@ -43,6 +44,8 @@ interface PickerGroup {
   tier: number;
   /** Already training with this crewmate today — one training per crewmate per day. */
   taken: boolean;
+  /** The DM has this crewmate off-limits today; holds their reason, if any ('' when none). */
+  unavailable: string | null;
   trainings: TrainingWithCrew[];
 }
 
@@ -57,6 +60,7 @@ interface PickerGroup {
   styleUrl: './add-block-dialog.component.scss',
 })
 export class AddBlockDialogComponent implements OnInit {
+  readonly crew = inject(CrewService);
   data = inject<AddBlockDialogData>(MAT_DIALOG_DATA);
   private dialogRef = inject(MatDialogRef<AddBlockDialogComponent>);
   private trainingService = inject(TrainingService);
@@ -113,7 +117,7 @@ export class AddBlockDialogComponent implements OnInit {
     const tag = this.tagFilter();
 
     const groups: PickerGroup[] = [];
-    for (const crew of CREW_LIST) {
+    for (const crew of this.crew.names()) {
       const tier = this.relationshipService.getTierForCrewMember(userId, crew);
       if (tier <= 0) continue;
       const trainings = this.trainingService.getTrainingsForCrewByName(crew)
@@ -125,14 +129,15 @@ export class AddBlockDialogComponent implements OnInit {
       if (trainings.length === 0) continue;
       groups.push({
         crew,
-        role: CREW_META[crew]?.role ?? '',
+        role: this.crew.roleOf(crew),
         tier,
         taken: this.isCrewTaken(crew),
+        unavailable: this.unavailableReason(crew),
         trainings,
       });
     }
-    // Crewmates already booked today sink to the bottom.
-    return groups.sort((a, b) => Number(a.taken) - Number(b.taken));
+    // Crewmates who can't teach today sink to the bottom.
+    return groups.sort((a, b) => Number(this.isClosed(a)) - Number(this.isClosed(b)));
   });
 
   // Custom mode
@@ -206,7 +211,18 @@ export class AddBlockDialogComponent implements OnInit {
   }
 
   getCrewColor(name: string): string {
-    return CREW_COLORS[name] ?? '#666';
+    return this.crew.colorOf(name);
+  }
+
+  /** Why the DM has this crewmate off-limits today ('' with no reason), or null if they're free. */
+  unavailableReason(crew: string): string | null {
+    const block = this.crew.unavailableOn(crew, this.data.dayId);
+    return block ? (block.reason ?? '') : null;
+  }
+
+  /** True when this crewmate's trainings can't be picked today. */
+  isClosed(g: PickerGroup): boolean {
+    return g.taken || g.unavailable !== null;
   }
 
   /** True when this crew member already has a training booked for the day. */
@@ -224,6 +240,7 @@ export class AddBlockDialogComponent implements OnInit {
 
   selectTraining(training: TrainingWithCrew) {
     if (this.isCrewTaken(training.crew_member_name) || this.isMastered(training)) return;
+    if (this.unavailableReason(training.crew_member_name) !== null) return;
     this.selectedTraining.set(training);
     // Default to the longest block that fits without planning past mastery.
     const fits = this.lengths.filter(l => this.lengthAffordable(l));

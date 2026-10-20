@@ -39,24 +39,29 @@
 
       <div class="picker-list">
         @for (g of groups(); track g.crew) {
-          <div class="catalog-group" [class.picker-taken]="g.taken">
+          <div class="catalog-group" [class.picker-taken]="isClosed(g)">
             <div class="catalog-group-head">
               <span class="crew-chip">
                 <span class="crew-dot" [style.background]="getCrewColor(g.crew)"></span>
                 <span class="crew-chip-name">{{ g.crew }}</span>
                 <span class="crew-chip-role">{{ g.role }}</span>
               </span>
-              @if (g.taken) {
+              @if (g.unavailable !== null) {
+                <span class="cr-state" style="margin-left: auto;">Unavailable today</span>
+              } @else if (g.taken) {
                 <span class="cr-state" style="margin-left: auto;">Already training today</span>
               } @else {
                 <span class="tier-tag" style="margin-left: auto;"
                   [style.color]="tierColor(g.tier)" [style.border-color]="tierColor(g.tier)">{{ tierName(g.tier) }}</span>
               }
             </div>
+            @if (g.unavailable) {
+              <p class="unavailable-note"><span class="ms sm">block</span>{{ g.unavailable }}</p>
+            }
             <div class="catalog-list">
               @for (t of g.trainings; track t.id) {
                 @let pts = pointsBanked(t);
-                <button class="training-item pickable" [disabled]="g.taken"
+                <button class="training-item pickable" [disabled]="isClosed(g)"
                   [style.border-left-color]="getCrewColor(g.crew)"
                   (click)="selectTraining(t)">
                   <div class="ti-head">

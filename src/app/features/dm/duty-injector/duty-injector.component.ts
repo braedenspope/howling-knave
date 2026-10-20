@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,9 +9,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { VoyageService } from '../../voyage/voyage.service';
 import { ScheduleService } from '../../schedule/schedule.service';
-import { CREW_LIST, DEFAULT_DUTY_HOURS } from '../../../shared/data/training.data';
+import { DEFAULT_DUTY_HOURS } from '../../../shared/data/training.data';
 import { MandatoryDuty, SlotWeight } from '../../../shared/models';
 import { ToastService } from '../../../shared/toast.service';
+import { CrewService } from '../../crew/crew.service';
 
 @Component({
   selector: 'app-duty-injector',
@@ -30,7 +31,8 @@ import { ToastService } from '../../../shared/toast.service';
   styleUrl: './duty-injector.component.scss',
 })
 export class DutyInjectorComponent implements OnInit {
-  crewList = CREW_LIST;
+  readonly crew = inject(CrewService);
+  get crewList() { return this.crew.names(); }
   editingDay = signal<string | null>(null);
   dutyHours = signal(DEFAULT_DUTY_HOURS);
   rolling = signal(false);

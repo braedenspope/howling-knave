@@ -4,6 +4,7 @@ import { AuthService } from '../../core/auth/auth.service';
 import { ScheduleBlock, SlotWeight, SLOT_WEIGHT_UNITS, DAY_BUDGET } from '../../shared/models';
 import { DUTY_TASKS, DEFAULT_DUTY_HOURS } from '../../shared/data/training.data';
 import { RealtimeChannel } from '@supabase/supabase-js';
+import { CrewService } from '../crew/crew.service';
 
 @Injectable({ providedIn: 'root' })
 export class ScheduleService {
@@ -17,6 +18,7 @@ export class ScheduleService {
     private sb: SupabaseService,
     private auth: AuthService,
     private ngZone: NgZone,
+    private crew: CrewService,
   ) {}
 
   async loadAllUsers() {
@@ -124,6 +126,7 @@ export class ScheduleService {
       const already = this.getBlocksForDayUser(dayId, userId)
         .some(b => !b.is_mandatory && b.crew_member === crewMember);
       if (already) return `Already training with ${crewMember} today`;
+      if (this.crew.unavailableOn(crewMember, dayId)) return `${crewMember} isn't available to train today`;
     }
 
     const remaining = this.getRemainingBudget(dayId, userId);

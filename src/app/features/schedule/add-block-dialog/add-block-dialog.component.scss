@@ -189,3 +189,15 @@
   &:disabled { cursor: not-allowed; }
 }
 .picker-taken { opacity: 0.5; }
+
+.unavailable-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text-secondary);
+
+  .ms { font-size: 15px; }
+}

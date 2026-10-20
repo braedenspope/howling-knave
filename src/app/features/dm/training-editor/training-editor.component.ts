@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -8,8 +8,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { TrainingService, HiddenBonusInput } from '../training.service';
-import { CREW_COLORS } from '../../../shared/data/training.data';
 import { TrainingWithCrew, TrainingTag, TRAINING_TAGS, thresholdForTier } from '../../../shared/models';
+import { CrewService } from '../../crew/crew.service';
 
 interface TrainingForm {
   topic: string;
@@ -40,6 +40,7 @@ interface TrainingForm {
   styleUrl: './training-editor.component.scss',
 })
 export class TrainingEditorComponent implements OnInit {
+  readonly crew = inject(CrewService);
   editingId = signal<string | null>(null);
   addingForCrew = signal<number | null>(null);
 
@@ -51,12 +52,11 @@ export class TrainingEditorComponent implements OnInit {
   constructor(public trainingService: TrainingService) {}
 
   async ngOnInit() {
-    await this.trainingService.loadCrewMembers();
     await this.trainingService.loadTrainings();
   }
 
   getCrewColor(name: string): string {
-    return CREW_COLORS[name] ?? '#666';
+    return this.crew.colorOf(name);
   }
 
   /** Points a training at this tier asks for — 12 per tier, never hand-set. */

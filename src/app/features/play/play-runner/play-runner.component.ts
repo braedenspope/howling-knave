@@ -6,8 +6,8 @@ import { ScheduleService } from '../../schedule/schedule.service';
 import { TrainingService } from '../../dm/training.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ToastService } from '../../../shared/toast.service';
-import { CREW_COLORS } from '../../../shared/data/training.data';
 import { RollOutcome, SLOT_WEIGHT_LABEL } from '../../../shared/models';
+import { CrewService } from '../../crew/crew.service';
 
 /** Everything the runner card shows for the stop it is sitting on. */
 interface StopView {
@@ -48,6 +48,7 @@ interface StopView {
   styleUrl: './play-runner.component.scss',
 })
 export class PlayRunnerComponent implements OnInit {
+  readonly crew = inject(CrewService);
   play = inject(PlayService);
   auth = inject(AuthService);
   voyageService = inject(VoyageService);
@@ -106,7 +107,7 @@ export class PlayRunnerComponent implements OnInit {
       kind: stop.kind,
       characterName,
       crewMember: block.crew_member,
-      crewColor: CREW_COLORS[block.crew_member] ?? '#6a6a5a',
+      crewColor: this.crew.colorOf(block.crew_member, '#6a6a5a'),
       topic: block.training_topic,
       lengthLabel: SLOT_WEIGHT_LABEL[block.slot_weight],
       rollLabel: `Roll ${stop.rollIndex + 1} of ${stop.rollCount}`,

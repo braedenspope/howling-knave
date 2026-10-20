@@ -4,7 +4,6 @@ import {
   Training,
   TrainingWithCrew,
   TrainingHiddenBonus,
-  CrewMember,
   thresholdForTier,
 } from '../../shared/models';
 
@@ -14,18 +13,9 @@ export type HiddenBonusInput = Omit<TrainingHiddenBonus, 'id' | 'training_id'>;
 @Injectable({ providedIn: 'root' })
 export class TrainingService {
   readonly trainings = signal<TrainingWithCrew[]>([]);
-  readonly crewMembers = signal<CrewMember[]>([]);
   readonly loading = signal(false);
 
   constructor(private sb: SupabaseService) {}
-
-  async loadCrewMembers() {
-    const { data } = await this.sb.supabase
-      .from('crew_members')
-      .select('*')
-      .order('id');
-    if (data) this.crewMembers.set(data as CrewMember[]);
-  }
 
   async loadTrainings() {
     this.loading.set(true);

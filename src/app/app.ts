@@ -7,6 +7,7 @@ import { AuthService } from './core/auth/auth.service';
 import { VoyageService } from './features/voyage/voyage.service';
 import { PlayService } from './features/play/play.service';
 import { RelationshipService } from './features/dm/relationship.service';
+import { CrewService } from './features/crew/crew.service';
 import { TweaksPanelComponent } from './shared/tweaks-panel/tweaks-panel.component';
 import { DutyRequestModalsComponent } from './features/schedule/duty-request-modals/duty-request-modals.component';
 import { ChronometerService } from './features/chronometer/chronometer.service';
@@ -40,6 +41,7 @@ export class App {
     public voyageService: VoyageService,
     public play: PlayService,
     private relationships: RelationshipService,
+    private crew: CrewService,
     private chronometer: ChronometerService,
   ) {
     // Own the play-state subscription at the shell so the nav link — and every
@@ -59,6 +61,13 @@ export class App {
     effect(() => {
       if (this.auth.isAuthed()) this.relationships.subscribe();
       else this.relationships.unsubscribe();
+    });
+
+    // Every screen draws crew in their roster colors, and the training picker
+    // honors the DM's day blocks — follow both live.
+    effect(() => {
+      if (this.auth.isAuthed()) this.crew.subscribe();
+      else this.crew.unsubscribe();
     });
 
     // The in-game date sits in the header, so follow the DM's clock from here.

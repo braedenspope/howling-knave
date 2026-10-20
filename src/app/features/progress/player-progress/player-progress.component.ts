@@ -1,11 +1,9 @@
-import { Component, OnInit, computed } from '@angular/core';
+import { Component, OnInit, computed, inject } from '@angular/core';
 import { TrainingTrackerService } from '../../dm/training-tracker.service';
 import { TrainingService } from '../../dm/training.service';
 import { RelationshipService } from '../../dm/relationship.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import {
-  CREW_COLORS,
-  CREW_META,
   TIER_NAMES,
   TIER_COLORS,
 } from '../../../shared/data/training.data';
@@ -16,6 +14,7 @@ import {
   SLOT_WEIGHT_LABEL,
   SLOT_WEIGHT_UNITS,
 } from '../../../shared/models';
+import { CrewService } from '../../crew/crew.service';
 
 interface ProgressRow {
   progress: TrainingProgress;
@@ -44,6 +43,7 @@ interface EarnedAbility {
   styleUrl: './player-progress.component.scss',
 })
 export class PlayerProgressComponent implements OnInit {
+  readonly crew = inject(CrewService);
   constructor(
     private tracker: TrainingTrackerService,
     private training: TrainingService,
@@ -86,7 +86,7 @@ export class PlayerProgressComponent implements OnInit {
           topic: p.training_topic,
           reward: t?.reward ?? '',
           crew: p.crew_member,
-          color: CREW_COLORS[p.crew_member] ?? '#666',
+          color: this.crew.colorOf(p.crew_member),
         };
       });
   });
@@ -105,7 +105,7 @@ export class PlayerProgressComponent implements OnInit {
     return Array.from(map.entries())
       .map(([crew, rows]) => ({
         crew,
-        role: CREW_META[crew]?.role ?? '',
+        role: this.crew.roleOf(crew),
         tier: userId ? this.relationships.getTierForCrewMember(userId, crew) : 1,
         rows,
       }))
@@ -113,7 +113,7 @@ export class PlayerProgressComponent implements OnInit {
   });
 
   getCrewColor(name: string): string {
-    return CREW_COLORS[name] ?? '#666';
+    return this.crew.colorOf(name);
   }
   tierName(tier: number): string {
     return TIER_NAMES[tier] ?? 'Unknown';

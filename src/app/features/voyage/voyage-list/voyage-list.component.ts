@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -16,7 +16,7 @@ import { VoyageService } from '../voyage.service';
 import { ScheduleService } from '../../schedule/schedule.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { Day, MandatoryDuty, ScheduleBlock, SlotWeight, Voyage } from '../../../shared/models';
-import { CREW_LIST, CREW_COLORS } from '../../../shared/data/training.data';
+import { CrewService } from '../../crew/crew.service';
 
 @Component({
   selector: 'app-voyage-list',
@@ -39,6 +39,7 @@ import { CREW_LIST, CREW_COLORS } from '../../../shared/data/training.data';
   styleUrl: './voyage-list.component.scss',
 })
 export class VoyageListComponent implements OnInit {
+  readonly crew = inject(CrewService);
   newName = '';
   newDayCount = 7;
   creating = signal(false);
@@ -62,8 +63,7 @@ export class VoyageListComponent implements OnInit {
     consequence_description: '',
   };
 
-  readonly crewList = CREW_LIST;
-  readonly crewColors = CREW_COLORS;
+  get crewList() { return this.crew.names(); }
 
   constructor(
     public voyageService: VoyageService,
@@ -256,6 +256,6 @@ export class VoyageListComponent implements OnInit {
   }
 
   getCrewColor(name: string): string {
-    return this.crewColors[name] ?? '#888';
+    return this.crew.colorOf(name, '#888');
   }
 }

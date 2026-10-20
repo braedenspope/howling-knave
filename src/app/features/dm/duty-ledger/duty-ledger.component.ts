@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, signal, input } from '@angular/core';
+import { Component, OnInit, computed, signal, input, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { VoyageService } from '../../voyage/voyage.service';
 import { ScheduleService } from '../../schedule/schedule.service';
@@ -7,7 +7,8 @@ import { RelationshipService } from '../relationship.service';
 import { TrainingService } from '../training.service';
 import { Day } from '../../../shared/models';
 import { ToastService } from '../../../shared/toast.service';
-import { CREW_LIST, CREW_COLORS, TIER_NAMES, TIER_COLORS } from '../../../shared/data/training.data';
+import { TIER_NAMES, TIER_COLORS } from '../../../shared/data/training.data';
+import { CrewService } from '../../crew/crew.service';
 
 @Component({
   selector: 'app-duty-ledger',
@@ -141,6 +142,7 @@ import { CREW_LIST, CREW_COLORS, TIER_NAMES, TIER_COLORS } from '../../../shared
   `],
 })
 export class DutyLedgerComponent implements OnInit {
+  readonly crew = inject(CrewService);
   /**
    * When embedded on the board, the host already loads (and live-subscribes to)
    * voyages, users, corrections, days, and blocks. Re-fetching here would toggle
@@ -151,7 +153,7 @@ export class DutyLedgerComponent implements OnInit {
   days = signal<Day[]>([]);
   selectedDay = signal<Record<string, string | undefined>>({});
 
-  readonly crewList = CREW_LIST;
+  get crewList() { return this.crew.names(); }
   readonly tierPips = [1, 2, 3, 4, 5];
   private openStanding = signal<Set<string>>(new Set());
 
@@ -231,7 +233,7 @@ export class DutyLedgerComponent implements OnInit {
     return TIER_COLORS[tier] ?? '#5a5040';
   }
   crewColor(crew: string): string {
-    return CREW_COLORS[crew] ?? '#666';
+    return this.crew.colorOf(crew);
   }
 
   totalTrainings = computed(() => this.trainings.trainings().length);

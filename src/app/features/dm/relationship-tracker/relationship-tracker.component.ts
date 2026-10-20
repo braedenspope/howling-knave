@@ -1,9 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RelationshipService } from '../relationship.service';
 import { ScheduleService } from '../../schedule/schedule.service';
-import { CREW_LIST, CREW_COLORS, TIER_NAMES, TIER_COLORS } from '../../../shared/data/training.data';
+import { TIER_NAMES, TIER_COLORS } from '../../../shared/data/training.data';
 import { ToastService } from '../../../shared/toast.service';
+import { CrewService } from '../../crew/crew.service';
 
 @Component({
   selector: 'app-relationship-tracker',
@@ -13,7 +14,8 @@ import { ToastService } from '../../../shared/toast.service';
   styleUrl: './relationship-tracker.component.scss',
 })
 export class RelationshipTrackerComponent implements OnInit {
-  crewList = CREW_LIST;
+  readonly crew = inject(CrewService);
+  get crewList() { return this.crew.names(); }
   private openNotes = signal<Set<string>>(new Set());
   private noteTimers: Record<string, ReturnType<typeof setTimeout>> = {};
 
@@ -38,7 +40,7 @@ export class RelationshipTrackerComponent implements OnInit {
   }
 
   getCrewColor(name: string): string {
-    return CREW_COLORS[name] ?? '#666';
+    return this.crew.colorOf(name);
   }
 
   getTier(userId: string, crewMember: string): number {

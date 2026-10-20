@@ -1,8 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ScheduleService } from '../../schedule/schedule.service';
 import { VoyageService } from '../../voyage/voyage.service';
 import { PlayService } from '../../play/play.service';
-import { CREW_COLORS } from '../../../shared/data/training.data';
 import {
   RollOutcome,
   ScheduleBlock,
@@ -11,6 +10,7 @@ import {
   SlotWeight,
 } from '../../../shared/models';
 import { ToastService } from '../../../shared/toast.service';
+import { CrewService } from '../../crew/crew.service';
 
 /**
  * The correction grid: every training block of the voyage with its rolls laid
@@ -25,6 +25,7 @@ import { ToastService } from '../../../shared/toast.service';
   styleUrl: './block-outcomes.component.scss',
 })
 export class BlockOutcomesComponent implements OnInit {
+  readonly crew = inject(CrewService);
   constructor(
     public voyageService: VoyageService,
     public scheduleService: ScheduleService,
@@ -46,7 +47,7 @@ export class BlockOutcomesComponent implements OnInit {
   }
 
   getCrewColor(name: string): string {
-    return CREW_COLORS[name] ?? '#666';
+    return this.crew.colorOf(name);
   }
 
   lengthLabel(weight: SlotWeight): string {

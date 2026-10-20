@@ -14,8 +14,10 @@ import { TrainingTrackerService } from '../../dm/training-tracker.service';
 import { PlayService } from '../../play/play.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ToastService } from '../../../shared/toast.service';
-import { CREW_COLORS, TIER_NAMES } from '../../../shared/data/training.data';
+import { FormsModule } from '@angular/forms';
+import { TIER_NAMES } from '../../../shared/data/training.data';
 import { Day, ScheduleBlock, DAY_BUDGET, SLOT_WEIGHT_UNITS, SLOT_WEIGHT_LABEL } from '../../../shared/models';
+import { CrewService } from '../../crew/crew.service';
 
 export interface SlotItem {
   type: 'block' | 'empty';
@@ -30,11 +32,12 @@ const SEAL_HUES = [0, 320, 22, 268, 180, 96, 210, 45];
 @Component({
   selector: 'app-day-row',
   standalone: true,
-  imports: [MatMenuModule],
+  imports: [MatMenuModule, FormsModule],
   templateUrl: './day-row.component.html',
   styleUrl: './day-row.component.scss',
 })
 export class DayRowComponent {
+  readonly crew = inject(CrewService);
   day = input.required<Day>();
   users = input.required<{ id: string; display_name: string; character_name: string }[]>();
 
@@ -46,6 +49,61 @@ export class DayRowComponent {
     this.breakpoints.observe('(max-width: 860px)').pipe(map(r => r.matches)),
     { initialValue: false },
   );
+
+  // ----- crewmates off today (DM blocks them from teaching on this day) -----
+
+  /** Crew the DM has off today, with any trainings booked with them before the block. */
+  readonly offToday = computed(() => {
+    const dayId = this.day().id;
+    return this.crew.members()
+      .map(member => ({ member, block: this.crew.unavailableOn(member.name, dayId) }))
+      .filter(o => o.block)
+      .map(o => ({ member: o.member, reason: o.block!.reason ?? '', booked: this.bookedWith(o.member.name) }));
+  });
+
+  /** Crew still free to teach today — what the DM can take off. */
+  readonly onDutyCrew = computed(() => {
+    const dayId = this.day().id;
+    return this.crew.members().filter(m => !this.crew.unavailableOn(m.name, dayId));
+  });
+
+  /** Crewmate whose reason is being typed, or null. */
+  readonly editingOff = signal<number | null>(null);
+  offReason = '';
+
+  bookedWith(crewName: string): number {
+    const dayId = this.day().id;
+    return this.scheduleService.blocks()
+      .filter(b => b.day_id === dayId && !b.is_mandatory && b.crew_member === crewName).length;
+  }
+
+  async takeOff(crewId: number) {
+    const err = await this.crew.block(crewId, this.day().id, null);
+    if (err) {
+      this.toast.warn(err);
+      return;
+    }
+    this.editOffReason(crewId, '');
+  }
+
+  editOffReason(crewId: number, reason: string) {
+    this.offReason = reason;
+    this.editingOff.set(crewId);
+  }
+
+  async saveOffReason() {
+    const crewId = this.editingOff();
+    if (crewId === null) return;
+    const err = await this.crew.block(crewId, this.day().id, this.offReason);
+    if (err) this.toast.warn(err);
+    this.editingOff.set(null);
+  }
+
+  async liftOff(crewId: number) {
+    if (this.editingOff() === crewId) this.editingOff.set(null);
+    const err = await this.crew.unblock(crewId, this.day().id);
+    if (err) this.toast.warn(err);
+  }
 
   // mobile: which crewmate strips are expanded
   expanded = signal<Set<string>>(new Set());
@@ -472,7 +530,7 @@ export class DayRowComponent {
   }
 
   // ----- helpers -----
-  crewColor(name: string): string { return CREW_COLORS[name] ?? '#666'; }
+  crewColor(name: string): string { return this.crew.colorOf(name); }
   roman(i: number): string { return ROMAN[i] ?? `${i + 1}`; }
   lengthLabel(weight: ScheduleBlock['slot_weight']): string {
     return `${SLOT_WEIGHT_LABEL[weight]} · ${SLOT_WEIGHT_UNITS[weight]}`;

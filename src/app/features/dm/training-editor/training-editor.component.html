@@ -1,5 +1,5 @@
 <mat-accordion multi>
-  @for (crew of trainingService.crewMembers(); track crew.id) {
+  @for (crew of crew.members(); track crew.id) {
     <mat-expansion-panel>
       <mat-expansion-panel-header>
         <mat-panel-title>

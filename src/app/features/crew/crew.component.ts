@@ -8,9 +8,6 @@ import { TrainingTrackerService } from '../dm/training-tracker.service';
 import { ScheduleService } from '../schedule/schedule.service';
 import { AuthService } from '../../core/auth/auth.service';
 import {
-  CREW_LIST,
-  CREW_COLORS,
-  CREW_META,
   TIER_NAMES,
   TIER_COLORS,
 } from '../../shared/data/training.data';
@@ -20,6 +17,7 @@ import {
   TRAINING_TAGS,
   matchesTrainingSearch,
 } from '../../shared/models';
+import { CrewService } from './crew.service';
 
 type StatusKind = 'mastered' | 'progress' | 'locked' | 'available';
 
@@ -56,6 +54,7 @@ const CATALOG_FILTERS: { id: 'all' | StatusKind; label: string }[] = [
   styleUrl: './crew.component.scss',
 })
 export class CrewComponent implements OnInit {
+  readonly crew = inject(CrewService);
   readonly tierNames = TIER_NAMES;
   readonly catalogFilters = CATALOG_FILTERS;
   private dialog = inject(MatDialog);
@@ -80,7 +79,6 @@ export class CrewComponent implements OnInit {
 
   async ngOnInit() {
     await Promise.all([
-      this.training.loadCrewMembers(),
       this.training.loadTrainings(),
       this.relationships.loadAllTiers(),
       this.tracker.loadAllProgress(),
@@ -106,7 +104,7 @@ export class CrewComponent implements OnInit {
   readonly sortedCrew = computed(() => {
     // touch the tiers signal so this recomputes when relationships load/change
     this.relationships.tiers();
-    return [...CREW_LIST].sort((a, b) => this.tierOf(b) - this.tierOf(a));
+    return [...this.crew.names()].sort((a, b) => this.tierOf(b) - this.tierOf(a));
   });
 
   readonly catalogGroups = computed<CatalogGroup[]>(() => {
@@ -115,7 +113,7 @@ export class CrewComponent implements OnInit {
     const f = this.filter();
     const search = this.search();
     const tag = this.tagFilter();
-    return CREW_LIST.map(crew => {
+    return this.crew.names().map(crew => {
       const tier = this.tierOf(crew);
       const paths = this.training
         .getTrainingsForCrewByName(crew)
@@ -135,16 +133,13 @@ export class CrewComponent implements OnInit {
     this.tagFilter.update(current => (current === tag ? null : tag));
   }
   crewColor(name: string): string {
-    return CREW_COLORS[name] ?? '#666';
+    return this.crew.colorOf(name);
   }
   crewRole(name: string): string {
-    // Single source of truth: the database crew_members.role (falls back to
-    // the static roster only until the live data has loaded).
-    const fromDb = this.training.crewMembers().find(c => c.name === name)?.role;
-    return fromDb ?? CREW_META[name]?.role ?? '';
+    return this.crew.roleOf(name);
   }
   crewLine(name: string): string {
-    return CREW_META[name]?.line ?? '';
+    return this.crew.lineOf(name);
   }
   tierName(tier: number): string {
     return TIER_NAMES[tier] ?? 'Unknown';
