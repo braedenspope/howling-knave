@@ -8,8 +8,18 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { TrainingService, HiddenBonusInput } from '../training.service';
-import { TrainingWithCrew, TrainingTag, TRAINING_TAGS, thresholdForTier } from '../../../shared/models';
+import {
+  TrainingWithCrew,
+  TrainingTag,
+  TRAINING_TAGS,
+  RollCheck,
+  SLOT_WEIGHT_UNITS,
+  thresholdForTier,
+} from '../../../shared/models';
 import { CrewService } from '../../crew/crew.service';
+
+/** A Long block runs four hours, so a training can ask for at most four rolls. */
+const MAX_ROLLS = Math.max(...Object.values(SLOT_WEIGHT_UNITS));
 
 interface TrainingForm {
   topic: string;
@@ -19,6 +29,8 @@ interface TrainingForm {
   narrative_thread: string;
   tier_required: number;
   tags: TrainingTag[];
+  /** Always one entry per hour of the longest block, blank where unset. */
+  roll_checks: RollCheck[];
   hidden_character: string;
   hidden_body: string;
 }
@@ -73,6 +85,7 @@ export class TrainingEditorComponent implements OnInit {
       narrative_thread: '',
       tier_required: 1,
       tags: [],
+      roll_checks: this.rollSlots([]),
       hidden_character: '',
       hidden_body: '',
     };
@@ -88,6 +101,7 @@ export class TrainingEditorComponent implements OnInit {
       narrative_thread: training.narrative_thread ?? '',
       tier_required: training.tier_required,
       tags: [...training.tags],
+      roll_checks: this.rollSlots(training.roll_checks),
       hidden_character: training.hidden_bonus?.character_name ?? '',
       hidden_body: training.hidden_bonus?.body ?? '',
     };
@@ -102,6 +116,32 @@ export class TrainingEditorComponent implements OnInit {
     return { character_name: form.hidden_character.trim(), body: form.hidden_body.trim() };
   }
 
+  /** Pad (or trim) saved checks to one editable slot per roll. */
+  private rollSlots(saved: RollCheck[]): RollCheck[] {
+    return Array.from({ length: MAX_ROLLS }, (_, i) => ({
+      check: saved[i]?.check ?? '',
+      dc: saved[i]?.dc ?? null,
+    }));
+  }
+
+  /** Clean the form's slots for saving, dropping blank ones off the end. */
+  private cleanRollChecks(slots: RollCheck[]): RollCheck[] {
+    const cleaned = slots.map(r => {
+      const dc = Number(r.dc);
+      return { check: r.check.trim(), dc: r.dc === null || `${r.dc}`.trim() === '' || !Number.isFinite(dc) ? null : dc };
+    });
+    while (cleaned.length && !cleaned[cleaned.length - 1].check && cleaned[cleaned.length - 1].dc === null) {
+      cleaned.pop();
+    }
+    return cleaned;
+  }
+
+  /** "Athletics DC 12" — for the training's summary line. */
+  rollCheckLabel(r: RollCheck): string {
+    const check = r.check || 'DM’s call';
+    return r.dc !== null ? `${check} DC ${r.dc}` : check;
+  }
+
   private trainingFields(form: TrainingForm) {
     const tier = Number(form.tier_required) || 1;
     return {
@@ -113,6 +153,7 @@ export class TrainingEditorComponent implements OnInit {
       tier_required: tier,
       threshold_pp: thresholdForTier(tier),
       tags: form.tags,
+      roll_checks: this.cleanRollChecks(form.roll_checks),
     };
   }
 

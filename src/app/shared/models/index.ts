@@ -174,6 +174,12 @@ export interface TrainingHiddenBonus {
   body: string;
 }
 
+/** One hour's check — "Athletics", DC 12. A blank check is left to the DM's call. */
+export interface RollCheck {
+  check: string;
+  dc: number | null;
+}
+
 export interface Training {
   id: string;
   crew_member_id: number;
@@ -193,6 +199,8 @@ export interface Training {
   threshold_pp: number;
   /** What kind of training this is — players search and filter by these. */
   tags: TrainingTag[];
+  /** The check each hour of a block calls for, indexed by roll (0-based). */
+  roll_checks: RollCheck[];
   created_at: string;
   updated_at: string;
 }

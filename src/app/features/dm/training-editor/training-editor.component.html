@@ -56,6 +56,24 @@
                 </mat-form-field>
               </div>
 
+              <p class="form-section-label">Rolls — one per hour of a block</p>
+              <div class="roll-checks">
+                @for (r of editForm.roll_checks; track $index) {
+                  <div class="roll-check-row">
+                    <span class="roll-check-num">Roll {{ $index + 1 }}</span>
+                    <mat-form-field appearance="outline" class="roll-check-name">
+                      <mat-label>Check</mat-label>
+                      <input matInput [(ngModel)]="r.check" placeholder="e.g. Athletics" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="roll-check-dc">
+                      <mat-label>DC</mat-label>
+                      <input matInput type="number" [(ngModel)]="r.dc" min="1" />
+                    </mat-form-field>
+                  </div>
+                }
+                <p class="roll-check-hint">Leave a roll blank to call it at the table.</p>
+              </div>
+
               <!-- hidden bonus -->
               <p class="form-section-label">Hidden bonus (optional)</p>
               <div class="form-grid">
@@ -94,6 +112,13 @@
 
               @if (training.narrative_thread) {
                 <p class="training-narrative">{{ training.narrative_thread }}</p>
+              }
+              @if (training.roll_checks.length) {
+                <p class="training-rolls">
+                  @for (r of training.roll_checks; track $index) {
+                    <span class="badge roll-badge">{{ $index + 1 }} · {{ rollCheckLabel(r) }}</span>
+                  }
+                </p>
               }
               @if (training.scene_seed) {
                 <p class="training-seed">“{{ training.scene_seed }}”</p>
@@ -148,6 +173,24 @@
                 <mat-label>Scene seed (table prompt)</mat-label>
                 <textarea matInput rows="2" [(ngModel)]="addForm.scene_seed"></textarea>
               </mat-form-field>
+            </div>
+
+            <p class="form-section-label">Rolls — one per hour of a block</p>
+            <div class="roll-checks">
+              @for (r of addForm.roll_checks; track $index) {
+                <div class="roll-check-row">
+                  <span class="roll-check-num">Roll {{ $index + 1 }}</span>
+                  <mat-form-field appearance="outline" class="roll-check-name">
+                    <mat-label>Check</mat-label>
+                    <input matInput [(ngModel)]="r.check" placeholder="e.g. Athletics" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="roll-check-dc">
+                    <mat-label>DC</mat-label>
+                    <input matInput type="number" [(ngModel)]="r.dc" min="1" />
+                  </mat-form-field>
+                </div>
+              }
+              <p class="roll-check-hint">Leave a roll blank to call it at the table.</p>
             </div>
 
 

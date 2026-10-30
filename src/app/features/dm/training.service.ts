@@ -48,6 +48,7 @@ export class TrainingService {
           tier_required: t.tier_required,
           threshold_pp: t.threshold_pp ?? thresholdForTier(t.tier_required),
           tags: t.tags ?? [],
+          roll_checks: t.roll_checks ?? [],
           created_at: t.created_at,
           updated_at: t.updated_at,
           crew_member_name: t.crew_members.name,

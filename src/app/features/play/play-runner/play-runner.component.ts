@@ -6,7 +6,7 @@ import { ScheduleService } from '../../schedule/schedule.service';
 import { TrainingService } from '../../dm/training.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ToastService } from '../../../shared/toast.service';
-import { RollOutcome, SLOT_WEIGHT_LABEL, SHIP_DUTY_LABEL } from '../../../shared/models';
+import { RollCheck, RollOutcome, SLOT_WEIGHT_LABEL, SHIP_DUTY_LABEL } from '../../../shared/models';
 import { CrewService } from '../../crew/crew.service';
 
 /** Everything the runner card shows for the stop it is sitting on. */
@@ -26,6 +26,8 @@ interface StopView {
    */
   spare: boolean;
   description: string | null;
+  /** "Athletics · DC 12" — the check the DM set for this roll, if any. */
+  rollCheck: string | null;
   sceneSeed: string | null;
   /** One entry per hour of the block: its outcome, or null if not yet rolled. */
   history: (RollOutcome | null)[];
@@ -113,6 +115,7 @@ export class PlayRunnerComponent implements OnInit {
       rollLabel: `Roll ${stop.rollIndex + 1} of ${stop.rollCount}`,
       spare: stop.kind === 'roll' && mastered && !recorded,
       description: training?.description ?? null,
+      rollCheck: this.rollCheckLabel(training?.roll_checks[stop.rollIndex]),
       sceneSeed: training?.scene_seed ?? null,
       history,
       recorded,
@@ -121,6 +124,13 @@ export class PlayRunnerComponent implements OnInit {
       hiddenBonus,
     };
   });
+
+  private rollCheckLabel(r: RollCheck | undefined): string | null {
+    if (!r) return null;
+    const check = r.check.trim();
+    if (!check && r.dc === null) return null;
+    return [check || 'Any check', r.dc !== null ? `DC ${r.dc}` : null].filter(Boolean).join(' · ');
+  }
 
   characterName(userId: string): string {
     const user = this.scheduleService.allUsers().find(u => u.id === userId);
