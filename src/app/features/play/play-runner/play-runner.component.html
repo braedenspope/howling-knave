@@ -81,11 +81,10 @@
         </div>
 
         @if (isDm()) {
-          @if (v.rollCheck) {
-            <p class="runner-rolltype"><span class="ms sm">casino</span> {{ v.rollCheck }}</p>
-          } @else {
-            <p class="runner-rolltype"><span class="ms sm">casino</span> Call a roll that fits the hour</p>
-          }
+          <p class="runner-rolltype">
+            <span class="ms sm">casino</span>
+            {{ v.pointLabel }} · {{ v.rollCheck ?? 'Call a roll that fits the hour' }}
+          </p>
         }
         @if (isDm() && v.sceneSeed) {
           <p class="runner-seed">{{ v.sceneSeed }}</p>

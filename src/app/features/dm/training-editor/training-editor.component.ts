@@ -13,13 +13,9 @@ import {
   TrainingTag,
   TRAINING_TAGS,
   RollCheck,
-  SLOT_WEIGHT_UNITS,
   thresholdForTier,
 } from '../../../shared/models';
 import { CrewService } from '../../crew/crew.service';
-
-/** A Long block runs four hours, so a training can ask for at most four rolls. */
-const MAX_ROLLS = Math.max(...Object.values(SLOT_WEIGHT_UNITS));
 
 interface TrainingForm {
   topic: string;
@@ -29,7 +25,7 @@ interface TrainingForm {
   narrative_thread: string;
   tier_required: number;
   tags: TrainingTag[];
-  /** Always one entry per hour of the longest block, blank where unset. */
+  /** One entry per training point, blank where unset; may run past the tier's goal. */
   roll_checks: RollCheck[];
   hidden_character: string;
   hidden_body: string;
@@ -116,17 +112,33 @@ export class TrainingEditorComponent implements OnInit {
     return { character_name: form.hidden_character.trim(), body: form.hidden_body.trim() };
   }
 
-  /** Pad (or trim) saved checks to one editable slot per roll. */
   private rollSlots(saved: RollCheck[]): RollCheck[] {
-    return Array.from({ length: MAX_ROLLS }, (_, i) => ({
-      check: saved[i]?.check ?? '',
-      dc: saved[i]?.dc ?? null,
-    }));
+    return saved.map(r => ({ check: r.check ?? '', dc: r.dc ?? null }));
   }
 
-  /** Clean the form's slots for saving, dropping blank ones off the end. */
-  private cleanRollChecks(slots: RollCheck[]): RollCheck[] {
-    const cleaned = slots.map(r => {
+  /**
+   * One editable slot per point the training's tier asks for. Grows the form's
+   * list in place when the tier goes up; slots past a lowered tier are kept
+   * until save, so nudging the tier down and back up loses nothing.
+   */
+  pointSlots(form: TrainingForm): RollCheck[] {
+    const count = this.thresholdFor(form.tier_required);
+    while (form.roll_checks.length < count) form.roll_checks.push({ check: '', dc: null });
+    return form.roll_checks.slice(0, count);
+  }
+
+  /** Copy each filled check down into the blank points after it. */
+  fillDown(form: TrainingForm) {
+    let last: RollCheck | null = null;
+    for (const r of this.pointSlots(form)) {
+      if (r.check.trim() || r.dc !== null) last = r;
+      else if (last) Object.assign(r, { check: last.check, dc: last.dc });
+    }
+  }
+
+  /** Clean the form's slots for saving: cut to the tier's goal, drop blanks off the end. */
+  private cleanRollChecks(form: TrainingForm): RollCheck[] {
+    const cleaned = this.pointSlots(form).map(r => {
       const dc = Number(r.dc);
       return { check: r.check.trim(), dc: r.dc === null || `${r.dc}`.trim() === '' || !Number.isFinite(dc) ? null : dc };
     });
@@ -136,10 +148,9 @@ export class TrainingEditorComponent implements OnInit {
     return cleaned;
   }
 
-  /** "Athletics DC 12" — for the training's summary line. */
-  rollCheckLabel(r: RollCheck): string {
-    const check = r.check || 'DM’s call';
-    return r.dc !== null ? `${check} DC ${r.dc}` : check;
+  /** How many of the training's points have a check set. */
+  checksSet(training: TrainingWithCrew): number {
+    return training.roll_checks.filter(r => r.check || r.dc !== null).length;
   }
 
   private trainingFields(form: TrainingForm) {
@@ -153,7 +164,7 @@ export class TrainingEditorComponent implements OnInit {
       tier_required: tier,
       threshold_pp: thresholdForTier(tier),
       tags: form.tags,
-      roll_checks: this.cleanRollChecks(form.roll_checks),
+      roll_checks: this.cleanRollChecks(form),
     };
   }
 

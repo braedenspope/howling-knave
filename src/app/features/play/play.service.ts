@@ -397,6 +397,29 @@ export class PlayService {
     return `${p?.pp_accumulated ?? 0}/${p?.threshold_pp ?? this.thresholdOf(block.crew_member, block.training_topic)}`;
   }
 
+  /**
+   * Which training point (0-based) the roll at `stopIndex` is going for: the
+   * points banked, less any successes already marked at or after that stop —
+   * so stepping back to an earlier hour shows the check it was rolled against.
+   */
+  pointIndexAt(stopIndex: number): number {
+    const stop = this.queue()[stopIndex];
+    if (!stop) return 0;
+    const { block } = stop;
+    const banked = this.tracker.getProgress(block.user_id, block.crew_member, block.training_topic)?.pp_accumulated ?? 0;
+    const later = this.queue()
+      .slice(stopIndex)
+      .filter(s =>
+        s.kind === 'roll' &&
+        s.userId === block.user_id &&
+        s.block.crew_member === block.crew_member &&
+        s.block.training_topic === block.training_topic &&
+        this.rollFor(s.block.id, s.rollIndex)?.outcome === 'success',
+      ).length;
+    const threshold = this.thresholdOf(block.crew_member, block.training_topic);
+    return Math.max(0, Math.min(banked - later, threshold - 1));
+  }
+
   isMastered(block: ScheduleBlock): boolean {
     return this.tracker.getProgress(block.user_id, block.crew_member, block.training_topic)?.completed ?? false;
   }

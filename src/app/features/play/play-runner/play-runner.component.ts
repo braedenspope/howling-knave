@@ -26,7 +26,9 @@ interface StopView {
    */
   spare: boolean;
   description: string | null;
-  /** "Athletics · DC 12" — the check the DM set for this roll, if any. */
+  /** "Point 5 of 12" — the training point this roll is going for. */
+  pointLabel: string;
+  /** "Athletics · DC 12" — the check the DM set for that point, if any. */
   rollCheck: string | null;
   sceneSeed: string | null;
   /** One entry per hour of the block: its outcome, or null if not yet rolled. */
@@ -96,6 +98,7 @@ export class PlayRunnerComponent implements OnInit {
     );
 
     const recorded = history[stop.rollIndex] ?? null;
+    const pointIndex = this.play.pointIndexAt(this.play.cursor());
     const mastered = this.play.isMastered(block);
 
     const bonus = training?.hidden_bonus;
@@ -115,7 +118,8 @@ export class PlayRunnerComponent implements OnInit {
       rollLabel: `Roll ${stop.rollIndex + 1} of ${stop.rollCount}`,
       spare: stop.kind === 'roll' && mastered && !recorded,
       description: training?.description ?? null,
-      rollCheck: this.rollCheckLabel(training?.roll_checks[stop.rollIndex]),
+      pointLabel: `Point ${pointIndex + 1} of ${training?.threshold_pp ?? '?'}`,
+      rollCheck: this.rollCheckLabel(training?.roll_checks[pointIndex]),
       sceneSeed: training?.scene_seed ?? null,
       history,
       recorded,
